@@ -1,4 +1,4 @@
-# IRL Shopping Assistant
+# Shopping Assist
 
 A shopping calculator for IRL Shopping assistance
 
@@ -6,12 +6,11 @@ A shopping calculator for IRL Shopping assistance
 
 ### Settings Screen
 
-Settings should contain the following:
+Contains the following global settings:
 
 - Set Currency Symbol
 - Set Weight Unit (Metric, Imperial or Both)
 - Set Tax Rate (0-100) for countries that display prices without tax
-- CRUD Tax Rates for catagories
 
 ### Homepage Screen
 
@@ -42,6 +41,13 @@ Settings should contain the following:
 
 ## Future Requirements
 
+### Analytics
+
+- Purchase history graph
+- Price history graph for individual items
+- Price history graph for all items timeline
+- Monthly spend
+
 ### Imports and Exports
 
 - Export to CSV
@@ -50,7 +56,7 @@ Settings should contain the following:
 
 ### QOL
 
-- OCR data entry
+- Item details autocompletion with Camera identification (tensorflow)
 - Item duplication
 - Item suggestions while typing based on history
 - Easy price per item/quantity toggle
