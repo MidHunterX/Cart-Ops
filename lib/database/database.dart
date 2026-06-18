@@ -1,21 +1,11 @@
 import 'package:drift/drift.dart';
 import 'package:drift_flutter/drift_flutter.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:shopping_assist/database/models.dart';
 
 part 'database.g.dart';
 
-// TABLE DEFINITIONS
-
-class TodoItems extends Table {
-  IntColumn get id => integer().autoIncrement()();
-  TextColumn get title => text().withLength(min: 6, max: 32)();
-  TextColumn get content => text().named('body')();
-  DateTimeColumn get createdAt => dateTime().nullable()();
-}
-
-// DATABASE CLASS
-
-@DriftDatabase(tables: [TodoItems])
+@DriftDatabase(tables: [PurchaseGroups, Purchases, Items])
 class AppDatabase extends _$AppDatabase {
   AppDatabase._([QueryExecutor? executor])
     : super(executor ?? _openConnection());
@@ -29,6 +19,7 @@ class AppDatabase extends _$AppDatabase {
   @override
   int get schemaVersion => 1;
 
+  // Database connection
   static QueryExecutor _openConnection() {
     return driftDatabase(
       name: 'shopping_assist.db',
