@@ -1,0 +1,28 @@
+# vim: ft=sh
+
+# No need for sidebar. The output will center the code instead
+export NVIM_OPEN_SIDEBAR=0
+
+setup_post_init_hook() {
+  log "📏 Resizing output window..."
+  (
+    local timeout=120
+    while true; do
+      sleep 1
+      workspace_id=$(hyprctl -j activeworkspace | jq '.id')
+      tiled_window_count=$(hyprctl -j clients | jq "[.[] | select(.workspace.id == $workspace_id and .floating == false and .pinned == false)] | length")
+      # Check if the output window popped up
+      if [ "$tiled_window_count" -eq 2 ]; then
+        is_active_window_floating=$(hyprctl -j activewindow | jq -r '.floating')
+        if [ "$is_active_window_floating" = "false" ]; then
+          # Move output to left
+          hyprctl dispatch "hl.dsp.window.swap({ direction = 'l' })"
+          # Make it smartphone like
+          hyprctl dispatch "hl.dsp.window.resize({ x = -400, y = 0, relative = true })"
+          exit 0
+        fi
+      fi
+      ((timeout--)) || { exit 1; }
+    done
+  ) &
+}
