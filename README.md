@@ -1,6 +1,14 @@
 # Shopping Assist
 
-A shopping calculator for IRL Shopping assistance
+A specialized tool for IRL shopping assistance
+
+## Dev Snippets
+
+On every DB change, run the following command:
+
+```sh
+dart run build_runner build
+```
 
 ## Basic Requirements
 

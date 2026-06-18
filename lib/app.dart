@@ -1,4 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:shopping_assist/database.dart';
+
+Future<List<TodoItem>> insertDB(String title, String content) async {
+  WidgetsFlutterBinding.ensureInitialized();
+  final database = AppDatabase();
+
+  await database
+      .into(database.todoItems)
+      .insert(TodoItemsCompanion.insert(title: title, content: content));
+  List<TodoItem> allItems = await database.select(database.todoItems).get();
+  return allItems;
+}
 
 class ShoppingApp extends StatelessWidget {
   const ShoppingApp({super.key});
@@ -29,6 +41,9 @@ class _MyHomePageState extends State<MyHomePage> {
     setState(() {
       _counter++;
     });
+    String title = 'Title $_counter';
+    String content = 'Pressed $_counter times';
+    insertDB(title, content);
   }
 
   @override
