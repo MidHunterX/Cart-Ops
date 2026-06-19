@@ -2,19 +2,18 @@ import 'package:drift/drift.dart';
 import 'package:drift_flutter/drift_flutter.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shopping_assist/database/models.dart';
+import 'package:shopping_assist/database/daos/groups_dao.dart';
+import 'package:shopping_assist/database/daos/items_dao.dart';
 
 part 'database.g.dart';
 
-@DriftDatabase(tables: [Groups, Purchases, Items, PurchasedItems])
+@DriftDatabase(
+  tables: [Groups, Purchases, Items, PurchasedItems],
+  daos: [GroupsDao, ItemsDao],
+)
 class AppDatabase extends _$AppDatabase {
-  AppDatabase._([QueryExecutor? executor])
-    : super(executor ?? _openConnection());
-
-  static final AppDatabase _instance = AppDatabase._(); // Singleton instance
-
-  factory AppDatabase() {
-    return _instance;
-  }
+  // Just a simple constructor, no singleton. Provider manage instance
+  AppDatabase() : super(_openConnection());
 
   @override
   int get schemaVersion => 2;
@@ -52,17 +51,4 @@ class AppDatabase extends _$AppDatabase {
       ),
     );
   }
-
-  // Group Operations
-  Stream<List<Group>> watchGroups() => select(groups).watch();
-  Future<int> insertGroup(GroupsCompanion group) => into(groups).insert(group);
-  Future deleteGroup(int id) =>
-      (delete(groups)..where((t) => t.id.equals(id))).go();
-
-  // Item Operations
-  Stream<List<Item>> watchItemsInGroup(int groupId) {
-    return (select(items)..where((t) => t.groupId.equals(groupId))).watch();
-  }
-
-  Future<int> insertItem(ItemsCompanion item) => into(items).insert(item);
 }
