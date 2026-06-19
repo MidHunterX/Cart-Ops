@@ -5,7 +5,7 @@ import 'package:shopping_assist/database/models.dart';
 
 part 'database.g.dart';
 
-@DriftDatabase(tables: [Groups, Purchases, Items])
+@DriftDatabase(tables: [Groups, Purchases, Items, PurchasedItems])
 class AppDatabase extends _$AppDatabase {
   AppDatabase._([QueryExecutor? executor])
     : super(executor ?? _openConnection());
