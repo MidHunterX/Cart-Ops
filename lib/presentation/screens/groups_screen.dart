@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shopping_assist/database/database.dart';
 import 'package:shopping_assist/presentation/screens/purchases_screen.dart';
-import '../widgets/add_group_dialog.dart';
+import 'package:shopping_assist/presentation/widgets/add_group_dialog.dart';
+import 'package:shopping_assist/presentation/widgets/empty_state.dart';
 
 class GroupsScreen extends StatelessWidget {
   const GroupsScreen({super.key});
@@ -26,7 +27,12 @@ class GroupsScreen extends StatelessWidget {
           final groups = snapshot.data ?? [];
 
           if (groups.isEmpty) {
-            return const Center(child: Text('No groups yet. Add one below!'));
+            return const EmptyState(
+              icon: Icons.storefront_outlined,
+              title: 'No Groups Yet',
+              message:
+                  'Create a group for your favorite stores, malls, or types of shopping routines.',
+            );
           }
 
           return ListView.builder(

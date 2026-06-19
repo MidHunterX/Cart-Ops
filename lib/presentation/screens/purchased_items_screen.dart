@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:shopping_assist/database/database.dart';
 import 'package:shopping_assist/database/daos/purchased_items_dao.dart';
 import 'package:shopping_assist/presentation/widgets/add_purchased_item_dialog.dart';
+import 'package:shopping_assist/presentation/widgets/empty_state.dart';
 
 class PurchasedItemsScreen extends StatelessWidget {
   final Purchase purchase;
@@ -33,7 +34,11 @@ class PurchasedItemsScreen extends StatelessWidget {
           final purchasedItems = snapshot.data ?? [];
 
           if (purchasedItems.isEmpty) {
-            return const Center(child: Text('No items in this purchase yet.'));
+            return const EmptyState(
+              icon: Icons.remove_shopping_cart_outlined,
+              title: 'Your Cart is Empty',
+              message: 'Add items to your purchase to see the running total.',
+            );
           }
 
           return ListView.builder(

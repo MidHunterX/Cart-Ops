@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:shopping_assist/database/database.dart';
 import 'package:shopping_assist/presentation/widgets/add_purchase_dialog.dart';
 import 'package:shopping_assist/presentation/screens/purchased_items_screen.dart';
+import 'package:shopping_assist/presentation/widgets/empty_state.dart';
 
 class PurchasesScreen extends StatelessWidget {
   final Group group;
@@ -28,7 +29,11 @@ class PurchasesScreen extends StatelessWidget {
           final purchases = snapshot.data ?? [];
 
           if (purchases.isEmpty) {
-            return const Center(child: Text('No purchases yet. Add one!'));
+            return const EmptyState(
+              icon: Icons.shopping_bag_outlined,
+              title: 'No Purchases Yet',
+              message: 'Start a new shopping event by adding a purchase.',
+            );
           }
 
           return ListView.builder(
