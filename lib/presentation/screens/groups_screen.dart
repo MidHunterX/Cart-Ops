@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shopping_assist/database/database.dart';
+import 'package:shopping_assist/presentation/screens/purchases_screen.dart';
 import '../widgets/add_group_dialog.dart';
 
 class GroupsScreen extends StatelessWidget {
@@ -40,7 +41,12 @@ class GroupsScreen extends StatelessWidget {
                   onPressed: () => db.groupsDao.deleteGroup(group.id),
                 ),
                 onTap: () {
-                  print('Selected group: ${group.name}');
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => PurchasesScreen(group: group),
+                    ),
+                  );
                 },
               );
             },

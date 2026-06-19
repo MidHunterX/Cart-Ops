@@ -3,13 +3,14 @@ import 'package:drift_flutter/drift_flutter.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shopping_assist/database/models.dart';
 import 'package:shopping_assist/database/daos/groups_dao.dart';
+import 'package:shopping_assist/database/daos/purchases_dao.dart';
 import 'package:shopping_assist/database/daos/items_dao.dart';
 
 part 'database.g.dart';
 
 @DriftDatabase(
   tables: [Groups, Purchases, Items, PurchasedItems],
-  daos: [GroupsDao, ItemsDao],
+  daos: [GroupsDao, PurchasesDao, ItemsDao],
 )
 class AppDatabase extends _$AppDatabase {
   // Just a simple constructor, no singleton. Provider manage instance

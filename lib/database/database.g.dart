@@ -1412,6 +1412,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $ItemsTable items = $ItemsTable(this);
   late final $PurchasedItemsTable purchasedItems = $PurchasedItemsTable(this);
   late final GroupsDao groupsDao = GroupsDao(this as AppDatabase);
+  late final PurchasesDao purchasesDao = PurchasesDao(this as AppDatabase);
   late final ItemsDao itemsDao = ItemsDao(this as AppDatabase);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
