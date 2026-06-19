@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shopping_assist/screens/groups_screen.dart';
 
 class ShoppingApp extends StatelessWidget {
   const ShoppingApp({super.key});
@@ -8,7 +9,7 @@ class ShoppingApp extends StatelessWidget {
     return MaterialApp(
       title: 'Shopping Assist',
       theme: ThemeData(colorScheme: .fromSeed(seedColor: Colors.green)),
-      home: const MyHomePage(title: 'Shopping Assist'),
+      home: const GroupsScreen(),
     );
   }
 }
