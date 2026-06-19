@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shopping_assist/database/database.dart';
 import 'package:shopping_assist/presentation/widgets/add_purchase_dialog.dart';
+import 'package:shopping_assist/presentation/screens/purchased_items_screen.dart';
 
 class PurchasesScreen extends StatelessWidget {
   final Group group;
@@ -45,8 +46,15 @@ class PurchasesScreen extends StatelessWidget {
                   onPressed: () => db.purchasesDao.deletePurchase(purchase.id),
                 ),
                 onTap: () {
-                  // In the future, this will navigate to the specific items inside the purchase
-                  print('Selected purchase: ${purchase.name}');
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => PurchasedItemsScreen(
+                        purchase: purchase,
+                        group: group,
+                      ),
+                    ),
+                  );
                 },
               );
             },
