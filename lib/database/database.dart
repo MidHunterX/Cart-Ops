@@ -17,10 +17,34 @@ class AppDatabase extends _$AppDatabase {
   }
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
+
+  @override
+  MigrationStrategy get migration {
+    return MigrationStrategy(
+      onCreate: (Migrator m) async {
+        await m.createAll();
+      },
+      onUpgrade: (Migrator m, int from, int to) async {
+        if (from == 1) {
+          await m.createTable(groups);
+          await m.createTable(purchases);
+          await m.createTable(items);
+          await m.createTable(purchasedItems);
+        }
+      },
+      beforeOpen: (details) async {
+        // SQLite disables foreign keys by default O_o
+        await customStatement('PRAGMA foreign_keys = ON');
+      },
+    );
+  }
 
   // Database connection
   static QueryExecutor _openConnection() {
+    /*getApplicationSupportDirectory().then((dir) {
+      print("DATABASE DIR: ${dir.path}");
+    });*/
     return driftDatabase(
       name: 'shopping_assist.db',
       native: const DriftNativeOptions(
@@ -28,4 +52,17 @@ class AppDatabase extends _$AppDatabase {
       ),
     );
   }
+
+  // Group Operations
+  Stream<List<Group>> watchGroups() => select(groups).watch();
+  Future<int> insertGroup(GroupsCompanion group) => into(groups).insert(group);
+  Future deleteGroup(int id) =>
+      (delete(groups)..where((t) => t.id.equals(id))).go();
+
+  // Item Operations
+  Stream<List<Item>> watchItemsInGroup(int groupId) {
+    return (select(items)..where((t) => t.groupId.equals(groupId))).watch();
+  }
+
+  Future<int> insertItem(ItemsCompanion item) => into(items).insert(item);
 }
