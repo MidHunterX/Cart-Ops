@@ -21,7 +21,9 @@ class _AddGroupDialogState extends State<AddGroupDialog> {
   void _submit() {
     if (_controller.text.trim().isNotEmpty) {
       final db = Provider.of<AppDatabase>(context, listen: false);
-      db.groupsDao.insertGroup(_controller.text.trim());
+      db.groupsDao.insertGroup(
+        GroupsCompanion.insert(name: _controller.text.trim()),
+      );
       Navigator.pop(context);
     }
   }
@@ -43,10 +45,7 @@ class _AddGroupDialogState extends State<AddGroupDialog> {
           onPressed: () => Navigator.pop(context),
           child: const Text('Cancel'),
         ),
-        ElevatedButton(
-          onPressed: _submit,
-          child: const Text('Add'),
-        ),
+        ElevatedButton(onPressed: _submit, child: const Text('Add')),
       ],
     );
   }

@@ -16,7 +16,6 @@ class GroupsScreen extends StatelessWidget {
         backgroundColor: Theme.of(context).colorScheme.primaryContainer,
       ),
       body: StreamBuilder<List<Group>>(
-        // Use the DAO to watch groups
         stream: db.groupsDao.watchGroups(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
@@ -38,7 +37,6 @@ class GroupsScreen extends StatelessWidget {
                 title: Text(group.name),
                 trailing: IconButton(
                   icon: const Icon(Icons.delete_outline),
-                  // Use the DAO to delete
                   onPressed: () => db.groupsDao.deleteGroup(group.id),
                 ),
                 onTap: () {

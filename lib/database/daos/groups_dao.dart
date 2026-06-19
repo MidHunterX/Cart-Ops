@@ -10,8 +10,8 @@ class GroupsDao extends DatabaseAccessor<AppDatabase> with _$GroupsDaoMixin {
 
   Stream<List<Group>> watchGroups() => select(groups).watch();
 
-  Future<int> insertGroup(String name) {
-    return into(groups).insert(GroupsCompanion.insert(name: name));
+  Future<int> insertGroup(GroupsCompanion group) {
+    return into(groups).insert(group);
   }
 
   Future deleteGroup(int id) =>
