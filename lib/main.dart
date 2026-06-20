@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shopping_assist/app.dart';
 import 'package:provider/provider.dart';
-import 'package:shopping_assist/database/database.dart';
+import 'package:shopping_assist/core/database/database.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();

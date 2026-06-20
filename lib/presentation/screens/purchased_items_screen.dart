@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:shopping_assist/database/database.dart';
-import 'package:shopping_assist/database/daos/purchased_items_dao.dart';
+import 'package:shopping_assist/core/database/database.dart';
+import 'package:shopping_assist/core/database/daos/purchased_items_dao.dart';
 import 'package:shopping_assist/presentation/widgets/add_purchased_item_dialog.dart';
 import 'package:shopping_assist/presentation/widgets/empty_state.dart';
 
