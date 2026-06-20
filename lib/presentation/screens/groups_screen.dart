@@ -11,6 +11,7 @@ class GroupsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final db = Provider.of<AppDatabase>(context);
+    final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
       appBar: AppBar(
@@ -43,8 +44,8 @@ class GroupsScreen extends StatelessWidget {
                 leading: const Icon(Icons.storefront),
                 title: Text(group.name),
                 trailing: IconButton(
-                  icon: const Icon(Icons.delete_outline),
-                  onPressed: () => db.groupsDao.deleteGroup(group.id),
+                  icon: Icon(Icons.delete_outline, color: colorScheme.error),
+                  onPressed: () => _confirmDelete(context, db, group),
                 ),
                 onTap: () {
                   Navigator.push(
@@ -67,6 +68,34 @@ class GroupsScreen extends StatelessWidget {
           );
         },
         child: const Icon(Icons.add),
+      ),
+    );
+  }
+
+  void _confirmDelete(BuildContext context, AppDatabase db, Group group) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Delete Group?'),
+        content: Text(
+          'Are you sure you want to delete "${group.name}"? This will also remove all its purchase history.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(
+              backgroundColor: Theme.of(context).colorScheme.error,
+            ),
+            onPressed: () {
+              db.groupsDao.deleteGroup(group.id);
+              Navigator.pop(ctx);
+            },
+            child: const Text('Delete'),
+          ),
+        ],
       ),
     );
   }

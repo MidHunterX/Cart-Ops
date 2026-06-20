@@ -18,6 +18,7 @@ class PurchasedItemsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final db = Provider.of<AppDatabase>(context);
+    final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
       appBar: AppBar(
@@ -61,7 +62,7 @@ class PurchasedItemsScreen extends StatelessWidget {
                 ),
                 isThreeLine: true,
                 trailing: IconButton(
-                  icon: const Icon(Icons.delete_outline),
+                  icon: Icon(Icons.delete_outline, color: colorScheme.error),
                   onPressed: () =>
                       db.purchasedItemsDao.deletePurchasedItem(pItem.id),
                 ),

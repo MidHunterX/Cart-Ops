@@ -13,6 +13,7 @@ class PurchasesScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final db = Provider.of<AppDatabase>(context);
+    final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
       appBar: AppBar(
@@ -47,8 +48,8 @@ class PurchasesScreen extends StatelessWidget {
                   '${purchase.purchaseDate.day}/${purchase.purchaseDate.month}/${purchase.purchaseDate.year}',
                 ),
                 trailing: IconButton(
-                  icon: const Icon(Icons.delete_outline),
-                  onPressed: () => db.purchasesDao.deletePurchase(purchase.id),
+                  icon: Icon(Icons.delete_outline, color: colorScheme.error),
+                  onPressed: () => _confirmDelete(context, db, purchase),
                 ),
                 onTap: () {
                   Navigator.push(
@@ -74,6 +75,32 @@ class PurchasesScreen extends StatelessWidget {
           );
         },
         child: const Icon(Icons.add),
+      ),
+    );
+  }
+
+  void _confirmDelete(BuildContext context, AppDatabase db, Purchase purchase) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Delete Purchase Event?'),
+        content: Text('Are you sure you want to delete "${purchase.name}"?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(
+              backgroundColor: Theme.of(context).colorScheme.error,
+            ),
+            onPressed: () {
+              db.purchasesDao.deletePurchase(purchase.id);
+              Navigator.pop(ctx);
+            },
+            child: const Text('Delete'),
+          ),
+        ],
       ),
     );
   }
