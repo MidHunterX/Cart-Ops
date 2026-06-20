@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:drift/drift.dart' hide Column;
 import 'package:shopping_assist/core/database/database.dart';
+import 'package:shopping_assist/features/purchased_items/repositories/purchased_items_repository.dart';
 
 class AddPurchasedItemDialog extends StatefulWidget {
   final Purchase purchase;
@@ -32,15 +32,10 @@ class _AddPurchasedItemDialogState extends State<AddPurchasedItemDialog> {
     _fetchItems();
   }
 
-  // Pre-load items from the database to drive the autocomplete feature safely
   Future<void> _fetchItems() async {
-    final db = Provider.of<AppDatabase>(context, listen: false);
-    final items = widget.group == null
-        ? await db.itemsDao.getItemsWithoutGroup()
-        : await db.itemsDao.getItemsInGroup(widget.group!.id);
-    setState(() {
-      _groupItems = items;
-    });
+    final repo = context.read<PurchasedItemsRepository>();
+    final items = await repo.getAvailableItems(widget.group?.id);
+    if (mounted) setState(() => _groupItems = items);
   }
 
   @override
@@ -63,48 +58,17 @@ class _AddPurchasedItemDialogState extends State<AddPurchasedItemDialog> {
     final qty = double.tryParse(qtyStr) ?? 1.0;
     final discount = double.tryParse(discountStr) ?? 0.0;
 
-    final db = Provider.of<AppDatabase>(context, listen: false);
-
-    Item? targetItem;
-    try {
-      // Find matching item case-insensitively
-      targetItem = _groupItems.firstWhere(
-        (item) => item.name.toLowerCase() == name.toLowerCase(),
-      );
-    } catch (e) {
-      targetItem = null;
-    }
-
-    int itemId;
-    if (targetItem != null) {
-      // Reuse existing item ID
-      itemId = targetItem.id;
-    } else {
-      // Create new Item under the group as it didn't match perfectly
-      itemId = await db.itemsDao.insertItem(
-        ItemsCompanion.insert(
-          name: name,
-          price: price, // initial base price
-          groupId: Value(widget.group?.id),
-        ),
-      );
-    }
-
-    // Record the instance of the Purchase
-    await db.purchasedItemsDao.insertPurchasedItem(
-      PurchasedItemsCompanion.insert(
-        price: price, // Explicit purchase price
-        quantity: qty,
-        isWeight: Value(_isWeight),
-        discount: Value(discount),
-        purchaseId: widget.purchase.id,
-        itemId: itemId,
-      ),
+    await context.read<PurchasedItemsRepository>().addPurchasedItem(
+      name: name,
+      price: price,
+      qty: qty,
+      discount: discount,
+      isWeight: _isWeight,
+      purchaseId: widget.purchase.id,
+      group: widget.group,
     );
 
-    if (mounted) {
-      Navigator.pop(context);
-    }
+    if (mounted) Navigator.pop(context);
   }
 
   @override
@@ -128,7 +92,6 @@ class _AddPurchasedItemDialogState extends State<AddPurchasedItemDialog> {
                 });
               },
               onSelected: (Item selection) {
-                // Pre-fill parameters on auto-complete match
                 _priceController.text = selection.price.toString();
                 _qtyController.text = '1';
               },
@@ -139,8 +102,7 @@ class _AddPurchasedItemDialogState extends State<AddPurchasedItemDialog> {
                     focusNode,
                     onFieldSubmitted,
                   ) {
-                    _nameController =
-                        textEditingController; // Attach controller hook to read on Submit
+                    _nameController = textEditingController;
                     return TextField(
                       controller: textEditingController,
                       focusNode: focusNode,
