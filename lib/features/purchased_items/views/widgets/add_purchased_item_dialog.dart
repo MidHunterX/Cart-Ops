@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:drift/drift.dart' hide Column;
-import 'package:shopping_assist/database/database.dart';
+import 'package:shopping_assist/core/database/database.dart';
 
 class AddPurchasedItemDialog extends StatefulWidget {
   final Purchase purchase;
@@ -190,7 +190,7 @@ class _AddPurchasedItemDialogState extends State<AddPurchasedItemDialog> {
           onPressed: () => Navigator.pop(context),
           child: const Text('Cancel'),
         ),
-        ElevatedButton(onPressed: _submit, child: const Text('Add')),
+        FilledButton(onPressed: _submit, child: const Text('Add')),
       ],
     );
   }

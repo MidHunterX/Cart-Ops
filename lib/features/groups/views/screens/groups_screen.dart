@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:shopping_assist/database/database.dart';
-import 'package:shopping_assist/presentation/screens/purchased_items_screen.dart';
-import 'package:shopping_assist/presentation/screens/purchases_screen.dart';
-import 'package:shopping_assist/presentation/widgets/add_group_dialog.dart';
-import 'package:shopping_assist/presentation/widgets/add_purchase_dialog.dart';
+import 'package:shopping_assist/core/database/database.dart';
+import 'package:shopping_assist/features/purchased_items/views/screens/purchased_items_screen.dart';
+import 'package:shopping_assist/features/purchases/views/screens/purchases_screen.dart';
+import 'package:shopping_assist/features/groups/views/widgets/add_group_dialog.dart';
+import 'package:shopping_assist/features/purchases/views/widgets/add_purchase_dialog.dart';
+import 'package:shopping_assist/core/widgets/empty_state.dart';
 
 class GroupsScreen extends StatelessWidget {
   const GroupsScreen({super.key});
@@ -30,18 +31,17 @@ class GroupsScreen extends StatelessWidget {
         child: const Icon(Icons.add),
       ),
 
-      body: CustomScrollView(
-        slivers: [
+      body: ListView(
+        padding: const EdgeInsets.only(bottom: 80),
+        children: [
           // GROUPS SECTION
-          SliverPadding(
+          Padding(
             padding: const EdgeInsets.fromLTRB(16, 24, 16, 16),
-            sliver: SliverToBoxAdapter(
-              child: Text(
-                'My Groups',
-                style: Theme.of(
-                  context,
-                ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
-              ),
+            child: Text(
+              'My Groups',
+              style: Theme.of(
+                context,
+              ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
             ),
           ),
 
@@ -49,64 +49,52 @@ class GroupsScreen extends StatelessWidget {
             stream: db.groupsDao.watchGroups(),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
-                return const SliverToBoxAdapter(
+                return const Padding(
+                  padding: EdgeInsets.all(32.0),
                   child: Center(child: CircularProgressIndicator()),
                 );
               }
 
               final groups = snapshot.data ?? [];
 
-              return SliverPadding(
+              return GridView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
                 padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                sliver: SliverGrid(
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 3,
-                    crossAxisSpacing: 16,
-                    mainAxisSpacing: 16,
-                    childAspectRatio: 1.0, // Perfect square logic for squircle
-                  ),
-                  delegate: SliverChildBuilderDelegate((context, index) {
-                    if (index == groups.length) {
-                      return _buildAddGroupTile(context, colorScheme);
-                    }
-                    return _buildGroupTile(
-                      context,
-                      db,
-                      groups[index],
-                      colorScheme,
-                    );
-                  }, childCount: groups.length + 1),
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 3,
+                  crossAxisSpacing: 16,
+                  mainAxisSpacing: 16,
                 ),
+                itemCount: groups.length + 1,
+                itemBuilder: (context, index) {
+                  if (index == groups.length) {
+                    return _buildAddGroupTile(context, colorScheme);
+                  }
+                  return _buildGroupTile(
+                    context,
+                    db,
+                    groups[index],
+                    colorScheme,
+                  );
+                },
               );
             },
           ),
 
           // GENERAL PURCHASES SECTION
-          SliverPadding(
+          Padding(
             padding: const EdgeInsets.fromLTRB(16, 32, 16, 8),
-            sliver: SliverToBoxAdapter(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'General Purchases',
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  IconButton(
-                    onPressed: () {
-                      showDialog(
-                        context: context,
-                        builder: (context) =>
-                            const AddPurchaseDialog(groupId: null),
-                      );
-                    },
-                    icon: const Icon(Icons.add_circle_outline),
-                    color: colorScheme.primary,
-                  ),
-                ],
-              ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'General Purchases',
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                ),
+              ],
             ),
           ),
 
@@ -114,7 +102,8 @@ class GroupsScreen extends StatelessWidget {
             stream: db.purchasesDao.watchPurchasesWithoutGroup(),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
-                return const SliverToBoxAdapter(
+                return const Padding(
+                  padding: EdgeInsets.all(32.0),
                   child: Center(child: CircularProgressIndicator()),
                 );
               }
@@ -122,21 +111,22 @@ class GroupsScreen extends StatelessWidget {
               final purchases = snapshot.data ?? [];
 
               if (purchases.isEmpty) {
-                return SliverToBoxAdapter(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 32.0),
-                    child: Center(
-                      child: Text(
-                        'No general purchases yet.',
-                        style: TextStyle(color: colorScheme.onSurfaceVariant),
-                      ),
-                    ),
+                return const Padding(
+                  padding: EdgeInsets.only(top: 32.0),
+                  child: EmptyState(
+                    icon: Icons.shopping_bag_outlined,
+                    title: 'No Purchases Yet',
+                    message: 'Start a new shopping event by adding a purchase.',
                   ),
                 );
               }
 
-              return SliverList(
-                delegate: SliverChildBuilderDelegate((context, index) {
+              return ListView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                padding: EdgeInsets.zero,
+                itemCount: purchases.length,
+                itemBuilder: (context, index) {
                   final purchase = purchases[index];
                   return ListTile(
                     leading: const Icon(Icons.shopping_bag_outlined),
@@ -164,11 +154,10 @@ class GroupsScreen extends StatelessWidget {
                       );
                     },
                   );
-                }, childCount: purchases.length),
+                },
               );
             },
           ),
-          const SliverPadding(padding: EdgeInsets.only(bottom: 80)),
         ],
       ),
     );

@@ -1,11 +1,11 @@
 import 'package:drift/drift.dart';
 import 'package:drift_flutter/drift_flutter.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:shopping_assist/database/models.dart';
-import 'package:shopping_assist/database/daos/groups_dao.dart';
-import 'package:shopping_assist/database/daos/purchases_dao.dart';
-import 'package:shopping_assist/database/daos/items_dao.dart';
-import 'package:shopping_assist/database/daos/purchased_items_dao.dart';
+import 'package:shopping_assist/core/database/models.dart';
+import 'package:shopping_assist/core/database/daos/groups_dao.dart';
+import 'package:shopping_assist/core/database/daos/purchases_dao.dart';
+import 'package:shopping_assist/core/database/daos/items_dao.dart';
+import 'package:shopping_assist/core/database/daos/purchased_items_dao.dart';
 
 part 'database.g.dart';
 

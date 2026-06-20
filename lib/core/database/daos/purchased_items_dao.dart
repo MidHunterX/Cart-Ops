@@ -1,6 +1,6 @@
 import 'package:drift/drift.dart';
-import 'package:shopping_assist/database/database.dart';
-import 'package:shopping_assist/database/models.dart';
+import 'package:shopping_assist/core/database/database.dart';
+import 'package:shopping_assist/core/database/models.dart';
 
 part 'purchased_items_dao.g.dart';
 
