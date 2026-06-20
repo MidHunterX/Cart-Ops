@@ -12,7 +12,7 @@ dart run build_runner build
 
 ## Basic Requirements
 
-![General Plan](./.assets/plan.svg)
+![General Plan](./.assets/Shopping-Assist.svg)
 
 ### Settings Screen
 
