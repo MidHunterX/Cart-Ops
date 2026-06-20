@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:shopping_assist/core/database/database.dart';
+import 'package:shopping_assist/features/groups/repositories/groups_repository.dart';
 
 class AddGroupDialog extends StatefulWidget {
   const AddGroupDialog({super.key});
@@ -19,11 +19,9 @@ class _AddGroupDialogState extends State<AddGroupDialog> {
   }
 
   void _submit() {
-    if (_controller.text.trim().isNotEmpty) {
-      final db = Provider.of<AppDatabase>(context, listen: false);
-      db.groupsDao.insertGroup(
-        GroupsCompanion.insert(name: _controller.text.trim()),
-      );
+    final name = _controller.text.trim();
+    if (name.isNotEmpty) {
+      context.read<GroupsRepository>().addGroup(name);
       Navigator.pop(context);
     }
   }
@@ -38,7 +36,7 @@ class _AddGroupDialogState extends State<AddGroupDialog> {
           hintText: 'e.g. Lulu Hypermarket, Hardware Store',
         ),
         autofocus: true,
-        onSubmitted: (_) => _submit(), // Allow submit via keyboard 'Enter'
+        onSubmitted: (_) => _submit(),
       ),
       actions: [
         TextButton(

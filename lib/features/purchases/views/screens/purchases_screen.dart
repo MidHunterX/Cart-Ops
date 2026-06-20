@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shopping_assist/core/database/database.dart';
-import 'package:shopping_assist/features/purchases/views/widgets/add_purchase_dialog.dart';
-import 'package:shopping_assist/features/purchased_items/views/screens/purchased_items_screen.dart';
 import 'package:shopping_assist/core/widgets/empty_state.dart';
+import 'package:shopping_assist/features/purchased_items/views/screens/purchased_items_screen.dart';
+import 'package:shopping_assist/features/purchases/repositories/purchases_repository.dart';
+import 'package:shopping_assist/features/purchases/views/widgets/add_purchase_dialog.dart';
 
 class PurchasesScreen extends StatelessWidget {
   final Group group;
@@ -12,16 +13,16 @@ class PurchasesScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final db = Provider.of<AppDatabase>(context);
     final colorScheme = Theme.of(context).colorScheme;
+    final repo = context.watch<PurchasesRepository>();
 
     return Scaffold(
       appBar: AppBar(
         title: Text('${group.name} Purchases'),
-        backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+        backgroundColor: colorScheme.primaryContainer,
       ),
       body: StreamBuilder<List<Purchase>>(
-        stream: db.purchasesDao.watchPurchasesInGroup(group.id),
+        stream: repo.watchPurchasesInGroup(group.id),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -49,37 +50,37 @@ class PurchasesScreen extends StatelessWidget {
                 ),
                 trailing: IconButton(
                   icon: Icon(Icons.delete_outline, color: colorScheme.error),
-                  onPressed: () => _confirmDelete(context, db, purchase),
+                  onPressed: () =>
+                      _confirmDelete(context, repo, purchase, colorScheme),
                 ),
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => PurchasedItemsScreen(
-                        purchase: purchase,
-                        group: group,
-                      ),
-                    ),
-                  );
-                },
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) =>
+                        PurchasedItemsScreen(purchase: purchase, group: group),
+                  ),
+                ),
               );
             },
           );
         },
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          showDialog(
-            context: context,
-            builder: (context) => AddPurchaseDialog(groupId: group.id),
-          );
-        },
+        onPressed: () => showDialog(
+          context: context,
+          builder: (_) => AddPurchaseDialog(groupId: group.id),
+        ),
         child: const Icon(Icons.add),
       ),
     );
   }
 
-  void _confirmDelete(BuildContext context, AppDatabase db, Purchase purchase) {
+  void _confirmDelete(
+    BuildContext context,
+    PurchasesRepository repo,
+    Purchase purchase,
+    ColorScheme colorScheme,
+  ) {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -91,11 +92,9 @@ class PurchasesScreen extends StatelessWidget {
             child: const Text('Cancel'),
           ),
           FilledButton(
-            style: FilledButton.styleFrom(
-              backgroundColor: Theme.of(context).colorScheme.error,
-            ),
+            style: FilledButton.styleFrom(backgroundColor: colorScheme.error),
             onPressed: () {
-              db.purchasesDao.deletePurchase(purchase.id);
+              repo.deletePurchase(purchase.id);
               Navigator.pop(ctx);
             },
             child: const Text('Delete'),

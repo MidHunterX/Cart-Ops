@@ -1,7 +1,6 @@
-import 'package:drift/drift.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:shopping_assist/core/database/database.dart';
+import 'package:shopping_assist/features/purchases/repositories/purchases_repository.dart';
 
 class AddPurchaseDialog extends StatefulWidget {
   final int? groupId;
@@ -22,17 +21,9 @@ class _AddPurchaseDialogState extends State<AddPurchaseDialog> {
   }
 
   void _submit() {
-    if (_controller.text.trim().isNotEmpty) {
-      final db = Provider.of<AppDatabase>(context, listen: false);
-
-      db.purchasesDao.insertPurchase(
-        PurchasesCompanion.insert(
-          name: _controller.text.trim(),
-          purchaseDate: DateTime.now(),
-          groupId: Value(widget.groupId),
-        ),
-      );
-
+    final name = _controller.text.trim();
+    if (name.isNotEmpty) {
+      context.read<PurchasesRepository>().addPurchase(name, widget.groupId);
       Navigator.pop(context);
     }
   }

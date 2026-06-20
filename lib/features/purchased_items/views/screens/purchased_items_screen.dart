@@ -4,29 +4,26 @@ import 'package:shopping_assist/core/database/database.dart';
 import 'package:shopping_assist/core/database/daos/purchased_items_dao.dart';
 import 'package:shopping_assist/features/purchased_items/views/widgets/add_purchased_item_dialog.dart';
 import 'package:shopping_assist/core/widgets/empty_state.dart';
+import 'package:shopping_assist/features/purchased_items/repositories/purchased_items_repository.dart';
 
 class PurchasedItemsScreen extends StatelessWidget {
   final Purchase purchase;
   final Group? group;
 
-  const PurchasedItemsScreen({
-    super.key,
-    required this.purchase,
-    required this.group,
-  });
+  const PurchasedItemsScreen({super.key, required this.purchase, required this.group});
 
   @override
   Widget build(BuildContext context) {
-    final db = Provider.of<AppDatabase>(context);
+    final repo = context.watch<PurchasedItemsRepository>();
     final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
       appBar: AppBar(
         title: Text(purchase.name),
-        backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+        backgroundColor: colorScheme.primaryContainer,
       ),
       body: StreamBuilder<List<PurchasedItemWithDetails>>(
-        stream: db.purchasedItemsDao.watchPurchasedItems(purchase.id),
+        stream: repo.watchPurchasedItems(purchase.id),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -48,7 +45,6 @@ class PurchasedItemsScreen extends StatelessWidget {
               final details = purchasedItems[index];
               final pItem = details.purchasedItem;
               final item = details.item;
-
               final total = (pItem.price - pItem.discount) * pItem.quantity;
 
               return ListTile(
@@ -63,8 +59,7 @@ class PurchasedItemsScreen extends StatelessWidget {
                 isThreeLine: true,
                 trailing: IconButton(
                   icon: Icon(Icons.delete_outline, color: colorScheme.error),
-                  onPressed: () =>
-                      db.purchasedItemsDao.deletePurchasedItem(pItem.id),
+                  onPressed: () => repo.deletePurchasedItem(pItem.id),
                 ),
               );
             },
@@ -72,13 +67,10 @@ class PurchasedItemsScreen extends StatelessWidget {
         },
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          showDialog(
-            context: context,
-            builder: (context) =>
-                AddPurchasedItemDialog(purchase: purchase, group: group),
-          );
-        },
+        onPressed: () => showDialog(
+          context: context,
+          builder: (context) => AddPurchasedItemDialog(purchase: purchase, group: group),
+        ),
         child: const Icon(Icons.add),
       ),
     );
