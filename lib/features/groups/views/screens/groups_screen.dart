@@ -5,7 +5,7 @@ import 'package:shopping_assist/presentation/screens/purchased_items_screen.dart
 import 'package:shopping_assist/presentation/screens/purchases_screen.dart';
 import 'package:shopping_assist/features/groups/views/widgets/add_group_dialog.dart';
 import 'package:shopping_assist/presentation/widgets/add_purchase_dialog.dart';
-import 'package:shopping_assist/presentation/widgets/empty_state.dart';
+import 'package:shopping_assist/core/widgets/empty_state.dart';
 
 class GroupsScreen extends StatelessWidget {
   const GroupsScreen({super.key});

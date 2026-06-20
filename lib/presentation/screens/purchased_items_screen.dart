@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:shopping_assist/core/database/database.dart';
 import 'package:shopping_assist/core/database/daos/purchased_items_dao.dart';
 import 'package:shopping_assist/presentation/widgets/add_purchased_item_dialog.dart';
-import 'package:shopping_assist/presentation/widgets/empty_state.dart';
+import 'package:shopping_assist/core/widgets/empty_state.dart';
 
 class PurchasedItemsScreen extends StatelessWidget {
   final Purchase purchase;
