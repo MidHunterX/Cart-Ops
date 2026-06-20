@@ -13,8 +13,12 @@ class Purchases extends Table {
   DateTimeColumn get purchaseDate => dateTime()();
   RealColumn get totalPrice => real().nullable()();
   RealColumn get taxRate => real().nullable()(); // override global tax rate
-  IntColumn get groupId =>
-      integer().references(Groups, #id, onDelete: KeyAction.cascade)();
+  // Optional Group
+  IntColumn get groupId => integer().nullable().references(
+    Groups,
+    #id,
+    onDelete: KeyAction.cascade,
+  )();
 }
 
 // What - the items under a group (for autocompletion)
@@ -23,8 +27,12 @@ class Items extends Table {
   TextColumn get name => text().withLength(min: 1, max: 100)();
   RealColumn get price => real()();
   TextColumn get imagePath => text().nullable()(); // Store local image path
-  IntColumn get groupId =>
-      integer().references(Groups, #id, onDelete: KeyAction.cascade)();
+  // Optional Group
+  IntColumn get groupId => integer().nullable().references(
+    Groups,
+    #id,
+    onDelete: KeyAction.cascade,
+  )();
 }
 
 class PurchasedItems extends Table {

@@ -263,9 +263,9 @@ class $PurchasesTable extends Purchases
   late final GeneratedColumn<int> groupId = GeneratedColumn<int>(
     'group_id',
     aliasedName,
-    false,
+    true,
     type: DriftSqlType.int,
-    requiredDuringInsert: true,
+    requiredDuringInsert: false,
     defaultConstraints: GeneratedColumn.constraintIsAlways(
       'REFERENCES "groups" (id) ON DELETE CASCADE',
     ),
@@ -330,8 +330,6 @@ class $PurchasesTable extends Purchases
         _groupIdMeta,
         groupId.isAcceptableOrUnknown(data['group_id']!, _groupIdMeta),
       );
-    } else if (isInserting) {
-      context.missing(_groupIdMeta);
     }
     return context;
   }
@@ -365,7 +363,7 @@ class $PurchasesTable extends Purchases
       groupId: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}group_id'],
-      )!,
+      ),
     );
   }
 
@@ -381,14 +379,14 @@ class Purchase extends DataClass implements Insertable<Purchase> {
   final DateTime purchaseDate;
   final double? totalPrice;
   final double? taxRate;
-  final int groupId;
+  final int? groupId;
   const Purchase({
     required this.id,
     required this.name,
     required this.purchaseDate,
     this.totalPrice,
     this.taxRate,
-    required this.groupId,
+    this.groupId,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -402,7 +400,9 @@ class Purchase extends DataClass implements Insertable<Purchase> {
     if (!nullToAbsent || taxRate != null) {
       map['tax_rate'] = Variable<double>(taxRate);
     }
-    map['group_id'] = Variable<int>(groupId);
+    if (!nullToAbsent || groupId != null) {
+      map['group_id'] = Variable<int>(groupId);
+    }
     return map;
   }
 
@@ -417,7 +417,9 @@ class Purchase extends DataClass implements Insertable<Purchase> {
       taxRate: taxRate == null && nullToAbsent
           ? const Value.absent()
           : Value(taxRate),
-      groupId: Value(groupId),
+      groupId: groupId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(groupId),
     );
   }
 
@@ -432,7 +434,7 @@ class Purchase extends DataClass implements Insertable<Purchase> {
       purchaseDate: serializer.fromJson<DateTime>(json['purchaseDate']),
       totalPrice: serializer.fromJson<double?>(json['totalPrice']),
       taxRate: serializer.fromJson<double?>(json['taxRate']),
-      groupId: serializer.fromJson<int>(json['groupId']),
+      groupId: serializer.fromJson<int?>(json['groupId']),
     );
   }
   @override
@@ -444,7 +446,7 @@ class Purchase extends DataClass implements Insertable<Purchase> {
       'purchaseDate': serializer.toJson<DateTime>(purchaseDate),
       'totalPrice': serializer.toJson<double?>(totalPrice),
       'taxRate': serializer.toJson<double?>(taxRate),
-      'groupId': serializer.toJson<int>(groupId),
+      'groupId': serializer.toJson<int?>(groupId),
     };
   }
 
@@ -454,14 +456,14 @@ class Purchase extends DataClass implements Insertable<Purchase> {
     DateTime? purchaseDate,
     Value<double?> totalPrice = const Value.absent(),
     Value<double?> taxRate = const Value.absent(),
-    int? groupId,
+    Value<int?> groupId = const Value.absent(),
   }) => Purchase(
     id: id ?? this.id,
     name: name ?? this.name,
     purchaseDate: purchaseDate ?? this.purchaseDate,
     totalPrice: totalPrice.present ? totalPrice.value : this.totalPrice,
     taxRate: taxRate.present ? taxRate.value : this.taxRate,
-    groupId: groupId ?? this.groupId,
+    groupId: groupId.present ? groupId.value : this.groupId,
   );
   Purchase copyWithCompanion(PurchasesCompanion data) {
     return Purchase(
@@ -512,7 +514,7 @@ class PurchasesCompanion extends UpdateCompanion<Purchase> {
   final Value<DateTime> purchaseDate;
   final Value<double?> totalPrice;
   final Value<double?> taxRate;
-  final Value<int> groupId;
+  final Value<int?> groupId;
   const PurchasesCompanion({
     this.id = const Value.absent(),
     this.name = const Value.absent(),
@@ -527,10 +529,9 @@ class PurchasesCompanion extends UpdateCompanion<Purchase> {
     required DateTime purchaseDate,
     this.totalPrice = const Value.absent(),
     this.taxRate = const Value.absent(),
-    required int groupId,
+    this.groupId = const Value.absent(),
   }) : name = Value(name),
-       purchaseDate = Value(purchaseDate),
-       groupId = Value(groupId);
+       purchaseDate = Value(purchaseDate);
   static Insertable<Purchase> custom({
     Expression<int>? id,
     Expression<String>? name,
@@ -555,7 +556,7 @@ class PurchasesCompanion extends UpdateCompanion<Purchase> {
     Value<DateTime>? purchaseDate,
     Value<double?>? totalPrice,
     Value<double?>? taxRate,
-    Value<int>? groupId,
+    Value<int?>? groupId,
   }) {
     return PurchasesCompanion(
       id: id ?? this.id,
@@ -663,9 +664,9 @@ class $ItemsTable extends Items with TableInfo<$ItemsTable, Item> {
   late final GeneratedColumn<int> groupId = GeneratedColumn<int>(
     'group_id',
     aliasedName,
-    false,
+    true,
     type: DriftSqlType.int,
-    requiredDuringInsert: true,
+    requiredDuringInsert: false,
     defaultConstraints: GeneratedColumn.constraintIsAlways(
       'REFERENCES "groups" (id) ON DELETE CASCADE',
     ),
@@ -714,8 +715,6 @@ class $ItemsTable extends Items with TableInfo<$ItemsTable, Item> {
         _groupIdMeta,
         groupId.isAcceptableOrUnknown(data['group_id']!, _groupIdMeta),
       );
-    } else if (isInserting) {
-      context.missing(_groupIdMeta);
     }
     return context;
   }
@@ -745,7 +744,7 @@ class $ItemsTable extends Items with TableInfo<$ItemsTable, Item> {
       groupId: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}group_id'],
-      )!,
+      ),
     );
   }
 
@@ -760,13 +759,13 @@ class Item extends DataClass implements Insertable<Item> {
   final String name;
   final double price;
   final String? imagePath;
-  final int groupId;
+  final int? groupId;
   const Item({
     required this.id,
     required this.name,
     required this.price,
     this.imagePath,
-    required this.groupId,
+    this.groupId,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -777,7 +776,9 @@ class Item extends DataClass implements Insertable<Item> {
     if (!nullToAbsent || imagePath != null) {
       map['image_path'] = Variable<String>(imagePath);
     }
-    map['group_id'] = Variable<int>(groupId);
+    if (!nullToAbsent || groupId != null) {
+      map['group_id'] = Variable<int>(groupId);
+    }
     return map;
   }
 
@@ -789,7 +790,9 @@ class Item extends DataClass implements Insertable<Item> {
       imagePath: imagePath == null && nullToAbsent
           ? const Value.absent()
           : Value(imagePath),
-      groupId: Value(groupId),
+      groupId: groupId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(groupId),
     );
   }
 
@@ -803,7 +806,7 @@ class Item extends DataClass implements Insertable<Item> {
       name: serializer.fromJson<String>(json['name']),
       price: serializer.fromJson<double>(json['price']),
       imagePath: serializer.fromJson<String?>(json['imagePath']),
-      groupId: serializer.fromJson<int>(json['groupId']),
+      groupId: serializer.fromJson<int?>(json['groupId']),
     );
   }
   @override
@@ -814,7 +817,7 @@ class Item extends DataClass implements Insertable<Item> {
       'name': serializer.toJson<String>(name),
       'price': serializer.toJson<double>(price),
       'imagePath': serializer.toJson<String?>(imagePath),
-      'groupId': serializer.toJson<int>(groupId),
+      'groupId': serializer.toJson<int?>(groupId),
     };
   }
 
@@ -823,13 +826,13 @@ class Item extends DataClass implements Insertable<Item> {
     String? name,
     double? price,
     Value<String?> imagePath = const Value.absent(),
-    int? groupId,
+    Value<int?> groupId = const Value.absent(),
   }) => Item(
     id: id ?? this.id,
     name: name ?? this.name,
     price: price ?? this.price,
     imagePath: imagePath.present ? imagePath.value : this.imagePath,
-    groupId: groupId ?? this.groupId,
+    groupId: groupId.present ? groupId.value : this.groupId,
   );
   Item copyWithCompanion(ItemsCompanion data) {
     return Item(
@@ -871,7 +874,7 @@ class ItemsCompanion extends UpdateCompanion<Item> {
   final Value<String> name;
   final Value<double> price;
   final Value<String?> imagePath;
-  final Value<int> groupId;
+  final Value<int?> groupId;
   const ItemsCompanion({
     this.id = const Value.absent(),
     this.name = const Value.absent(),
@@ -884,10 +887,9 @@ class ItemsCompanion extends UpdateCompanion<Item> {
     required String name,
     required double price,
     this.imagePath = const Value.absent(),
-    required int groupId,
+    this.groupId = const Value.absent(),
   }) : name = Value(name),
-       price = Value(price),
-       groupId = Value(groupId);
+       price = Value(price);
   static Insertable<Item> custom({
     Expression<int>? id,
     Expression<String>? name,
@@ -909,7 +911,7 @@ class ItemsCompanion extends UpdateCompanion<Item> {
     Value<String>? name,
     Value<double>? price,
     Value<String?>? imagePath,
-    Value<int>? groupId,
+    Value<int?>? groupId,
   }) {
     return ItemsCompanion(
       id: id ?? this.id,
@@ -1765,7 +1767,7 @@ typedef $$PurchasesTableCreateCompanionBuilder =
       required DateTime purchaseDate,
       Value<double?> totalPrice,
       Value<double?> taxRate,
-      required int groupId,
+      Value<int?> groupId,
     });
 typedef $$PurchasesTableUpdateCompanionBuilder =
     PurchasesCompanion Function({
@@ -1774,7 +1776,7 @@ typedef $$PurchasesTableUpdateCompanionBuilder =
       Value<DateTime> purchaseDate,
       Value<double?> totalPrice,
       Value<double?> taxRate,
-      Value<int> groupId,
+      Value<int?> groupId,
     });
 
 final class $$PurchasesTableReferences
@@ -1784,9 +1786,9 @@ final class $$PurchasesTableReferences
   static $GroupsTable _groupIdTable(_$AppDatabase db) =>
       db.groups.createAlias('purchases__group_id__groups__id');
 
-  $$GroupsTableProcessedTableManager get groupId {
-    final $_column = $_itemColumn<int>('group_id')!;
-
+  $$GroupsTableProcessedTableManager? get groupId {
+    final $_column = $_itemColumn<int>('group_id');
+    if ($_column == null) return null;
     final manager = $$GroupsTableTableManager(
       $_db,
       $_db.groups,
@@ -2068,7 +2070,7 @@ class $$PurchasesTableTableManager
                 Value<DateTime> purchaseDate = const Value.absent(),
                 Value<double?> totalPrice = const Value.absent(),
                 Value<double?> taxRate = const Value.absent(),
-                Value<int> groupId = const Value.absent(),
+                Value<int?> groupId = const Value.absent(),
               }) => PurchasesCompanion(
                 id: id,
                 name: name,
@@ -2084,7 +2086,7 @@ class $$PurchasesTableTableManager
                 required DateTime purchaseDate,
                 Value<double?> totalPrice = const Value.absent(),
                 Value<double?> taxRate = const Value.absent(),
-                required int groupId,
+                Value<int?> groupId = const Value.absent(),
               }) => PurchasesCompanion.insert(
                 id: id,
                 name: name,
@@ -2191,7 +2193,7 @@ typedef $$ItemsTableCreateCompanionBuilder =
       required String name,
       required double price,
       Value<String?> imagePath,
-      required int groupId,
+      Value<int?> groupId,
     });
 typedef $$ItemsTableUpdateCompanionBuilder =
     ItemsCompanion Function({
@@ -2199,7 +2201,7 @@ typedef $$ItemsTableUpdateCompanionBuilder =
       Value<String> name,
       Value<double> price,
       Value<String?> imagePath,
-      Value<int> groupId,
+      Value<int?> groupId,
     });
 
 final class $$ItemsTableReferences
@@ -2209,9 +2211,9 @@ final class $$ItemsTableReferences
   static $GroupsTable _groupIdTable(_$AppDatabase db) =>
       db.groups.createAlias('items__group_id__groups__id');
 
-  $$GroupsTableProcessedTableManager get groupId {
-    final $_column = $_itemColumn<int>('group_id')!;
-
+  $$GroupsTableProcessedTableManager? get groupId {
+    final $_column = $_itemColumn<int>('group_id');
+    if ($_column == null) return null;
     final manager = $$GroupsTableTableManager(
       $_db,
       $_db.groups,
@@ -2474,7 +2476,7 @@ class $$ItemsTableTableManager
                 Value<String> name = const Value.absent(),
                 Value<double> price = const Value.absent(),
                 Value<String?> imagePath = const Value.absent(),
-                Value<int> groupId = const Value.absent(),
+                Value<int?> groupId = const Value.absent(),
               }) => ItemsCompanion(
                 id: id,
                 name: name,
@@ -2488,7 +2490,7 @@ class $$ItemsTableTableManager
                 required String name,
                 required double price,
                 Value<String?> imagePath = const Value.absent(),
-                required int groupId,
+                Value<int?> groupId = const Value.absent(),
               }) => ItemsCompanion.insert(
                 id: id,
                 name: name,
