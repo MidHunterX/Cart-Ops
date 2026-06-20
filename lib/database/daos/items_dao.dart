@@ -17,6 +17,10 @@ class ItemsDao extends DatabaseAccessor<AppDatabase> with _$ItemsDaoMixin {
     return (select(items)..where((t) => t.groupId.equals(groupId))).get();
   }
 
+  Future<List<Item>> getItemsWithoutGroup() {
+    return (select(items)..where((t) => t.groupId.isNull())).get();
+  }
+
   Future<int> insertItem(ItemsCompanion item) => into(items).insert(item);
 
   Future deleteItem(int id) =>

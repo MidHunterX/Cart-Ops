@@ -13,6 +13,10 @@ class PurchasesDao extends DatabaseAccessor<AppDatabase>
     return (select(purchases)..where((t) => t.groupId.equals(groupId))).watch();
   }
 
+  Stream<List<Purchase>> watchPurchasesWithoutGroup() {
+    return (select(purchases)..where((t) => t.groupId.isNull())).watch();
+  }
+
   Future<int> insertPurchase(PurchasesCompanion purchase) {
     return into(purchases).insert(purchase);
   }
