@@ -5,7 +5,7 @@ import 'package:shopping_assist/database/database.dart';
 
 class AddPurchasedItemDialog extends StatefulWidget {
   final Purchase purchase;
-  final Group group;
+  final Group? group;
 
   const AddPurchasedItemDialog({
     super.key,
@@ -35,7 +35,9 @@ class _AddPurchasedItemDialogState extends State<AddPurchasedItemDialog> {
   // Pre-load items from the database to drive the autocomplete feature safely
   Future<void> _fetchItems() async {
     final db = Provider.of<AppDatabase>(context, listen: false);
-    final items = await db.itemsDao.getItemsInGroup(widget.group.id);
+    final items = widget.group == null
+        ? await db.itemsDao.getItemsWithoutGroup()
+        : await db.itemsDao.getItemsInGroup(widget.group!.id);
     setState(() {
       _groupItems = items;
     });
@@ -83,7 +85,7 @@ class _AddPurchasedItemDialogState extends State<AddPurchasedItemDialog> {
         ItemsCompanion.insert(
           name: name,
           price: price, // initial base price
-          groupId: widget.group.id,
+          groupId: Value(widget.group?.id),
         ),
       );
     }

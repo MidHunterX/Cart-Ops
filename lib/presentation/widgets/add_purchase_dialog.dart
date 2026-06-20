@@ -1,9 +1,10 @@
+import 'package:drift/drift.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shopping_assist/database/database.dart';
 
 class AddPurchaseDialog extends StatefulWidget {
-  final int groupId;
+  final int? groupId;
 
   const AddPurchaseDialog({super.key, required this.groupId});
 
@@ -28,7 +29,7 @@ class _AddPurchaseDialogState extends State<AddPurchaseDialog> {
         PurchasesCompanion.insert(
           name: _controller.text.trim(),
           purchaseDate: DateTime.now(),
-          groupId: widget.groupId,
+          groupId: Value(widget.groupId),
         ),
       );
 

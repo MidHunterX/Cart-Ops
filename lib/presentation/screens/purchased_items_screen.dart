@@ -7,7 +7,7 @@ import 'package:shopping_assist/presentation/widgets/empty_state.dart';
 
 class PurchasedItemsScreen extends StatelessWidget {
   final Purchase purchase;
-  final Group group;
+  final Group? group;
 
   const PurchasedItemsScreen({
     super.key,
@@ -36,8 +36,8 @@ class PurchasedItemsScreen extends StatelessWidget {
 
           if (purchasedItems.isEmpty) {
             return const EmptyState(
-              icon: Icons.remove_shopping_cart_outlined,
-              title: 'Your Cart is Empty',
+              icon: Icons.shopping_cart_outlined,
+              title: 'Your Cart is Ready',
               message: 'Add items to your purchase to see the running total.',
             );
           }
