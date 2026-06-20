@@ -5,6 +5,7 @@ import 'package:shopping_assist/presentation/screens/purchased_items_screen.dart
 import 'package:shopping_assist/presentation/screens/purchases_screen.dart';
 import 'package:shopping_assist/presentation/widgets/add_group_dialog.dart';
 import 'package:shopping_assist/presentation/widgets/add_purchase_dialog.dart';
+import 'package:shopping_assist/presentation/widgets/empty_state.dart';
 
 class GroupsScreen extends StatelessWidget {
   const GroupsScreen({super.key});
@@ -94,17 +95,6 @@ class GroupsScreen extends StatelessWidget {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  IconButton(
-                    onPressed: () {
-                      showDialog(
-                        context: context,
-                        builder: (context) =>
-                            const AddPurchaseDialog(groupId: null),
-                      );
-                    },
-                    icon: const Icon(Icons.add_circle_outline),
-                    color: colorScheme.primary,
-                  ),
                 ],
               ),
             ),
@@ -122,15 +112,12 @@ class GroupsScreen extends StatelessWidget {
               final purchases = snapshot.data ?? [];
 
               if (purchases.isEmpty) {
-                return SliverToBoxAdapter(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 32.0),
-                    child: Center(
-                      child: Text(
-                        'No general purchases yet.',
-                        style: TextStyle(color: colorScheme.onSurfaceVariant),
-                      ),
-                    ),
+                return SliverFillRemaining(
+                  hasScrollBody: false,
+                  child: const EmptyState(
+                    icon: Icons.shopping_bag_outlined,
+                    title: 'No Purchases Yet',
+                    message: 'Start a new shopping event by adding a purchase.',
                   ),
                 );
               }
