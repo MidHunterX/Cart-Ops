@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shopping_assist/core/database/database.dart';
-import 'package:shopping_assist/presentation/screens/purchased_items_screen.dart';
+import 'package:shopping_assist/features/purchased_items/views/screens/purchased_items_screen.dart';
 import 'package:shopping_assist/presentation/screens/purchases_screen.dart';
 import 'package:shopping_assist/features/groups/views/widgets/add_group_dialog.dart';
 import 'package:shopping_assist/presentation/widgets/add_purchase_dialog.dart';
