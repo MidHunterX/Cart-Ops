@@ -12,6 +12,8 @@ dart run build_runner build
 
 ## Basic Requirements
 
+![General Plan](./.assets/plan.svg)
+
 ### Settings Screen
 
 Contains the following global settings:
