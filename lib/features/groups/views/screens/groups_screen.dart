@@ -1,40 +1,38 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shopping_assist/core/database/database.dart';
-import 'package:shopping_assist/features/purchased_items/views/screens/purchased_items_screen.dart';
-import 'package:shopping_assist/features/purchases/views/screens/purchases_screen.dart';
-import 'package:shopping_assist/features/groups/views/widgets/add_group_dialog.dart';
-import 'package:shopping_assist/features/purchases/views/widgets/add_purchase_dialog.dart';
 import 'package:shopping_assist/core/widgets/empty_state.dart';
+import 'package:shopping_assist/features/groups/repositories/groups_repository.dart';
+import 'package:shopping_assist/features/groups/views/widgets/add_group_dialog.dart';
+import 'package:shopping_assist/features/purchased_items/views/screens/purchased_items_screen.dart';
+import 'package:shopping_assist/features/purchases/repositories/purchases_repository.dart';
+import 'package:shopping_assist/features/purchases/views/screens/purchases_screen.dart';
+import 'package:shopping_assist/features/purchases/views/widgets/add_purchase_dialog.dart';
 
 class GroupsScreen extends StatelessWidget {
   const GroupsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final db = Provider.of<AppDatabase>(context);
     final colorScheme = Theme.of(context).colorScheme;
+    final groupsRepo = context.watch<GroupsRepository>();
+    final purchasesRepo = context.watch<PurchasesRepository>();
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Shopping Assist'),
         backgroundColor: colorScheme.primaryContainer,
       ),
-
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          showDialog(
-            context: context,
-            builder: (context) => const AddPurchaseDialog(groupId: null),
-          );
-        },
+        onPressed: () => showDialog(
+          context: context,
+          builder: (context) => const AddPurchaseDialog(groupId: null),
+        ),
         child: const Icon(Icons.add),
       ),
-
       body: ListView(
         padding: const EdgeInsets.only(bottom: 80),
         children: [
-          // GROUPS SECTION
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 24, 16, 16),
             child: Text(
@@ -44,19 +42,13 @@ class GroupsScreen extends StatelessWidget {
               ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
             ),
           ),
-
           StreamBuilder<List<Group>>(
-            stream: db.groupsDao.watchGroups(),
+            stream: groupsRepo.watchGroups(),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Padding(
-                  padding: EdgeInsets.all(32.0),
-                  child: Center(child: CircularProgressIndicator()),
-                );
+                return const Center(child: CircularProgressIndicator());
               }
-
               final groups = snapshot.data ?? [];
-
               return GridView.builder(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
@@ -71,45 +63,27 @@ class GroupsScreen extends StatelessWidget {
                   if (index == groups.length) {
                     return _buildAddGroupTile(context, colorScheme);
                   }
-                  return _buildGroupTile(
-                    context,
-                    db,
-                    groups[index],
-                    colorScheme,
-                  );
+                  return _buildGroupTile(context, groups[index], colorScheme);
                 },
               );
             },
           ),
-
-          // GENERAL PURCHASES SECTION
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 32, 16, 8),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'General Purchases',
-                  style: Theme.of(
-                    context,
-                  ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
-                ),
-              ],
+            child: Text(
+              'General Purchases',
+              style: Theme.of(
+                context,
+              ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
             ),
           ),
-
           StreamBuilder<List<Purchase>>(
-            stream: db.purchasesDao.watchPurchasesWithoutGroup(),
+            stream: purchasesRepo.watchGeneralPurchases(),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Padding(
-                  padding: EdgeInsets.all(32.0),
-                  child: Center(child: CircularProgressIndicator()),
-                );
+                return const Center(child: CircularProgressIndicator());
               }
-
               final purchases = snapshot.data ?? [];
-
               if (purchases.isEmpty) {
                 return const Padding(
                   padding: EdgeInsets.only(top: 32.0),
@@ -120,7 +94,6 @@ class GroupsScreen extends StatelessWidget {
                   ),
                 );
               }
-
               return ListView.builder(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
@@ -140,19 +113,17 @@ class GroupsScreen extends StatelessWidget {
                         color: colorScheme.error,
                       ),
                       onPressed: () =>
-                          _confirmDeletePurchase(context, db, purchase),
+                          _confirmDeletePurchase(context, purchase),
                     ),
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => PurchasedItemsScreen(
-                            purchase: purchase,
-                            group: null,
-                          ),
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => PurchasedItemsScreen(
+                          purchase: purchase,
+                          group: null,
                         ),
-                      );
-                    },
+                      ),
+                    ),
                   );
                 },
               );
@@ -165,20 +136,15 @@ class GroupsScreen extends StatelessWidget {
 
   Widget _buildGroupTile(
     BuildContext context,
-    AppDatabase db,
     Group group,
     ColorScheme colorScheme,
   ) {
     return InkWell(
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => PurchasesScreen(group: group),
-          ),
-        );
-      },
-      borderRadius: BorderRadius.circular(24), // "Squircle" border radius
+      onTap: () => Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => PurchasesScreen(group: group)),
+      ),
+      borderRadius: BorderRadius.circular(24),
       child: Ink(
         decoration: BoxDecoration(
           color: colorScheme.primaryContainer.withValues(alpha: 0.4),
@@ -218,7 +184,7 @@ class GroupsScreen extends StatelessWidget {
                   size: 18,
                   color: colorScheme.onSurfaceVariant,
                 ),
-                onPressed: () => _confirmDeleteGroup(context, db, group),
+                onPressed: () => _confirmDeleteGroup(context, group),
               ),
             ),
           ],
@@ -229,12 +195,8 @@ class GroupsScreen extends StatelessWidget {
 
   Widget _buildAddGroupTile(BuildContext context, ColorScheme colorScheme) {
     return InkWell(
-      onTap: () {
-        showDialog(
-          context: context,
-          builder: (context) => const AddGroupDialog(),
-        );
-      },
+      onTap: () =>
+          showDialog(context: context, builder: (_) => const AddGroupDialog()),
       borderRadius: BorderRadius.circular(24),
       child: Ink(
         decoration: BoxDecoration(
@@ -242,7 +204,6 @@ class GroupsScreen extends StatelessWidget {
           borderRadius: BorderRadius.circular(24),
           border: Border.all(
             color: colorScheme.primary.withValues(alpha: 0.4),
-            style: BorderStyle.solid,
             width: 2,
           ),
         ),
@@ -266,7 +227,7 @@ class GroupsScreen extends StatelessWidget {
     );
   }
 
-  void _confirmDeleteGroup(BuildContext context, AppDatabase db, Group group) {
+  void _confirmDeleteGroup(BuildContext context, Group group) {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -284,7 +245,7 @@ class GroupsScreen extends StatelessWidget {
               backgroundColor: Theme.of(context).colorScheme.error,
             ),
             onPressed: () {
-              db.groupsDao.deleteGroup(group.id);
+              context.read<GroupsRepository>().deleteGroup(group.id);
               Navigator.pop(ctx);
             },
             child: const Text('Delete'),
@@ -294,11 +255,7 @@ class GroupsScreen extends StatelessWidget {
     );
   }
 
-  void _confirmDeletePurchase(
-    BuildContext context,
-    AppDatabase db,
-    Purchase purchase,
-  ) {
+  void _confirmDeletePurchase(BuildContext context, Purchase purchase) {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -314,7 +271,7 @@ class GroupsScreen extends StatelessWidget {
               backgroundColor: Theme.of(context).colorScheme.error,
             ),
             onPressed: () {
-              db.purchasesDao.deletePurchase(purchase.id);
+              context.read<PurchasesRepository>().deletePurchase(purchase.id);
               Navigator.pop(ctx);
             },
             child: const Text('Delete'),
