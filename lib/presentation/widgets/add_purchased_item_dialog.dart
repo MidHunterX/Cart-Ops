@@ -190,7 +190,7 @@ class _AddPurchasedItemDialogState extends State<AddPurchasedItemDialog> {
           onPressed: () => Navigator.pop(context),
           child: const Text('Cancel'),
         ),
-        ElevatedButton(onPressed: _submit, child: const Text('Add')),
+        FilledButton(onPressed: _submit, child: const Text('Add')),
       ],
     );
   }
