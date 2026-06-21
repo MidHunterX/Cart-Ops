@@ -101,29 +101,35 @@ class GroupsScreen extends StatelessWidget {
                 itemCount: purchases.length,
                 itemBuilder: (context, index) {
                   final purchase = purchases[index];
-                  return ListTile(
-                    leading: const Icon(Icons.shopping_bag_outlined),
-                    title: Text(purchase.name),
-                    subtitle: Text(
-                      '${purchase.purchaseDate.day}/${purchase.purchaseDate.month}/${purchase.purchaseDate.year}',
-                    ),
-                    trailing: IconButton(
-                      icon: Icon(
-                        Icons.delete_outline,
-                        color: colorScheme.error,
-                      ),
-                      onPressed: () =>
-                          _confirmDeletePurchase(context, purchase),
-                    ),
-                    onTap: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => PurchasedItemsScreen(
-                          purchase: purchase,
-                          group: null,
+                  return Column(
+                    children: [
+                      ListTile(
+                        leading: const Icon(Icons.shopping_bag_outlined),
+                        title: Text(purchase.name),
+                        subtitle: Text(
+                          '${purchase.purchaseDate.day}/${purchase.purchaseDate.month}/${purchase.purchaseDate.year}',
+                        ),
+                        trailing: IconButton(
+                          icon: Icon(
+                            Icons.delete_outline,
+                            color: colorScheme.error,
+                          ),
+                          onPressed: () =>
+                              _confirmDeletePurchase(context, purchase),
+                        ),
+                        onTap: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => PurchasedItemsScreen(
+                              purchase: purchase,
+                              group: null,
+                            ),
+                          ),
                         ),
                       ),
-                    ),
+                      if (index < purchases.length - 1)
+                        const Divider(height: 1),
+                    ],
                   );
                 },
               );
