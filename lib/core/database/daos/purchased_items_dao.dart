@@ -4,13 +4,6 @@ import 'package:shopping_assist/core/database/models.dart';
 
 part 'purchased_items_dao.g.dart';
 
-class PurchasedItemWithDetails {
-  final PurchasedItem purchasedItem;
-  final Item item;
-
-  PurchasedItemWithDetails(this.purchasedItem, this.item);
-}
-
 @DriftAccessor(tables: [PurchasedItems, Items])
 class PurchasedItemsDao extends DatabaseAccessor<AppDatabase>
     with _$PurchasedItemsDaoMixin {

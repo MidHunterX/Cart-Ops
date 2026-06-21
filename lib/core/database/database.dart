@@ -9,6 +9,14 @@ import 'package:shopping_assist/core/database/daos/purchased_items_dao.dart';
 
 part 'database.g.dart';
 
+// Drift basically creates classes like these based on tables, daos etc.
+// So, this is kept here in database
+class PurchasedItemWithDetails {
+  final PurchasedItem purchasedItem;
+  final Item item;
+  PurchasedItemWithDetails(this.purchasedItem, this.item);
+}
+
 @DriftDatabase(
   tables: [Groups, Purchases, Items, PurchasedItems],
   daos: [GroupsDao, PurchasesDao, ItemsDao, PurchasedItemsDao],
