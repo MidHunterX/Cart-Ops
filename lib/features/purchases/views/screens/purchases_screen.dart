@@ -42,24 +42,34 @@ class PurchasesScreen extends StatelessWidget {
             itemCount: purchases.length,
             itemBuilder: (context, index) {
               final purchase = purchases[index];
-              return ListTile(
-                leading: const Icon(Icons.shopping_cart),
-                title: Text(purchase.name),
-                subtitle: Text(
-                  '${purchase.purchaseDate.day}/${purchase.purchaseDate.month}/${purchase.purchaseDate.year}',
-                ),
-                trailing: IconButton(
-                  icon: Icon(Icons.delete_outline, color: colorScheme.error),
-                  onPressed: () =>
-                      _confirmDelete(context, repo, purchase, colorScheme),
-                ),
-                onTap: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) =>
-                        PurchasedItemsScreen(purchase: purchase, group: group),
+              return Column(
+                children: [
+                  ListTile(
+                    leading: const Icon(Icons.shopping_cart),
+                    title: Text(purchase.name),
+                    subtitle: Text(
+                      '${purchase.purchaseDate.day}/${purchase.purchaseDate.month}/${purchase.purchaseDate.year}',
+                    ),
+                    trailing: IconButton(
+                      icon: Icon(
+                        Icons.delete_outline,
+                        color: colorScheme.error,
+                      ),
+                      onPressed: () =>
+                          _confirmDelete(context, repo, purchase, colorScheme),
+                    ),
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => PurchasedItemsScreen(
+                          purchase: purchase,
+                          group: group,
+                        ),
+                      ),
+                    ),
                   ),
-                ),
+                  if (index < purchases.length - 1) const Divider(height: 1),
+                ],
               );
             },
           );

@@ -10,7 +10,11 @@ class PurchasedItemsScreen extends StatelessWidget {
   final Purchase purchase;
   final Group? group;
 
-  const PurchasedItemsScreen({super.key, required this.purchase, required this.group});
+  const PurchasedItemsScreen({
+    super.key,
+    required this.purchase,
+    required this.group,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -47,20 +51,29 @@ class PurchasedItemsScreen extends StatelessWidget {
               final item = details.item;
               final total = (pItem.price - pItem.discount) * pItem.quantity;
 
-              return ListTile(
-                leading: const Icon(Icons.label_outline),
-                title: Text(item.name),
-                subtitle: Text(
-                  'Qty: ${pItem.quantity}${pItem.isWeight ? "kg" : ""} | '
-                  'Price: \$${pItem.price} | '
-                  'Disc: \$${pItem.discount}\n'
-                  'Total: \$${total.toStringAsFixed(2)}',
-                ),
-                isThreeLine: true,
-                trailing: IconButton(
-                  icon: Icon(Icons.delete_outline, color: colorScheme.error),
-                  onPressed: () => repo.deletePurchasedItem(pItem.id),
-                ),
+              return Column(
+                children: [
+                  ListTile(
+                    leading: const Icon(Icons.label_outline),
+                    title: Text(item.name),
+                    subtitle: Text(
+                      'Qty: ${pItem.quantity}${pItem.isWeight ? "kg" : ""} | '
+                      'Price: \$${pItem.price} | '
+                      'Disc: \$${pItem.discount}\n'
+                      'Total: \$${total.toStringAsFixed(2)}',
+                    ),
+                    isThreeLine: true,
+                    trailing: IconButton(
+                      icon: Icon(
+                        Icons.delete_outline,
+                        color: colorScheme.error,
+                      ),
+                      onPressed: () => repo.deletePurchasedItem(pItem.id),
+                    ),
+                  ),
+                  if (index < purchasedItems.length - 1)
+                    const Divider(height: 1),
+                ],
               );
             },
           );
@@ -69,7 +82,8 @@ class PurchasedItemsScreen extends StatelessWidget {
       floatingActionButton: FloatingActionButton(
         onPressed: () => showDialog(
           context: context,
-          builder: (context) => AddPurchasedItemDialog(purchase: purchase, group: group),
+          builder: (context) =>
+              AddPurchasedItemDialog(purchase: purchase, group: group),
         ),
         child: const Icon(Icons.add),
       ),
