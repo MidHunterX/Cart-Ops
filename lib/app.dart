@@ -8,7 +8,21 @@ class ShoppingApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Shopping Assist',
-      theme: ThemeData(colorScheme: ColorScheme.fromSeed(seedColor: Colors.green)),
+      theme: ThemeData(
+        useMaterial3: true,
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: Colors.greenAccent,
+          brightness: Brightness.light,
+        ),
+      ),
+      darkTheme: ThemeData(
+        useMaterial3: true,
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: Colors.greenAccent,
+          brightness: Brightness.dark,
+        ),
+      ),
+      themeMode: ThemeMode.system,
       home: const GroupsScreen(),
     );
   }
