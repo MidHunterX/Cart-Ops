@@ -8,6 +8,7 @@ import 'package:shopping_assist/features/purchased_items/views/screens/purchased
 import 'package:shopping_assist/features/purchases/repositories/purchases_repository.dart';
 import 'package:shopping_assist/features/purchases/views/screens/purchases_screen.dart';
 import 'package:shopping_assist/features/purchases/views/widgets/add_purchase_dialog.dart';
+import 'package:shopping_assist/features/settings/views/settings_screen.dart';
 
 class GroupsScreen extends StatelessWidget {
   const GroupsScreen({super.key});
@@ -22,6 +23,15 @@ class GroupsScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Shopping Assist'),
         backgroundColor: colorScheme.primaryContainer,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.settings),
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const SettingsScreen()),
+            ),
+          ),
+        ],
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => showDialog(

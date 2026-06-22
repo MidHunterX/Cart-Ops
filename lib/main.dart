@@ -5,6 +5,7 @@ import 'package:shopping_assist/core/database/database.dart';
 import 'package:shopping_assist/features/groups/repositories/groups_repository.dart';
 import 'package:shopping_assist/features/purchased_items/repositories/purchased_items_repository.dart';
 import 'package:shopping_assist/features/purchases/repositories/purchases_repository.dart';
+import 'package:shopping_assist/features/settings/settings_provider.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -12,6 +13,7 @@ void main() {
   runApp(
     MultiProvider(
       providers: [
+        ChangeNotifierProvider(create: (_) => SettingsProvider()),
         Provider<AppDatabase>(
           create: (_) => AppDatabase(),
           dispose: (_, db) => db.close(),

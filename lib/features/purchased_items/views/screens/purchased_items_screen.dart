@@ -4,6 +4,7 @@ import 'package:shopping_assist/core/database/database.dart';
 import 'package:shopping_assist/features/purchased_items/views/widgets/add_purchased_item_dialog.dart';
 import 'package:shopping_assist/core/widgets/empty_state.dart';
 import 'package:shopping_assist/features/purchased_items/repositories/purchased_items_repository.dart';
+import 'package:shopping_assist/features/settings/settings_provider.dart';
 
 class PurchasedItemsScreen extends StatelessWidget {
   final Purchase purchase;
@@ -19,6 +20,8 @@ class PurchasedItemsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final repo = context.watch<PurchasedItemsRepository>();
     final colorScheme = Theme.of(context).colorScheme;
+    final settings = context.watch<SettingsProvider>();
+    final currency = settings.currencySymbol;
 
     return Scaffold(
       appBar: AppBar(
@@ -57,9 +60,9 @@ class PurchasedItemsScreen extends StatelessWidget {
                     title: Text(item.name),
                     subtitle: Text(
                       'Qty: ${pItem.quantity}${pItem.isWeight ? "kg" : ""} | '
-                      'Price: \$${pItem.price} | '
-                      'Disc: \$${pItem.discount}\n'
-                      'Total: \$${total.toStringAsFixed(2)}',
+                      'Price: $currency${pItem.price} | '
+                      'Disc: $currency${pItem.discount}\n'
+                      'Total: $currency${total.toStringAsFixed(2)}',
                     ),
                     isThreeLine: true,
                     trailing: IconButton(

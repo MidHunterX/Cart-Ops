@@ -1,28 +1,32 @@
 import 'package:flutter/material.dart';
 import 'package:shopping_assist/features/groups/views/screens/groups_screen.dart';
+import 'package:provider/provider.dart';
+import 'package:shopping_assist/features/settings/settings_provider.dart';
 
 class ShoppingApp extends StatelessWidget {
   const ShoppingApp({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final settings = context.watch<SettingsProvider>();
+
     return MaterialApp(
       title: 'Shopping Assist',
       theme: ThemeData(
         useMaterial3: true,
         colorScheme: ColorScheme.fromSeed(
-          seedColor: Colors.greenAccent,
+          seedColor: settings.seedColor,
           brightness: Brightness.light,
         ),
       ),
       darkTheme: ThemeData(
         useMaterial3: true,
         colorScheme: ColorScheme.fromSeed(
-          seedColor: Colors.greenAccent,
+          seedColor: settings.seedColor,
           brightness: Brightness.dark,
         ),
       ),
-      themeMode: ThemeMode.system,
+      themeMode: settings.themeMode,
       home: const GroupsScreen(),
     );
   }
