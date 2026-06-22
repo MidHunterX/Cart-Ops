@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shopping_assist/features/groups/views/screens/groups_screen.dart';
 import 'package:provider/provider.dart';
-import 'package:shopping_assist/features/settings/settings_provider.dart';
+import 'package:shopping_assist/features/settings/providers/settings_provider.dart';
 
 class ShoppingApp extends StatelessWidget {
   const ShoppingApp({super.key});

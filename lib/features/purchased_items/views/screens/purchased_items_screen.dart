@@ -4,7 +4,7 @@ import 'package:shopping_assist/core/database/database.dart';
 import 'package:shopping_assist/features/purchased_items/views/widgets/add_purchased_item_dialog.dart';
 import 'package:shopping_assist/core/widgets/empty_state.dart';
 import 'package:shopping_assist/features/purchased_items/repositories/purchased_items_repository.dart';
-import 'package:shopping_assist/features/settings/settings_provider.dart';
+import 'package:shopping_assist/features/settings/providers/settings_provider.dart';
 
 class PurchasedItemsScreen extends StatelessWidget {
   final Purchase purchase;

@@ -1,5 +1,4 @@
 import 'package:drift/drift.dart';
-import 'package:shopping_assist/core/database/daos/purchased_items_dao.dart';
 import 'package:shopping_assist/core/database/database.dart';
 
 class PurchasedItemsRepository {

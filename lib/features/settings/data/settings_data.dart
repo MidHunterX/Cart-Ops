@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import './types.dart';
 
 final List<Color> colorOptions = [
   Colors.greenAccent,
@@ -83,12 +84,3 @@ final List<Currency> currencies = [
   Currency('ETH', 'Ξ', 'Ethereum', '🌐'),
   Currency('USDT', '₮', 'Tether', '🌐'),
 ];
-
-class Currency {
-  final String code;
-  final String symbol;
-  final String name;
-  final String flag;
-
-  const Currency(this.code, this.symbol, this.name, this.flag);
-}

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:shopping_assist/features/settings/settings_provider.dart';
-import './data.dart';
+import 'package:shopping_assist/features/settings/providers/settings_provider.dart';
+import '../data/settings_data.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
