@@ -87,44 +87,35 @@ class SettingsScreen extends StatelessWidget {
 
           ListTile(
             title: const Text('Currency'),
-            subtitle: Text(
-              currencies
-                  .firstWhere(
-                    (c) => c.symbol == settings.currencySymbol,
-                    orElse: () => currencies[0],
-                  )
-                  .name,
-            ),
-            trailing: DropdownButton<String>(
-              value: settings.currencySymbol,
-              items: currencies.map((currency) {
-                return DropdownMenuItem<String>(
-                  value: currency.symbol,
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(currency.flag),
-                      const SizedBox(width: 8),
-                      Text(currency.symbol),
-                      const SizedBox(width: 4),
-                      Text(
-                        currency.code,
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: Colors.grey,
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-              }).toList(),
-              onChanged: (val) {
-                if (val != null) settings.setCurrency(val);
-              },
-            ),
+            subtitle: Text(settings.currencySymbol),
+            trailing: const Icon(Icons.arrow_drop_down),
+            onTap: () => _showCurrencyPicker(context, settings),
           ),
         ],
       ),
     );
   }
+}
+
+void _showCurrencyPicker(BuildContext context, SettingsProvider settings) {
+  showModalBottomSheet(
+    context: context,
+    builder: (context) {
+      return ListView.builder(
+        itemCount: currencies.length,
+        itemBuilder: (context, index) {
+          final currency = currencies[index];
+          return ListTile(
+            leading: Text(currency.flag, style: const TextStyle(fontSize: 24)),
+            title: Text('${currency.symbol} - ${currency.code}'),
+            subtitle: Text(currency.name),
+            onTap: () {
+              settings.setCurrency(currency.code);
+              Navigator.pop(context);
+            },
+          );
+        },
+      );
+    },
+  );
 }
