@@ -1,4 +1,6 @@
-# Cart Operator
+# Cart-Ops
+
+Personal commerce operator tool focusing on the expansion of human abilities through technological assistance.
 
 ![Flutter](https://img.shields.io/badge/Flutter-02569B?style=for-the-badge&logo=flutter&logoColor=white)
 ![Dart](https://img.shields.io/badge/Dart-0175C2?style=for-the-badge&logo=dart&logoColor=white)
@@ -14,48 +16,19 @@ dart run build_runner build
 
 ## Basic Requirements
 
-![General Plan](./.assets/Shopping-Assist.svg)
+![General Plan](./.assets/Cart-Ops-Mockup.svg)
 
 ### Settings Screen
 
-Contains the following global settings:
-
-- [ ] Set Currency Symbol
-- [ ] Set Weight Unit (Metric, Imperial or Both)
-- [ ] Set Tax Rate (0-100) for countries that display prices without tax
-
-### Homepage Screen
-
-- [x] Contains a list of purchases
-- [x] Contains groups of purchases
-- [x] CRUD purchase groups
-- [x] CRUD purchase
-
-### Other Screens
-
-- [x] CRUD purchasedItems
-- [ ] Settings
-- [ ] CRUD items
-
-### Purchases Screen
-
-- [x] Contains a list of purchases in a group
-- [x] Purchase item has these attributes:
-  - string name
-  - datetime purchase_datetime
-  - ref tax_rate
-  - total_price (calc)
-
-### PurchasedItems Screen (Cart)
-
-- [x] Contains a list of items in a purchase
-- [x] CRUD PurchasedItems
-- [x] PurchasedItems has these attributes:
-  - string name
-  - image photo
-  - float discount
-  - float quantity
-  - float price
+- [x] Globally Set Currency Symbol
+- [x] Globally Set Theme Colors
+- [ ] Globally Set Weight Unit (Metric, Imperial or Both)
+- [ ] Globally Set Tax Rate (0-100) for countries that display prices without tax
+- [x] CRUD General purchases + Groups Screen
+- [x] CRUD purchase Screen
+- [x] CRUD PurchasedItems Screen
+- [ ] CRUD reusable items
+- [x] Settings Screen
 
 ## Future Requirements
 
@@ -76,6 +49,6 @@ Contains the following global settings:
 
 - [ ] Item details autocompletion with Camera identification (tensorflow)
 - [ ] Item duplication
-- [ ] Item suggestions while typing based on history
+- [x] Item suggestions while typing based on history
 - [ ] Easy price per item/quantity toggle
 - [ ] Numpad type (top to bottom, bottom to top)
