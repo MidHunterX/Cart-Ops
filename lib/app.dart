@@ -17,6 +17,7 @@ class ShoppingApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(
           seedColor: settings.seedColor,
           brightness: Brightness.light,
+          surface: Colors.white,
         ),
       ),
       darkTheme: ThemeData(
@@ -24,6 +25,7 @@ class ShoppingApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(
           seedColor: settings.seedColor,
           brightness: Brightness.dark,
+          surface: Colors.black,
         ),
       ),
       themeMode: settings.themeMode,
