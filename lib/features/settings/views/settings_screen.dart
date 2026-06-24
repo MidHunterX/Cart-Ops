@@ -32,6 +32,8 @@ class SettingsScreen extends StatelessWidget {
             ),
           ),
 
+          const Divider(),
+
           ListTile(
             title: const Text('Theme Color'),
             subtitle: ThemeColorPicker(
@@ -41,11 +43,12 @@ class SettingsScreen extends StatelessWidget {
           ),
 
           const Divider(),
+
           const SettingsSectionHeader(title: 'Localization'),
 
           ListTile(
             title: const Text('Currency'),
-            subtitle: Text(settings.currencySymbol),
+            subtitle: Text(settings.currencyCode),
             trailing: const Icon(Icons.arrow_drop_down),
             onTap: () => showModalBottomSheet(
               context: context,
