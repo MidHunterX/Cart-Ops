@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shopping_assist/features/settings/providers/settings_provider.dart';
-import '../data/settings_data.dart';
+import './widgets/theme_colorpicker_v2.dart';
+import './widgets/section_header.dart';
+import './widgets/currency_picker.dart';
+import './widgets/theme_mode_selector.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -18,104 +21,41 @@ class SettingsScreen extends StatelessWidget {
       ),
       body: ListView(
         children: [
-          const ListTile(
-            title: Text(
-              'Appearance',
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
-          ),
+          const SettingsSectionHeader(title: 'Appearance'),
 
           ListTile(
             title: const Text('Theme Mode'),
             subtitle: Text(settings.themeMode.name.toUpperCase()),
-            trailing: SegmentedButton<ThemeMode>(
-              segments: const [
-                ButtonSegment(
-                  value: ThemeMode.light,
-                  icon: Icon(Icons.light_mode),
-                ),
-                ButtonSegment(
-                  value: ThemeMode.system,
-                  icon: Icon(Icons.settings_brightness),
-                ),
-                ButtonSegment(
-                  value: ThemeMode.dark,
-                  icon: Icon(Icons.dark_mode),
-                ),
-              ],
-              selected: {settings.themeMode},
-              onSelectionChanged: (set) => settings.setThemeMode(set.first),
+            trailing: ThemeModeSelector(
+              currentThemeMode: settings.themeMode,
+              onThemeModeChanged: settings.setThemeMode,
             ),
           ),
 
           ListTile(
             title: const Text('Theme Color'),
-            subtitle: Padding(
-              padding: const EdgeInsets.only(top: 8.0),
-              child: Wrap(
-                spacing: 12,
-                children: colorOptions.map((color) {
-                  return GestureDetector(
-                    onTap: () => settings.setSeedColor(color),
-                    child: Padding(
-                      padding: const EdgeInsets.only(bottom: 8.0),
-                      child: CircleAvatar(
-                        backgroundColor: color,
-                        radius: 20,
-                        child: settings.seedColor == color
-                            ? const Icon(
-                                Icons.check,
-                                size: 16,
-                                color: Colors.black,
-                              )
-                            : null,
-                      ),
-                    ),
-                  );
-                }).toList(),
-              ),
+            subtitle: ThemeColorPicker(
+              selectedColor: settings.seedColor,
+              onColorSelected: settings.setSeedColor,
             ),
           ),
 
           const Divider(),
-          const ListTile(
-            title: Text(
-              'Localization',
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
-          ),
+          const SettingsSectionHeader(title: 'Localization'),
 
           ListTile(
             title: const Text('Currency'),
             subtitle: Text(settings.currencySymbol),
             trailing: const Icon(Icons.arrow_drop_down),
-            onTap: () => _showCurrencyPicker(context, settings),
+            onTap: () => showModalBottomSheet(
+              context: context,
+              builder: (context) {
+                return CurrencyPicker(settings: settings);
+              },
+            ),
           ),
         ],
       ),
     );
   }
-}
-
-void _showCurrencyPicker(BuildContext context, SettingsProvider settings) {
-  showModalBottomSheet(
-    context: context,
-    builder: (context) {
-      return ListView.builder(
-        itemCount: currencies.length,
-        itemBuilder: (context, index) {
-          final currency = currencies[index];
-          return ListTile(
-            leading: Text(currency.flag, style: const TextStyle(fontSize: 24)),
-            title: Text('${currency.symbol} - ${currency.code}'),
-            subtitle: Text(currency.name),
-            onTap: () {
-              settings.setCurrency(currency.code);
-              Navigator.pop(context);
-            },
-          );
-        },
-      );
-    },
-  );
 }

@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import './types.dart';
 
 final List<Color> colorOptions = [
-  Colors.greenAccent,
-  Colors.blueAccent,
-  Colors.redAccent,
-  Colors.orangeAccent,
-  Colors.purpleAccent,
-  Colors.tealAccent,
-  Colors.pinkAccent,
+  Colors.green,
+  Colors.blue,
+  Colors.red,
+  Colors.orange,
+  Colors.purple,
+  Colors.teal,
+  Colors.pink,
 ];
 
 final List<Currency> currencies = [
