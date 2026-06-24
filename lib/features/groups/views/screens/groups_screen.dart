@@ -21,7 +21,7 @@ class GroupsScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Shopping Assist'),
+        title: const Text('Cart Ops'),
         backgroundColor: colorScheme.primaryContainer,
         actions: [
           IconButton(
@@ -33,12 +33,13 @@ class GroupsScreen extends StatelessWidget {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
+      floatingActionButton: FloatingActionButton.extended(
         onPressed: () => showDialog(
           context: context,
           builder: (context) => const AddPurchaseDialog(groupId: null),
         ),
-        child: const Icon(Icons.add),
+        icon: const Icon(Icons.add),
+        label: const Text('Add Purchase'),
       ),
       body: ListView(
         padding: const EdgeInsets.only(bottom: 80),
@@ -59,22 +60,25 @@ class GroupsScreen extends StatelessWidget {
                 return const Center(child: CircularProgressIndicator());
               }
               final groups = snapshot.data ?? [];
-              return GridView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 3,
-                  crossAxisSpacing: 16,
-                  mainAxisSpacing: 16,
+              return SizedBox(
+                height: 150, // Fixed height is required for horizontal grids
+                child: GridView.builder(
+                  scrollDirection: Axis.horizontal,
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    mainAxisSpacing: 16,
+                    crossAxisCount: 1,
+                    crossAxisSpacing: 16,
+                    childAspectRatio: 1.0,
+                  ),
+                  itemCount: groups.length + 1,
+                  itemBuilder: (context, index) {
+                    if (index == groups.length) {
+                      return _buildAddGroupTile(context, colorScheme);
+                    }
+                    return _buildGroupTile(context, groups[index], colorScheme);
+                  },
                 ),
-                itemCount: groups.length + 1,
-                itemBuilder: (context, index) {
-                  if (index == groups.length) {
-                    return _buildAddGroupTile(context, colorScheme);
-                  }
-                  return _buildGroupTile(context, groups[index], colorScheme);
-                },
               );
             },
           ),
