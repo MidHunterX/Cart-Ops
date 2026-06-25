@@ -82,10 +82,12 @@ class PurchasedItemsScreen extends StatelessWidget {
         },
       ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => showDialog(
+        onPressed: () => showModalBottomSheet(
           context: context,
+          isScrollControlled: true,
+          useSafeArea: true,
           builder: (context) =>
-              AddPurchasedItemDialog(purchase: purchase, group: group),
+              AddPurchasedItemSheet(purchase: purchase, group: group),
         ),
         icon: const Icon(Icons.add),
         label: const Text('Add Item'),
