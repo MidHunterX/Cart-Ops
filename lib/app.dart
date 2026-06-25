@@ -30,6 +30,7 @@ class ShoppingApp extends StatelessWidget {
       ),
       themeMode: settings.themeMode,
       home: const GroupsScreen(),
+      debugShowCheckedModeBanner: false, // Yeet the annoying banner
     );
   }
 }
