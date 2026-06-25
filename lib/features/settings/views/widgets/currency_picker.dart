@@ -15,7 +15,11 @@ class CurrencyPicker extends StatelessWidget {
         final currency = currencies[index];
         return ListTile(
           leading: Text(currency.flag, style: const TextStyle(fontSize: 24)),
-          title: Text('${currency.code} - ${currency.symbol}'),
+          title: Text(currency.code),
+          trailing: Text(
+            currency.symbol,
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+          ),
           subtitle: Text(currency.name),
           onTap: () {
             settings.setCurrency(currency.code);
