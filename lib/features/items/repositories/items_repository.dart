@@ -9,6 +9,10 @@ class ItemsRepository {
     return _db.itemsDao.watchItemsInGroup(groupId);
   }
 
+  Stream<List<Item>> watchItemsWithoutGroup() {
+    return _db.itemsDao.watchItemsWithoutGroup();
+  }
+
   Future<List<Item>> getItemsInGroup(int groupId) {
     return _db.itemsDao.getItemsInGroup(groupId);
   }

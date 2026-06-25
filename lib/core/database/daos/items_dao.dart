@@ -12,6 +12,10 @@ class ItemsDao extends DatabaseAccessor<AppDatabase> with _$ItemsDaoMixin {
     return (select(items)..where((t) => t.groupId.equals(groupId))).watch();
   }
 
+  Stream<List<Item>> watchItemsWithoutGroup() {
+    return (select(items)..where((t) => t.groupId.isNull())).watch();
+  }
+
   // For AutoComplete
   Future<List<Item>> getItemsInGroup(int groupId) {
     return (select(items)..where((t) => t.groupId.equals(groupId))).get();
@@ -43,7 +47,7 @@ class ItemsDao extends DatabaseAccessor<AppDatabase> with _$ItemsDaoMixin {
     if (!hasPurchases) {
       await (delete(items)..where((t) => t.id.equals(id))).go();
     } else {
-      throw Exception('Cannot delete item with purchases');
+      throw Exception('Item with id:$id has purchase history');
     }
   }
 }

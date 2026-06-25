@@ -5,6 +5,7 @@ import 'package:shopping_assist/core/widgets/empty_state.dart';
 import 'package:shopping_assist/features/purchased_items/views/screens/purchased_items_screen.dart';
 import 'package:shopping_assist/features/purchases/repositories/purchases_repository.dart';
 import 'package:shopping_assist/features/purchases/views/widgets/add_purchase_dialog.dart';
+import 'package:shopping_assist/features/items/views/screens/items_screen.dart';
 
 class PurchasesScreen extends StatelessWidget {
   final Group group;
@@ -20,6 +21,18 @@ class PurchasesScreen extends StatelessWidget {
       appBar: AppBar(
         title: Text('${group.name} Purchases'),
         backgroundColor: colorScheme.primaryContainer,
+        actions: [
+          IconButton(
+            icon: const Padding(
+              padding: EdgeInsets.all(8.0),
+              child: Icon(Icons.inventory_2_outlined),
+            ),
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => ItemsScreen(group: group)),
+            ),
+          ),
+        ],
       ),
       body: StreamBuilder<List<Purchase>>(
         stream: repo.watchPurchasesInGroup(group.id),

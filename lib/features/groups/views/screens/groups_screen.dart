@@ -8,6 +8,7 @@ import 'package:shopping_assist/features/purchased_items/views/screens/purchased
 import 'package:shopping_assist/features/purchases/repositories/purchases_repository.dart';
 import 'package:shopping_assist/features/purchases/views/screens/purchases_screen.dart';
 import 'package:shopping_assist/features/purchases/views/widgets/add_purchase_dialog.dart';
+import 'package:shopping_assist/features/items/views/screens/items_screen.dart';
 import 'package:shopping_assist/features/settings/views/settings_screen.dart';
 
 class GroupsScreen extends StatelessWidget {
@@ -25,9 +26,19 @@ class GroupsScreen extends StatelessWidget {
         backgroundColor: colorScheme.primaryContainer,
         actions: [
           IconButton(
+            icon: const Padding(
+              padding: EdgeInsets.all(8.0),
+              child: Icon(Icons.inventory_2_outlined),
+            ),
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const ItemsScreen(group: null)),
+            ),
+          ),
+          IconButton(
             icon: Padding(
               padding: const EdgeInsets.all(8.0),
-              child: const Icon(Icons.settings)
+              child: const Icon(Icons.settings),
             ),
             onPressed: () => Navigator.push(
               context,
