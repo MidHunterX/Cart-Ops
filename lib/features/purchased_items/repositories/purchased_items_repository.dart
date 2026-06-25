@@ -1,10 +1,12 @@
 import 'package:drift/drift.dart';
 import 'package:shopping_assist/core/database/database.dart';
+import 'package:shopping_assist/features/items/repositories/items_repository.dart';
 
 class PurchasedItemsRepository {
   final AppDatabase _db;
+  final ItemsRepository _itemsRepository;
 
-  PurchasedItemsRepository(this._db);
+  PurchasedItemsRepository(this._db) : _itemsRepository = ItemsRepository(_db);
 
   Stream<List<PurchasedItemWithDetails>> watchPurchasedItems(int purchaseId) {
     return _db.purchasedItemsDao.watchPurchasedItems(purchaseId);
@@ -12,8 +14,8 @@ class PurchasedItemsRepository {
 
   Future<List<Item>> getAvailableItems(int? groupId) {
     return groupId == null
-        ? _db.itemsDao.getItemsWithoutGroup()
-        : _db.itemsDao.getItemsInGroup(groupId);
+        ? _itemsRepository.getItemsWithoutGroup()
+        : _itemsRepository.getItemsInGroup(groupId);
   }
 
   Future<void> addPurchasedItem({
@@ -40,12 +42,8 @@ class PurchasedItemsRepository {
     if (targetItem != null) {
       itemId = targetItem.id;
     } else {
-      itemId = await _db.itemsDao.insertItem(
-        ItemsCompanion.insert(
-          name: name,
-          price: price,
-          groupId: Value(group?.id),
-        ),
+      itemId = await _itemsRepository.insertItem(
+        ItemsCompanion.insert(name: name, groupId: Value(group?.id)),
       );
     }
 

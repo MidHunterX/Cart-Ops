@@ -4,7 +4,7 @@ import 'package:shopping_assist/core/database/models.dart';
 
 part 'items_dao.g.dart';
 
-@DriftAccessor(tables: [Items])
+@DriftAccessor(tables: [Items, PurchasedItems])
 class ItemsDao extends DatabaseAccessor<AppDatabase> with _$ItemsDaoMixin {
   ItemsDao(super.db);
 
@@ -23,6 +23,27 @@ class ItemsDao extends DatabaseAccessor<AppDatabase> with _$ItemsDaoMixin {
 
   Future<int> insertItem(ItemsCompanion item) => into(items).insert(item);
 
-  Future deleteItem(int id) =>
-      (delete(items)..where((t) => t.id.equals(id))).go();
+  Future<double?> getLastPurchasedPrice(int itemId) async {
+    final query = select(purchasedItems)
+      ..where((t) => t.itemId.equals(itemId))
+      ..orderBy([(t) => OrderingTerm.desc(t.id)])
+      ..limit(1);
+    final result = await query.getSingleOrNull();
+    return result?.price;
+  }
+
+  Future<bool> hasPurchasedItems(int itemId) async {
+    final query = select(purchasedItems)..where((t) => t.itemId.equals(itemId));
+    final result = await query.getSingleOrNull();
+    return result != null;
+  }
+
+  Future deleteItem(int id) async {
+    final hasPurchases = await hasPurchasedItems(id);
+    if (!hasPurchases) {
+      await (delete(items)..where((t) => t.id.equals(id))).go();
+    } else {
+      throw Exception('Cannot delete item with purchases');
+    }
+  }
 }

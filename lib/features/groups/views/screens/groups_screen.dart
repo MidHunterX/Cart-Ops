@@ -25,7 +25,10 @@ class GroupsScreen extends StatelessWidget {
         backgroundColor: colorScheme.primaryContainer,
         actions: [
           IconButton(
-            icon: const Icon(Icons.settings),
+            icon: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: const Icon(Icons.settings)
+            ),
             onPressed: () => Navigator.push(
               context,
               MaterialPageRoute(builder: (_) => const SettingsScreen()),

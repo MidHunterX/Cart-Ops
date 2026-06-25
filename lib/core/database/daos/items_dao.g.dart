@@ -6,6 +6,8 @@ part of 'items_dao.dart';
 mixin _$ItemsDaoMixin on DatabaseAccessor<AppDatabase> {
   $GroupsTable get groups => attachedDatabase.groups;
   $ItemsTable get items => attachedDatabase.items;
+  $PurchasesTable get purchases => attachedDatabase.purchases;
+  $PurchasedItemsTable get purchasedItems => attachedDatabase.purchasedItems;
   ItemsDaoManager get managers => ItemsDaoManager(this);
 }
 
@@ -16,4 +18,11 @@ class ItemsDaoManager {
       $$GroupsTableTableManager(_db.attachedDatabase, _db.groups);
   $$ItemsTableTableManager get items =>
       $$ItemsTableTableManager(_db.attachedDatabase, _db.items);
+  $$PurchasesTableTableManager get purchases =>
+      $$PurchasesTableTableManager(_db.attachedDatabase, _db.purchases);
+  $$PurchasedItemsTableTableManager get purchasedItems =>
+      $$PurchasedItemsTableTableManager(
+        _db.attachedDatabase,
+        _db.purchasedItems,
+      );
 }

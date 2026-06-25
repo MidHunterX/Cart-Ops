@@ -637,15 +637,6 @@ class $ItemsTable extends Items with TableInfo<$ItemsTable, Item> {
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
-  static const VerificationMeta _priceMeta = const VerificationMeta('price');
-  @override
-  late final GeneratedColumn<double> price = GeneratedColumn<double>(
-    'price',
-    aliasedName,
-    false,
-    type: DriftSqlType.double,
-    requiredDuringInsert: true,
-  );
   static const VerificationMeta _imagePathMeta = const VerificationMeta(
     'imagePath',
   );
@@ -672,7 +663,7 @@ class $ItemsTable extends Items with TableInfo<$ItemsTable, Item> {
     ),
   );
   @override
-  List<GeneratedColumn> get $columns => [id, name, price, imagePath, groupId];
+  List<GeneratedColumn> get $columns => [id, name, imagePath, groupId];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -695,14 +686,6 @@ class $ItemsTable extends Items with TableInfo<$ItemsTable, Item> {
       );
     } else if (isInserting) {
       context.missing(_nameMeta);
-    }
-    if (data.containsKey('price')) {
-      context.handle(
-        _priceMeta,
-        price.isAcceptableOrUnknown(data['price']!, _priceMeta),
-      );
-    } else if (isInserting) {
-      context.missing(_priceMeta);
     }
     if (data.containsKey('image_path')) {
       context.handle(
@@ -733,10 +716,6 @@ class $ItemsTable extends Items with TableInfo<$ItemsTable, Item> {
         DriftSqlType.string,
         data['${effectivePrefix}name'],
       )!,
-      price: attachedDatabase.typeMapping.read(
-        DriftSqlType.double,
-        data['${effectivePrefix}price'],
-      )!,
       imagePath: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}image_path'],
@@ -757,13 +736,11 @@ class $ItemsTable extends Items with TableInfo<$ItemsTable, Item> {
 class Item extends DataClass implements Insertable<Item> {
   final int id;
   final String name;
-  final double price;
   final String? imagePath;
   final int? groupId;
   const Item({
     required this.id,
     required this.name,
-    required this.price,
     this.imagePath,
     this.groupId,
   });
@@ -772,7 +749,6 @@ class Item extends DataClass implements Insertable<Item> {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
     map['name'] = Variable<String>(name);
-    map['price'] = Variable<double>(price);
     if (!nullToAbsent || imagePath != null) {
       map['image_path'] = Variable<String>(imagePath);
     }
@@ -786,7 +762,6 @@ class Item extends DataClass implements Insertable<Item> {
     return ItemsCompanion(
       id: Value(id),
       name: Value(name),
-      price: Value(price),
       imagePath: imagePath == null && nullToAbsent
           ? const Value.absent()
           : Value(imagePath),
@@ -804,7 +779,6 @@ class Item extends DataClass implements Insertable<Item> {
     return Item(
       id: serializer.fromJson<int>(json['id']),
       name: serializer.fromJson<String>(json['name']),
-      price: serializer.fromJson<double>(json['price']),
       imagePath: serializer.fromJson<String?>(json['imagePath']),
       groupId: serializer.fromJson<int?>(json['groupId']),
     );
@@ -815,7 +789,6 @@ class Item extends DataClass implements Insertable<Item> {
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
       'name': serializer.toJson<String>(name),
-      'price': serializer.toJson<double>(price),
       'imagePath': serializer.toJson<String?>(imagePath),
       'groupId': serializer.toJson<int?>(groupId),
     };
@@ -824,13 +797,11 @@ class Item extends DataClass implements Insertable<Item> {
   Item copyWith({
     int? id,
     String? name,
-    double? price,
     Value<String?> imagePath = const Value.absent(),
     Value<int?> groupId = const Value.absent(),
   }) => Item(
     id: id ?? this.id,
     name: name ?? this.name,
-    price: price ?? this.price,
     imagePath: imagePath.present ? imagePath.value : this.imagePath,
     groupId: groupId.present ? groupId.value : this.groupId,
   );
@@ -838,7 +809,6 @@ class Item extends DataClass implements Insertable<Item> {
     return Item(
       id: data.id.present ? data.id.value : this.id,
       name: data.name.present ? data.name.value : this.name,
-      price: data.price.present ? data.price.value : this.price,
       imagePath: data.imagePath.present ? data.imagePath.value : this.imagePath,
       groupId: data.groupId.present ? data.groupId.value : this.groupId,
     );
@@ -849,7 +819,6 @@ class Item extends DataClass implements Insertable<Item> {
     return (StringBuffer('Item(')
           ..write('id: $id, ')
           ..write('name: $name, ')
-          ..write('price: $price, ')
           ..write('imagePath: $imagePath, ')
           ..write('groupId: $groupId')
           ..write(')'))
@@ -857,14 +826,13 @@ class Item extends DataClass implements Insertable<Item> {
   }
 
   @override
-  int get hashCode => Object.hash(id, name, price, imagePath, groupId);
+  int get hashCode => Object.hash(id, name, imagePath, groupId);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is Item &&
           other.id == this.id &&
           other.name == this.name &&
-          other.price == this.price &&
           other.imagePath == this.imagePath &&
           other.groupId == this.groupId);
 }
@@ -872,35 +840,29 @@ class Item extends DataClass implements Insertable<Item> {
 class ItemsCompanion extends UpdateCompanion<Item> {
   final Value<int> id;
   final Value<String> name;
-  final Value<double> price;
   final Value<String?> imagePath;
   final Value<int?> groupId;
   const ItemsCompanion({
     this.id = const Value.absent(),
     this.name = const Value.absent(),
-    this.price = const Value.absent(),
     this.imagePath = const Value.absent(),
     this.groupId = const Value.absent(),
   });
   ItemsCompanion.insert({
     this.id = const Value.absent(),
     required String name,
-    required double price,
     this.imagePath = const Value.absent(),
     this.groupId = const Value.absent(),
-  }) : name = Value(name),
-       price = Value(price);
+  }) : name = Value(name);
   static Insertable<Item> custom({
     Expression<int>? id,
     Expression<String>? name,
-    Expression<double>? price,
     Expression<String>? imagePath,
     Expression<int>? groupId,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (name != null) 'name': name,
-      if (price != null) 'price': price,
       if (imagePath != null) 'image_path': imagePath,
       if (groupId != null) 'group_id': groupId,
     });
@@ -909,14 +871,12 @@ class ItemsCompanion extends UpdateCompanion<Item> {
   ItemsCompanion copyWith({
     Value<int>? id,
     Value<String>? name,
-    Value<double>? price,
     Value<String?>? imagePath,
     Value<int?>? groupId,
   }) {
     return ItemsCompanion(
       id: id ?? this.id,
       name: name ?? this.name,
-      price: price ?? this.price,
       imagePath: imagePath ?? this.imagePath,
       groupId: groupId ?? this.groupId,
     );
@@ -930,9 +890,6 @@ class ItemsCompanion extends UpdateCompanion<Item> {
     }
     if (name.present) {
       map['name'] = Variable<String>(name.value);
-    }
-    if (price.present) {
-      map['price'] = Variable<double>(price.value);
     }
     if (imagePath.present) {
       map['image_path'] = Variable<String>(imagePath.value);
@@ -948,7 +905,6 @@ class ItemsCompanion extends UpdateCompanion<Item> {
     return (StringBuffer('ItemsCompanion(')
           ..write('id: $id, ')
           ..write('name: $name, ')
-          ..write('price: $price, ')
           ..write('imagePath: $imagePath, ')
           ..write('groupId: $groupId')
           ..write(')'))
@@ -2191,7 +2147,6 @@ typedef $$ItemsTableCreateCompanionBuilder =
     ItemsCompanion Function({
       Value<int> id,
       required String name,
-      required double price,
       Value<String?> imagePath,
       Value<int?> groupId,
     });
@@ -2199,7 +2154,6 @@ typedef $$ItemsTableUpdateCompanionBuilder =
     ItemsCompanion Function({
       Value<int> id,
       Value<String> name,
-      Value<double> price,
       Value<String?> imagePath,
       Value<int?> groupId,
     });
@@ -2259,11 +2213,6 @@ class $$ItemsTableFilterComposer extends Composer<_$AppDatabase, $ItemsTable> {
 
   ColumnFilters<String> get name => $composableBuilder(
     column: $table.name,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<double> get price => $composableBuilder(
-    column: $table.price,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -2340,11 +2289,6 @@ class $$ItemsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<double> get price => $composableBuilder(
-    column: $table.price,
-    builder: (column) => ColumnOrderings(column),
-  );
-
   ColumnOrderings<String> get imagePath => $composableBuilder(
     column: $table.imagePath,
     builder: (column) => ColumnOrderings(column),
@@ -2388,9 +2332,6 @@ class $$ItemsTableAnnotationComposer
 
   GeneratedColumn<String> get name =>
       $composableBuilder(column: $table.name, builder: (column) => column);
-
-  GeneratedColumn<double> get price =>
-      $composableBuilder(column: $table.price, builder: (column) => column);
 
   GeneratedColumn<String> get imagePath =>
       $composableBuilder(column: $table.imagePath, builder: (column) => column);
@@ -2474,13 +2415,11 @@ class $$ItemsTableTableManager
               ({
                 Value<int> id = const Value.absent(),
                 Value<String> name = const Value.absent(),
-                Value<double> price = const Value.absent(),
                 Value<String?> imagePath = const Value.absent(),
                 Value<int?> groupId = const Value.absent(),
               }) => ItemsCompanion(
                 id: id,
                 name: name,
-                price: price,
                 imagePath: imagePath,
                 groupId: groupId,
               ),
@@ -2488,13 +2427,11 @@ class $$ItemsTableTableManager
               ({
                 Value<int> id = const Value.absent(),
                 required String name,
-                required double price,
                 Value<String?> imagePath = const Value.absent(),
                 Value<int?> groupId = const Value.absent(),
               }) => ItemsCompanion.insert(
                 id: id,
                 name: name,
-                price: price,
                 imagePath: imagePath,
                 groupId: groupId,
               ),

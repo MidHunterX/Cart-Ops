@@ -25,7 +25,6 @@ class Purchases extends Table {
 class Items extends Table {
   IntColumn get id => integer().autoIncrement()();
   TextColumn get name => text().withLength(min: 1, max: 100)();
-  RealColumn get price => real()();
   TextColumn get imagePath => text().nullable()(); // Store local image path
   // Optional Group
   IntColumn get groupId => integer().nullable().references(
