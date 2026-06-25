@@ -25,7 +25,7 @@ class ThemeColorPicker extends StatelessWidget {
               child: CircleAvatar(
                 backgroundColor: color,
                 radius: 20,
-                child: selectedColor == color
+                child: selectedColor.toARGB32() == color.toARGB32()
                     ? const Icon(Icons.check, size: 16, color: Colors.black)
                     : null,
               ),

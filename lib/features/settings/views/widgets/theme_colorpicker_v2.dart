@@ -19,7 +19,8 @@ class ThemeColorPicker extends StatelessWidget {
         spacing: 12,
         runSpacing: 12,
         children: colorOptions.map((color) {
-          final isSelected = selectedColor == color;
+          // Compare by ARGB value as dart sees it as different
+          final isSelected = selectedColor.toARGB32() == color.toARGB32();
 
           return GestureDetector(
             onTap: () => onColorSelected(color),
