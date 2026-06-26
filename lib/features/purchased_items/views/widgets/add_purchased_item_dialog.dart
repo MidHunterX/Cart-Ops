@@ -1,8 +1,12 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shopping_assist/core/database/database.dart';
 import 'package:shopping_assist/features/items/repositories/items_repository.dart';
 import 'package:shopping_assist/features/purchased_items/repositories/purchased_items_repository.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:uuid/uuid.dart';
 
 class AddPurchasedItemSheet extends StatefulWidget {
   final Purchase purchase;
@@ -31,6 +35,7 @@ class _AddPurchasedItemSheetState extends State<AddPurchasedItemSheet> {
 
   List<Item> _allItems = [];
   bool _isLoading = true;
+  String? _imagePath;
 
   @override
   void initState() {
@@ -71,6 +76,68 @@ class _AddPurchasedItemSheetState extends State<AddPurchasedItemSheet> {
     } catch (e) {
       // Silent fail for last price
     }
+  }
+
+  Future<void> _pickImage(ImageSource source) async {
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(
+      source: source,
+      imageQuality: 70, // Compresses the image natively
+    );
+
+    if (pickedFile != null) {
+      final directory = await getApplicationDocumentsDirectory();
+      final fileName = '${const Uuid().v4()}.jpg';
+      final savedImage = await File(
+        pickedFile.path,
+      ).copy('${directory.path}/$fileName');
+
+      setState(() {
+        _imagePath = savedImage.path;
+      });
+    }
+  }
+
+  void _showImagePickerOptions() {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) => SafeArea(
+        child: Wrap(
+          children: [
+            ListTile(
+              leading: const Icon(Icons.photo_library),
+              title: const Text('Gallery'),
+              onTap: () {
+                Navigator.pop(context);
+                _pickImage(ImageSource.gallery);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.photo_camera),
+              title: const Text('Camera'),
+              onTap: () {
+                Navigator.pop(context);
+                _pickImage(ImageSource.camera);
+              },
+            ),
+            if (_imagePath != null)
+              ListTile(
+                leading: const Icon(Icons.delete, color: Colors.red),
+                title: const Text(
+                  'Remove Image',
+                  style: TextStyle(color: Colors.red),
+                ),
+                onTap: () {
+                  Navigator.pop(context);
+                  setState(() {
+                    _imagePath = null;
+                  });
+                },
+              ),
+          ],
+        ),
+      ),
+    );
   }
 
   void _onKeypadPressed(String val) {
@@ -259,6 +326,7 @@ class _AddPurchasedItemSheetState extends State<AddPurchasedItemSheet> {
         isWeight: _isWeight,
         purchaseId: widget.purchase.id,
         group: widget.group,
+        imagePath: _imagePath,
       );
       if (mounted) Navigator.pop(context);
     } catch (e) {
@@ -539,10 +607,11 @@ class _AddPurchasedItemSheetState extends State<AddPurchasedItemSheet> {
                 onTap: _isLoading ? () {} : _showNameDialog,
               ),
               _buildActionBtn(
-                text: 'Image',
+                text: _imagePath == null ? 'Image' : 'Img Added',
+                icon: _imagePath == null ? null : Icons.check_circle,
                 bg: blueBg,
                 fg: blueFg,
-                onTap: () {},
+                onTap: _showImagePickerOptions,
               ),
               _buildActionBtn(
                 text: _discountStr == '0' || _discountStr.isEmpty

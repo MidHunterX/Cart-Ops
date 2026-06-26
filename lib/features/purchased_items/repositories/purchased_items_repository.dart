@@ -26,6 +26,7 @@ class PurchasedItemsRepository {
     required bool isWeight,
     required int purchaseId,
     required Group? group,
+    String? imagePath,
   }) async {
     final items = await getAvailableItems(group?.id);
 
@@ -41,9 +42,18 @@ class PurchasedItemsRepository {
     int itemId;
     if (targetItem != null) {
       itemId = targetItem.id;
+      if (imagePath != null) {
+        await (_db.update(_db.items)..where((t) => t.id.equals(itemId))).write(
+          ItemsCompanion(imagePath: Value(imagePath)),
+        );
+      }
     } else {
       itemId = await _itemsRepository.insertItem(
-        ItemsCompanion.insert(name: name, groupId: Value(group?.id)),
+        ItemsCompanion.insert(
+          name: name,
+          groupId: Value(group?.id),
+          imagePath: Value(imagePath),
+        ),
       );
     }
 
