@@ -62,9 +62,7 @@ class GroupsScreen extends StatelessWidget {
             padding: const EdgeInsets.fromLTRB(16, 24, 16, 16),
             child: Text(
               'My Groups',
-              style: Theme.of(
-                context,
-              ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+              style: Theme.of(context).textTheme.headlineMedium,
             ),
           ),
           StreamBuilder<List<Group>>(
@@ -100,9 +98,7 @@ class GroupsScreen extends StatelessWidget {
             padding: const EdgeInsets.fromLTRB(16, 32, 16, 8),
             child: Text(
               'General Purchases',
-              style: Theme.of(
-                context,
-              ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+              style: Theme.of(context).textTheme.headlineMedium,
             ),
           ),
           StreamBuilder<List<Purchase>>(

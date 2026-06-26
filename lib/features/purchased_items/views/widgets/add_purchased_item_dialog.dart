@@ -343,7 +343,13 @@ class _AddPurchasedItemSheetState extends State<AddPurchasedItemSheet> {
     );
   }
 
-  Widget _buildActionBtn(String text, Color bg, Color fg, VoidCallback onTap) {
+  Widget _buildActionBtn({
+    String? text,
+    IconData? icon,
+    required Color bg,
+    required Color fg,
+    required VoidCallback onTap,
+  }) {
     return Expanded(
       child: Padding(
         padding: const EdgeInsets.all(4.0),
@@ -358,15 +364,26 @@ class _AddPurchasedItemSheetState extends State<AddPurchasedItemSheet> {
               child: Center(
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                  child: Text(
-                    text,
-                    style: TextStyle(
-                      color: fg,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (icon != null) ...[
+                        Icon(icon, color: fg, size: 24),
+                        if (text != null && text.isNotEmpty)
+                          const SizedBox(width: 8),
+                      ],
+                      if (text != null && text.isNotEmpty)
+                        Text(
+                          text,
+                          style: TextStyle(
+                            color: fg,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                    ],
                   ),
                 ),
               ),
@@ -514,21 +531,33 @@ class _AddPurchasedItemSheetState extends State<AddPurchasedItemSheet> {
           Row(
             children: [
               _buildActionBtn(
-                _isLoading ? 'Loading...' : (_name.isEmpty ? 'Name' : _name),
-                blueBg,
-                blueFg,
-                _isLoading ? () {} : _showNameDialog,
+                text: _isLoading
+                    ? 'Loading...'
+                    : (_name.isEmpty ? 'Name' : _name),
+                bg: blueBg,
+                fg: blueFg,
+                onTap: _isLoading ? () {} : _showNameDialog,
               ),
-              _buildActionBtn('Image', blueBg, blueFg, () {}),
               _buildActionBtn(
-                _discountStr == '0' || _discountStr.isEmpty
+                text: 'Image',
+                bg: blueBg,
+                fg: blueFg,
+                onTap: () {},
+              ),
+              _buildActionBtn(
+                text: _discountStr == '0' || _discountStr.isEmpty
                     ? 'Discount'
                     : 'Disc: $_discountStr',
-                blueBg,
-                blueFg,
-                _showDiscountDialog,
+                bg: blueBg,
+                fg: blueFg,
+                onTap: _showDiscountDialog,
               ),
-              _buildActionBtn('OK', greenBg, greenFg, _submit),
+              _buildActionBtn(
+                text: 'OK',
+                bg: greenBg,
+                fg: greenFg,
+                onTap: _submit,
+              ),
             ],
           ),
           Row(
@@ -536,7 +565,12 @@ class _AddPurchasedItemSheetState extends State<AddPurchasedItemSheet> {
               _buildNumBtn('7'),
               _buildNumBtn('8'),
               _buildNumBtn('9'),
-              _buildActionBtn('<=', redBg, redFg, () => _onKeypadPressed('<=')),
+              _buildActionBtn(
+                icon: Icons.backspace,
+                bg: redBg,
+                fg: redFg,
+                onTap: () => _onKeypadPressed('<='),
+              ),
             ],
           ),
           Row(
@@ -544,7 +578,12 @@ class _AddPurchasedItemSheetState extends State<AddPurchasedItemSheet> {
               _buildNumBtn('4'),
               _buildNumBtn('5'),
               _buildNumBtn('6'),
-              _buildActionBtn('C', redBg, redFg, () => _onKeypadPressed('C')),
+              _buildActionBtn(
+                text: 'C',
+                bg: redBg,
+                fg: redFg,
+                onTap: () => _onKeypadPressed('C'),
+              ),
             ],
           ),
           Row(
@@ -552,7 +591,12 @@ class _AddPurchasedItemSheetState extends State<AddPurchasedItemSheet> {
               _buildNumBtn('1'),
               _buildNumBtn('2'),
               _buildNumBtn('3'),
-              _buildActionBtn('-', redBg, redFg, () => _onKeypadPressed('-')),
+              _buildActionBtn(
+                text: '-',
+                bg: redBg,
+                fg: redFg,
+                onTap: () => _onKeypadPressed('-'),
+              ),
             ],
           ),
           Row(
@@ -561,10 +605,10 @@ class _AddPurchasedItemSheetState extends State<AddPurchasedItemSheet> {
               _buildNumBtn('.'),
               _buildNumBtn('.99'),
               _buildActionBtn(
-                '=>',
-                greenBg,
-                greenFg,
-                () => _onKeypadPressed('=>'),
+                icon: Icons.keyboard_tab,
+                bg: greenBg,
+                fg: greenFg,
+                onTap: () => _onKeypadPressed('=>'),
               ),
             ],
           ),
