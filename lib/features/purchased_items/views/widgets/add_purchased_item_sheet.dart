@@ -9,7 +9,8 @@ import 'add_item_components/add_item_keypad.dart';
 import 'add_item_components/item_dialogs.dart';
 import 'add_item_utils/keypad_logic.dart';
 import 'add_item_utils/image_picker.dart';
-import 'package:shopping_assist/features/settings/providers/settings_provider.dart';
+import 'common/purchased_item_form_header.dart';
+import 'common/unit_quantity_selector.dart';
 
 class AddPurchasedItemSheet extends StatefulWidget {
   final Purchase purchase;
@@ -236,6 +237,30 @@ class _AddPurchasedItemSheetState extends State<AddPurchasedItemSheet> {
     );
   }
 
+  void _handleWeightToggle(bool val) {
+    setState(() {
+      _isWeight = val;
+      if (val) {
+        _qtyStr = '';
+        _qtyController.text = '';
+        _activeField = ActiveField.quantity;
+        _qtyFocusNode.requestFocus();
+      } else {
+        _qtyStr = '1';
+        _qtyController.text = '1';
+        _activeField = ActiveField.price;
+        _priceFocusNode.requestFocus();
+      }
+    });
+  }
+
+  void _handleDiscountTap() async {
+    final newDiscount = await ItemDialogs.showDiscountDialog(context, _discountStr);
+    if (newDiscount != null) {
+      setState(() => _discountStr = newDiscount.isEmpty ? '0' : newDiscount);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -248,7 +273,11 @@ class _AddPurchasedItemSheetState extends State<AddPurchasedItemSheet> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          _buildHeader(),
+          PurchasedItemFormHeader(
+            title: 'Add an Item',
+            isWeight: _isWeight,
+            onWeightChanged: _handleWeightToggle,
+          ),
           const SizedBox(height: 16),
           _buildFieldsRow(),
           const SizedBox(height: 16),
@@ -260,12 +289,7 @@ class _AddPurchasedItemSheetState extends State<AddPurchasedItemSheet> {
             onKeyPressed: _handleKeypadPress,
             onNameTap: _showNameDialog,
             onImageTap: _handleImagePicker,
-            onDiscountTap: () async {
-              final newDiscount = await ItemDialogs.showDiscountDialog(context, _discountStr);
-              if (newDiscount != null) {
-                setState(() => _discountStr = newDiscount.isEmpty ? '0' : newDiscount);
-              }
-            },
+            onDiscountTap: _handleDiscountTap,
             onSubmit: _submit,
             onIncrement: _incrementQuantity,
             onDecrement: _decrementQuantity,
@@ -273,47 +297,6 @@ class _AddPurchasedItemSheetState extends State<AddPurchasedItemSheet> {
           const SizedBox(height: 16),
         ],
       ),
-    );
-  }
-
-  Widget _buildHeader() {
-    final currencySymbol = context.read<SettingsProvider>().currencySymbol;
-    final colorScheme = Theme.of(context).colorScheme;
-
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text('Add an Item', style: Theme.of(context).textTheme.titleLarge),
-        Row(
-          children: [
-            Text(
-              '$currencySymbol/kg',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: colorScheme.primary,
-              ),
-            ),
-            const SizedBox(width: 8),
-            Switch(
-              value: _isWeight,
-              onChanged: (val) {
-                setState(() {
-                  _isWeight = val;
-                  if (val) {
-                    _qtyStr = '';
-                    _qtyController.text = '';
-                    _activeField = ActiveField.quantity;
-                  } else {
-                    _qtyStr = '1';
-                    _qtyController.text = '1';
-                    _activeField = ActiveField.price;
-                  }
-                });
-              },
-            ),
-          ],
-        ),
-      ],
     );
   }
 
@@ -335,7 +318,11 @@ class _AddPurchasedItemSheetState extends State<AddPurchasedItemSheet> {
                     controller: _qtyController,
                     focusNode: _qtyFocusNode,
                   )
-                : _buildUnitQuantityDisplay(),
+                : UnitQuantitySelector(
+                    quantity: _qtyStr,
+                    onIncrement: _incrementQuantity,
+                    onDecrement: _decrementQuantity,
+                  ),
           ),
           Expanded(
             flex: 10,
@@ -352,62 +339,6 @@ class _AddPurchasedItemSheetState extends State<AddPurchasedItemSheet> {
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildUnitQuantityDisplay() {
-    final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 4.0),
-      child: Container(
-        decoration: BoxDecoration(
-          border: Border.all(color: colorScheme.outline, width: 1),
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Row(
-          children: [
-            IconButton(
-              icon: const Icon(Icons.remove),
-              onPressed: _decrementQuantity,
-              style: IconButton.styleFrom(
-                backgroundColor: colorScheme.secondaryContainer,
-                shape: const RoundedRectangleBorder(
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(8),
-                    bottomLeft: Radius.circular(8),
-                  ),
-                ),
-                padding: EdgeInsets.zero,
-              ),
-            ),
-            Expanded(
-              child: Container(
-                alignment: Alignment.center,
-                child: Text(
-                  _qtyStr,
-                  style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
-                ),
-              ),
-            ),
-            IconButton(
-              icon: const Icon(Icons.add),
-              onPressed: _incrementQuantity,
-              style: IconButton.styleFrom(
-                backgroundColor: colorScheme.secondaryContainer,
-                shape: const RoundedRectangleBorder(
-                  borderRadius: BorderRadius.only(
-                    topRight: Radius.circular(8),
-                    bottomRight: Radius.circular(8),
-                  ),
-                ),
-                padding: EdgeInsets.zero,
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }

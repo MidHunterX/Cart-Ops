@@ -7,6 +7,8 @@ import 'add_item_components/input_field_box.dart';
 import 'add_item_components/add_item_keypad.dart';
 import 'add_item_components/item_dialogs.dart';
 import 'add_item_utils/keypad_logic.dart';
+import 'common/purchased_item_form_header.dart';
+import 'common/unit_quantity_selector.dart';
 
 class EditPurchasedItemSheet extends StatefulWidget {
   final PurchasedItem purchasedItem;
@@ -194,6 +196,13 @@ class _EditPurchasedItemSheetState extends State<EditPurchasedItemSheet> {
     }
   }
 
+  void _handleDiscountTap() async {
+    final newDiscount = await ItemDialogs.showDiscountDialog(context, _discountStr);
+    if (newDiscount != null) {
+      setState(() => _discountStr = newDiscount.isEmpty ? '0' : newDiscount);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -206,7 +215,26 @@ class _EditPurchasedItemSheetState extends State<EditPurchasedItemSheet> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          _buildHeader(),
+          PurchasedItemFormHeader(
+            title: 'Edit Item',
+            isWeight: _isWeight,
+            onWeightChanged: (val) {
+              setState(() {
+                _isWeight = val;
+                if (val) {
+                  _qtyStr = '';
+                  _qtyController.text = '';
+                  _activeField = ActiveField.quantity;
+                  _qtyFocusNode.requestFocus();
+                } else {
+                  _qtyStr = '1';
+                  _qtyController.text = '1';
+                  _activeField = ActiveField.price;
+                  _priceFocusNode.requestFocus();
+                }
+              });
+            },
+          ),
           const SizedBox(height: 16),
           _buildFieldsRow(),
           const SizedBox(height: 16),
@@ -216,22 +244,9 @@ class _EditPurchasedItemSheetState extends State<EditPurchasedItemSheet> {
             hasImage: widget.item.imagePath != null,
             discountStr: _discountStr,
             onKeyPressed: _handleKeypadPress,
-            onNameTap: () {
-              ScaffoldMessenger.of(
-                context,
-              ).showSnackBar(const SnackBar(content: Text('Item name cannot be edited here.')));
-            },
-            onImageTap: () {
-              ScaffoldMessenger.of(
-                context,
-              ).showSnackBar(const SnackBar(content: Text('Item image cannot be edited here.')));
-            },
-            onDiscountTap: () async {
-              final newDiscount = await ItemDialogs.showDiscountDialog(context, _discountStr);
-              if (newDiscount != null) {
-                setState(() => _discountStr = newDiscount.isEmpty ? '0' : newDiscount);
-              }
-            },
+            onNameTap: () => _showLockedMsg('Item name cannot be edited here.'),
+            onImageTap: () => _showLockedMsg('Item image cannot be edited here.'),
+            onDiscountTap: _handleDiscountTap,
             onSubmit: _submit,
             onIncrement: _incrementQuantity,
             onDecrement: _decrementQuantity,
@@ -240,6 +255,10 @@ class _EditPurchasedItemSheetState extends State<EditPurchasedItemSheet> {
         ],
       ),
     );
+  }
+
+  void _showLockedMsg(String msg) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
   }
 
   Widget _buildHeader() {
@@ -303,7 +322,11 @@ class _EditPurchasedItemSheetState extends State<EditPurchasedItemSheet> {
                     controller: _qtyController,
                     focusNode: _qtyFocusNode,
                   )
-                : _buildUnitQuantityDisplay(),
+                : UnitQuantitySelector(
+                    quantity: _qtyStr,
+                    onIncrement: _incrementQuantity,
+                    onDecrement: _decrementQuantity,
+                  ),
           ),
           Expanded(
             flex: 10,
@@ -320,62 +343,6 @@ class _EditPurchasedItemSheetState extends State<EditPurchasedItemSheet> {
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildUnitQuantityDisplay() {
-    final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 4.0),
-      child: Container(
-        decoration: BoxDecoration(
-          border: Border.all(color: colorScheme.outline, width: 1),
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Row(
-          children: [
-            IconButton(
-              icon: const Icon(Icons.remove),
-              onPressed: _decrementQuantity,
-              style: IconButton.styleFrom(
-                backgroundColor: colorScheme.secondaryContainer,
-                shape: const RoundedRectangleBorder(
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(8),
-                    bottomLeft: Radius.circular(8),
-                  ),
-                ),
-                padding: EdgeInsets.zero,
-              ),
-            ),
-            Expanded(
-              child: Container(
-                alignment: Alignment.center,
-                child: Text(
-                  _qtyStr,
-                  style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
-                ),
-              ),
-            ),
-            IconButton(
-              icon: const Icon(Icons.add),
-              onPressed: _incrementQuantity,
-              style: IconButton.styleFrom(
-                backgroundColor: colorScheme.secondaryContainer,
-                shape: const RoundedRectangleBorder(
-                  borderRadius: BorderRadius.only(
-                    topRight: Radius.circular(8),
-                    bottomRight: Radius.circular(8),
-                  ),
-                ),
-                padding: EdgeInsets.zero,
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }
