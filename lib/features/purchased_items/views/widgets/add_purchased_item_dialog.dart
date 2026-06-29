@@ -123,7 +123,16 @@ class _AddPurchasedItemSheetState extends State<AddPurchasedItemSheet> {
   void _handleKeypadPress(String val) {
     setState(() {
       if (val == '=>') {
-        _activeField = _activeField == ActiveField.price ? ActiveField.quantity : ActiveField.price;
+        if (_isWeight) {
+          // Weight Mode: Price and Weight Fields
+          _activeField = _activeField == ActiveField.price
+              ? ActiveField.quantity
+              : ActiveField.price;
+        } else {
+          // Unit Mode: Only Price Field
+          return;
+        }
+
         // Update focus
         if (_activeField == ActiveField.price) {
           _priceFocusNode.requestFocus();

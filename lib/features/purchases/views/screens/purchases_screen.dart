@@ -58,26 +58,19 @@ class PurchasesScreen extends StatelessWidget {
               return Column(
                 children: [
                   ListTile(
-                    leading: const Icon(Icons.shopping_cart),
+                    leading: const Icon(Icons.receipt_long_outlined),
                     title: Text(purchase.name),
                     subtitle: Text(
                       '${purchase.purchaseDate.day}/${purchase.purchaseDate.month}/${purchase.purchaseDate.year}',
                     ),
                     trailing: IconButton(
-                      icon: Icon(
-                        Icons.delete_outline,
-                        color: colorScheme.error,
-                      ),
-                      onPressed: () =>
-                          _confirmDelete(context, repo, purchase, colorScheme),
+                      icon: Icon(Icons.delete_outline, color: colorScheme.error),
+                      onPressed: () => _confirmDelete(context, repo, purchase, colorScheme),
                     ),
                     onTap: () => Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (_) => PurchasedItemsScreen(
-                          purchase: purchase,
-                          group: group,
-                        ),
+                        builder: (_) => PurchasedItemsScreen(purchase: purchase, group: group),
                       ),
                     ),
                   ),
@@ -93,7 +86,7 @@ class PurchasesScreen extends StatelessWidget {
           context: context,
           builder: (_) => AddPurchaseDialog(groupId: group.id),
         ),
-        icon: const Icon(Icons.add),
+        icon: const Icon(Icons.shopping_cart),
         label: const Text('Add Purchase'),
       ),
     );
@@ -111,10 +104,7 @@ class PurchasesScreen extends StatelessWidget {
         title: const Text('Delete Purchase Event?'),
         content: Text('Are you sure you want to delete "${purchase.name}"?'),
         actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancel'),
-          ),
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
           FilledButton(
             style: FilledButton.styleFrom(backgroundColor: colorScheme.error),
             onPressed: () {

@@ -36,14 +36,9 @@ class GroupsScreen extends StatelessWidget {
             ),
           ),
           IconButton(
-            icon: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: const Icon(Icons.settings),
-            ),
-            onPressed: () => Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => const SettingsScreen()),
-            ),
+            icon: Padding(padding: const EdgeInsets.all(8.0), child: const Icon(Icons.settings)),
+            onPressed: () =>
+                Navigator.push(context, MaterialPageRoute(builder: (_) => const SettingsScreen())),
           ),
         ],
       ),
@@ -52,7 +47,7 @@ class GroupsScreen extends StatelessWidget {
           context: context,
           builder: (context) => const AddPurchaseDialog(groupId: null),
         ),
-        icon: const Icon(Icons.add),
+        icon: const Icon(Icons.shopping_cart),
         label: const Text('Add Purchase'),
       ),
       body: ListView(
@@ -60,10 +55,7 @@ class GroupsScreen extends StatelessWidget {
         children: [
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 24, 16, 16),
-            child: Text(
-              'My Groups',
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
+            child: Text('My Groups', style: Theme.of(context).textTheme.headlineMedium),
           ),
           StreamBuilder<List<Group>>(
             stream: groupsRepo.watchGroups(),
@@ -96,10 +88,7 @@ class GroupsScreen extends StatelessWidget {
           ),
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 32, 16, 8),
-            child: Text(
-              'General Purchases',
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
+            child: Text('General Purchases', style: Theme.of(context).textTheme.headlineMedium),
           ),
           StreamBuilder<List<Purchase>>(
             stream: purchasesRepo.watchGeneralPurchases(),
@@ -128,31 +117,23 @@ class GroupsScreen extends StatelessWidget {
                   return Column(
                     children: [
                       ListTile(
-                        leading: const Icon(Icons.shopping_bag_outlined),
+                        leading: const Icon(Icons.receipt_long_outlined),
                         title: Text(purchase.name),
                         subtitle: Text(
                           '${purchase.purchaseDate.day}/${purchase.purchaseDate.month}/${purchase.purchaseDate.year}',
                         ),
                         trailing: IconButton(
-                          icon: Icon(
-                            Icons.delete_outline,
-                            color: colorScheme.error,
-                          ),
-                          onPressed: () =>
-                              _confirmDeletePurchase(context, purchase),
+                          icon: Icon(Icons.delete_outline, color: colorScheme.error),
+                          onPressed: () => _confirmDeletePurchase(context, purchase),
                         ),
                         onTap: () => Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (_) => PurchasedItemsScreen(
-                              purchase: purchase,
-                              group: null,
-                            ),
+                            builder: (_) => PurchasedItemsScreen(purchase: purchase, group: null),
                           ),
                         ),
                       ),
-                      if (index < purchases.length - 1)
-                        const Divider(height: 1),
+                      if (index < purchases.length - 1) const Divider(height: 1),
                     ],
                   );
                 },
@@ -164,16 +145,10 @@ class GroupsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildGroupTile(
-    BuildContext context,
-    Group group,
-    ColorScheme colorScheme,
-  ) {
+  Widget _buildGroupTile(BuildContext context, Group group, ColorScheme colorScheme) {
     return InkWell(
-      onTap: () => Navigator.push(
-        context,
-        MaterialPageRoute(builder: (_) => PurchasesScreen(group: group)),
-      ),
+      onTap: () =>
+          Navigator.push(context, MaterialPageRoute(builder: (_) => PurchasesScreen(group: group))),
       borderRadius: BorderRadius.circular(24),
       child: Ink(
         decoration: BoxDecoration(
@@ -194,10 +169,7 @@ class GroupsScreen extends StatelessWidget {
                     child: Text(
                       group.name,
                       textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontWeight: FontWeight.w600,
-                        color: colorScheme.onSurface,
-                      ),
+                      style: TextStyle(fontWeight: FontWeight.w600, color: colorScheme.onSurface),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -209,11 +181,7 @@ class GroupsScreen extends StatelessWidget {
               top: 0,
               right: 0,
               child: IconButton(
-                icon: Icon(
-                  Icons.close,
-                  size: 18,
-                  color: colorScheme.onSurfaceVariant,
-                ),
+                icon: Icon(Icons.close, size: 18, color: colorScheme.onSurfaceVariant),
                 onPressed: () => _confirmDeleteGroup(context, group),
               ),
             ),
@@ -225,17 +193,13 @@ class GroupsScreen extends StatelessWidget {
 
   Widget _buildAddGroupTile(BuildContext context, ColorScheme colorScheme) {
     return InkWell(
-      onTap: () =>
-          showDialog(context: context, builder: (_) => const AddGroupDialog()),
+      onTap: () => showDialog(context: context, builder: (_) => const AddGroupDialog()),
       borderRadius: BorderRadius.circular(24),
       child: Ink(
         decoration: BoxDecoration(
           color: colorScheme.surface,
           borderRadius: BorderRadius.circular(24),
-          border: Border.all(
-            color: colorScheme.primary.withValues(alpha: 0.4),
-            width: 2,
-          ),
+          border: Border.all(color: colorScheme.primary.withValues(alpha: 0.4), width: 2),
         ),
         child: Center(
           child: Column(
@@ -245,10 +209,7 @@ class GroupsScreen extends StatelessWidget {
               const SizedBox(height: 12),
               Text(
                 'Add Group',
-                style: TextStyle(
-                  fontWeight: FontWeight.w600,
-                  color: colorScheme.primary,
-                ),
+                style: TextStyle(fontWeight: FontWeight.w600, color: colorScheme.primary),
               ),
             ],
           ),
@@ -266,14 +227,9 @@ class GroupsScreen extends StatelessWidget {
           'Are you sure you want to delete "${group.name}"? This will also remove all its purchase history.',
         ),
         actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancel'),
-          ),
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
           FilledButton(
-            style: FilledButton.styleFrom(
-              backgroundColor: Theme.of(context).colorScheme.error,
-            ),
+            style: FilledButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.error),
             onPressed: () {
               context.read<GroupsRepository>().deleteGroup(group.id);
               Navigator.pop(ctx);
@@ -292,14 +248,9 @@ class GroupsScreen extends StatelessWidget {
         title: const Text('Delete Purchase Event?'),
         content: Text('Are you sure you want to delete "${purchase.name}"?'),
         actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancel'),
-          ),
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
           FilledButton(
-            style: FilledButton.styleFrom(
-              backgroundColor: Theme.of(context).colorScheme.error,
-            ),
+            style: FilledButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.error),
             onPressed: () {
               context.read<PurchasesRepository>().deletePurchase(purchase.id);
               Navigator.pop(ctx);

@@ -178,8 +178,8 @@ class AddItemKeypad extends StatelessWidget {
             _buildNumBtn(context, '.99'),
             _buildActionBtn(
               icon: Icons.keyboard_tab,
-              backgroundColor: colorScheme.primary,
-              foregroundColor: colorScheme.onPrimary,
+              backgroundColor: colorScheme.onPrimary,
+              foregroundColor: colorScheme.primary,
               onTap: () => onKeyPressed('=>'),
             ),
           ],
