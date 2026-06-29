@@ -27,13 +27,12 @@ class ItemsDao extends DatabaseAccessor<AppDatabase> with _$ItemsDaoMixin {
 
   Future<int> insertItem(ItemsCompanion item) => into(items).insert(item);
 
-  Future<double?> getLastPurchasedPrice(int itemId) async {
+  Future<PurchasedItem?> getLastPurchasedDetails(int itemId) async {
     final query = select(purchasedItems)
       ..where((t) => t.itemId.equals(itemId))
       ..orderBy([(t) => OrderingTerm.desc(t.id)])
       ..limit(1);
-    final result = await query.getSingleOrNull();
-    return result?.price;
+    return await query.getSingleOrNull();
   }
 
   Future<bool> hasPurchasedItems(int itemId) async {

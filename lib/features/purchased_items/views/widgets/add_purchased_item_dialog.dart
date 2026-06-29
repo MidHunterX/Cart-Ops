@@ -10,6 +10,7 @@ import 'add_item_components/add_item_keypad.dart';
 import 'add_item_components/item_dialogs.dart';
 import 'add_item_utils/keypad_logic.dart';
 import 'add_item_utils/image_picker.dart';
+import 'package:shopping_assist/features/settings/providers/settings_provider.dart';
 
 class AddPurchasedItemSheet extends StatefulWidget {
   final Purchase purchase;
@@ -62,15 +63,27 @@ class _AddPurchasedItemSheetState extends State<AddPurchasedItemSheet> {
     }
   }
 
-  void _loadLastPrice(int itemId) async {
+  void _loadLastPurchaseDetails(int itemId) async {
     try {
       final repo = context.read<ItemsRepository>();
-      final lastPrice = await repo.getLastPurchasedPrice(itemId);
-      if (lastPrice != null && mounted) {
-        setState(() => _priceStr = lastPrice.toString());
+      final lastPurchase = await repo.getLastPurchasedDetails(itemId);
+
+      if (lastPurchase != null && mounted) {
+        setState(() {
+          _priceStr = lastPurchase.price.toString();
+          _isWeight = lastPurchase.isWeight;
+
+          if (_isWeight) {
+            _qtyStr = '';
+            _activeField = ActiveField.quantity;
+          } else {
+            _qtyStr = '1';
+            _activeField = ActiveField.price;
+          }
+        });
       }
     } catch (e) {
-      // Silent fail for last price
+      // Silent fail
     }
   }
 
@@ -123,21 +136,28 @@ class _AddPurchasedItemSheetState extends State<AddPurchasedItemSheet> {
       return;
     }
 
-    final price = double.tryParse(priceStr) ?? 0.0;
+    final pricePerUnit = double.tryParse(priceStr) ?? 0.0;
     final qty = double.tryParse(qtyStr) ?? 1.0;
     final discount = double.tryParse(_discountStr.trim()) ?? 0.0;
 
-    if (price <= 0) {
+    if (pricePerUnit <= 0) {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(const SnackBar(content: Text('Price must be greater than 0')));
       return;
     }
 
+    if (qty <= 0) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Quantity must be greater than 0')));
+      return;
+    }
+
     try {
       await context.read<PurchasedItemsRepository>().addPurchasedItem(
         name: name,
-        price: price,
+        price: pricePerUnit,
         qty: qty,
         discount: discount,
         isWeight: _isWeight,
@@ -162,7 +182,7 @@ class _AddPurchasedItemSheetState extends State<AddPurchasedItemSheet> {
       allItems: _allItems,
       onSave: (newName, itemId) {
         setState(() => _name = newName);
-        if (itemId != null) _loadLastPrice(itemId);
+        if (itemId != null) _loadLastPurchaseDetails(itemId);
       },
     );
   }
@@ -206,13 +226,21 @@ class _AddPurchasedItemSheetState extends State<AddPurchasedItemSheet> {
   }
 
   Widget _buildHeader() {
+    final currencySymbol = context.read<SettingsProvider>().currencySymbol;
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text('Add an Item', style: Theme.of(context).textTheme.titleLarge),
         Row(
           children: [
-            Text('Unit / kg', style: Theme.of(context).textTheme.bodyMedium),
+            Text(
+              '$currencySymbol/kg',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: Theme.of(context).colorScheme.primary,
+              ),
+            ),
             const SizedBox(width: 8),
             Switch(
               value: _isWeight,
@@ -240,7 +268,7 @@ class _AddPurchasedItemSheetState extends State<AddPurchasedItemSheet> {
       children: [
         if (_isWeight)
           InputFieldBox(
-            label: 'Quantity (Weight)',
+            label: 'Quantity (kg)',
             value: _qtyStr,
             isActive: _activeField == ActiveField.quantity,
             flex: 6,
@@ -287,7 +315,7 @@ class _AddPurchasedItemSheetState extends State<AddPurchasedItemSheet> {
             ),
           ),
         InputFieldBox(
-          label: 'Price (${_isWeight ? 'per kg' : 'per item'})',
+          label: _isWeight ? 'Price (per kg)' : 'Price (per unit)',
           value: _priceStr,
           isActive: _activeField == ActiveField.price,
           flex: 9,

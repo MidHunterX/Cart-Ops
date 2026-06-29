@@ -25,8 +25,8 @@ class ItemsRepository {
     return _db.itemsDao.insertItem(item);
   }
 
-  Future<double?> getLastPurchasedPrice(int itemId) {
-    return _db.itemsDao.getLastPurchasedPrice(itemId);
+  Future<PurchasedItem?> getLastPurchasedDetails(int itemId) {
+    return _db.itemsDao.getLastPurchasedDetails(itemId);
   }
 
   Future<bool> hasPurchasedItems(int itemId) {
@@ -43,12 +43,8 @@ class ItemsRepository {
   }
 
   Future<List<Item>> searchItems(String query, {int? groupId}) async {
-    final items = groupId != null
-        ? await getItemsInGroup(groupId)
-        : await getItemsWithoutGroup();
+    final items = groupId != null ? await getItemsInGroup(groupId) : await getItemsWithoutGroup();
 
-    return items
-        .where((item) => item.name.toLowerCase().contains(query.toLowerCase()))
-        .toList();
+    return items.where((item) => item.name.toLowerCase().contains(query.toLowerCase())).toList();
   }
 }
