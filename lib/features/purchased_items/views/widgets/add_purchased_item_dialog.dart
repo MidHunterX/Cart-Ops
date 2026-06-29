@@ -322,39 +322,41 @@ class _AddPurchasedItemSheetState extends State<AddPurchasedItemSheet> {
   }
 
   Widget _buildFieldsRow() {
-    return Row(
-      children: [
-        Expanded(
-          flex: 5,
-          child: _isWeight
-              ? InputFieldBox(
-                  label: 'Quantity (kg)',
-                  value: _qtyStr,
-                  isActive: _activeField == ActiveField.quantity,
-                  onTap: () {
-                    setState(() => _activeField = ActiveField.quantity);
-                    _qtyFocusNode.requestFocus();
-                  },
-                  controller: _qtyController,
-                  focusNode: _qtyFocusNode,
-                )
-              : _buildUnitQuantityDisplay(),
-        ),
-        Expanded(
-          flex: 10,
-          child: InputFieldBox(
-            label: 'Price (per unit)',
-            value: _priceStr,
-            isActive: _activeField == ActiveField.price,
-            onTap: () {
-              setState(() => _activeField = ActiveField.price);
-              _priceFocusNode.requestFocus();
-            },
-            controller: _priceController,
-            focusNode: _priceFocusNode,
+    return IntrinsicHeight(
+      child: Row(
+        children: [
+          Expanded(
+            flex: 5,
+            child: _isWeight
+                ? InputFieldBox(
+                    label: 'Quantity (kg)',
+                    value: _qtyStr,
+                    isActive: _activeField == ActiveField.quantity,
+                    onTap: () {
+                      setState(() => _activeField = ActiveField.quantity);
+                      _qtyFocusNode.requestFocus();
+                    },
+                    controller: _qtyController,
+                    focusNode: _qtyFocusNode,
+                  )
+                : _buildUnitQuantityDisplay(),
           ),
-        ),
-      ],
+          Expanded(
+            flex: 10,
+            child: InputFieldBox(
+              label: 'Price (per unit)',
+              value: _priceStr,
+              isActive: _activeField == ActiveField.price,
+              onTap: () {
+                setState(() => _activeField = ActiveField.price);
+                _priceFocusNode.requestFocus();
+              },
+              controller: _priceController,
+              focusNode: _priceFocusNode,
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -372,7 +374,7 @@ class _AddPurchasedItemSheetState extends State<AddPurchasedItemSheet> {
         child: Row(
           children: [
             IconButton(
-              icon: const Icon(Icons.remove, size: 20),
+              icon: const Icon(Icons.remove),
               onPressed: _decrementQuantity,
               style: IconButton.styleFrom(
                 backgroundColor: colorScheme.secondaryContainer,
@@ -383,7 +385,6 @@ class _AddPurchasedItemSheetState extends State<AddPurchasedItemSheet> {
                   ),
                 ),
                 padding: EdgeInsets.zero,
-                minimumSize: const Size(40, 48),
               ),
             ),
             Expanded(
@@ -396,7 +397,7 @@ class _AddPurchasedItemSheetState extends State<AddPurchasedItemSheet> {
               ),
             ),
             IconButton(
-              icon: const Icon(Icons.add, size: 20),
+              icon: const Icon(Icons.add),
               onPressed: _incrementQuantity,
               style: IconButton.styleFrom(
                 backgroundColor: colorScheme.secondaryContainer,
@@ -407,7 +408,6 @@ class _AddPurchasedItemSheetState extends State<AddPurchasedItemSheet> {
                   ),
                 ),
                 padding: EdgeInsets.zero,
-                minimumSize: const Size(40, 48),
               ),
             ),
           ],
