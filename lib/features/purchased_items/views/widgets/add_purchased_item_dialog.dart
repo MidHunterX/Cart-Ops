@@ -1,28 +1,25 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:shopping_assist/core/database/database.dart';
 import 'package:shopping_assist/features/items/repositories/items_repository.dart';
 import 'package:shopping_assist/features/purchased_items/repositories/purchased_items_repository.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:uuid/uuid.dart';
+
+import 'add_item_components/input_field_box.dart';
+import 'add_item_components/add_item_keypad.dart';
+import 'add_item_components/item_dialogs.dart';
+import 'add_item_utils/keypad_logic.dart';
+import 'add_item_utils/image_picker.dart';
 
 class AddPurchasedItemSheet extends StatefulWidget {
   final Purchase purchase;
   final Group? group;
 
-  const AddPurchasedItemSheet({
-    super.key,
-    required this.purchase,
-    required this.group,
-  });
+  const AddPurchasedItemSheet({super.key, required this.purchase, required this.group});
 
   @override
   State<AddPurchasedItemSheet> createState() => _AddPurchasedItemSheetState();
 }
-
-enum ActiveField { quantity, price }
 
 class _AddPurchasedItemSheetState extends State<AddPurchasedItemSheet> {
   String _name = '';
@@ -32,7 +29,6 @@ class _AddPurchasedItemSheetState extends State<AddPurchasedItemSheet> {
   bool _isWeight = false;
 
   ActiveField _activeField = ActiveField.price;
-
   List<Item> _allItems = [];
   bool _isLoading = true;
   String? _imagePath;
@@ -78,221 +74,42 @@ class _AddPurchasedItemSheetState extends State<AddPurchasedItemSheet> {
     }
   }
 
-  Future<void> _pickImage(ImageSource source) async {
-    final picker = ImagePicker();
-    final pickedFile = await picker.pickImage(
-      source: source,
-      imageQuality: 70, // Compresses the image natively
-    );
+  void _handleImagePicker() async {
+    final action = await ItemDialogs.showImagePickerOptions(context, _imagePath != null);
 
-    if (pickedFile != null) {
-      final directory = await getApplicationDocumentsDirectory();
-      final fileName = '${const Uuid().v4()}.jpg';
-      final savedImage = await File(
-        pickedFile.path,
-      ).copy('${directory.path}/$fileName');
-
-      setState(() {
-        _imagePath = savedImage.path;
-      });
+    if (action == ImagePickerAction.remove) {
+      setState(() => _imagePath = null);
+    } else if (action == ImagePickerAction.gallery || action == ImagePickerAction.camera) {
+      final source = action == ImagePickerAction.gallery ? ImageSource.gallery : ImageSource.camera;
+      final path = await ImagePickerUtil.pickAndSaveImage(source);
+      if (path != null) setState(() => _imagePath = path);
     }
   }
 
-  void _showImagePickerOptions() {
-    showModalBottomSheet(
-      context: context,
-      builder: (context) => SafeArea(
-        child: Wrap(
-          children: [
-            ListTile(
-              leading: const Icon(Icons.photo_library),
-              title: const Text('Gallery'),
-              onTap: () {
-                Navigator.pop(context);
-                _pickImage(ImageSource.gallery);
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.photo_camera),
-              title: const Text('Camera'),
-              onTap: () {
-                Navigator.pop(context);
-                _pickImage(ImageSource.camera);
-              },
-            ),
-            if (_imagePath != null)
-              ListTile(
-                leading: const Icon(Icons.delete, color: Colors.red),
-                title: const Text(
-                  'Remove Image',
-                  style: TextStyle(color: Colors.red),
-                ),
-                onTap: () {
-                  Navigator.pop(context);
-                  setState(() {
-                    _imagePath = null;
-                  });
-                },
-              ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  void _onKeypadPressed(String val) {
+  void _handleKeypadPress(String val) {
     setState(() {
-      String current = _activeField == ActiveField.price ? _priceStr : _qtyStr;
-
-      if (val == '<=') {
-        if (current.isNotEmpty) {
-          current = current.substring(0, current.length - 1);
-        }
-      } else if (val == 'C') {
-        current = '';
-      } else if (val == '=>') {
-        _activeField = _activeField == ActiveField.price
-            ? ActiveField.quantity
-            : ActiveField.price;
+      if (val == '=>') {
+        _activeField = _activeField == ActiveField.price ? ActiveField.quantity : ActiveField.price;
         return;
-      } else if (val == '.99') {
-        if (current.isEmpty) {
-          current = '0.99';
-        } else if (!current.contains('.')) {
-          current += '.99';
-        } else {
-          final parts = current.split('.');
-          current = '${parts[0]}.99';
-        }
-      } else if (val == '.') {
-        if (current.isEmpty) {
-          current = '0.';
-        } else if (!current.contains('.')) {
-          current += val;
-        }
-      } else if (val == '-') {
-        if (!current.startsWith('-')) {
-          current = '-$current';
-        } else {
-          current = current.substring(1);
-        }
-      } else {
-        if (current == '0') {
-          current = val;
-        } else {
-          current += val;
-        }
       }
+
+      String current = _activeField == ActiveField.price ? _priceStr : _qtyStr;
+      String updated = KeypadLogic.calculateNewValue(current, val);
 
       if (_activeField == ActiveField.price) {
-        _priceStr = current;
+        _priceStr = updated;
       } else {
-        _qtyStr = current;
+        _qtyStr = updated;
       }
     });
-  }
-
-  void _showNameDialog() {
-    final nameCtrl = TextEditingController(text: _name);
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Item Name'),
-        content: Autocomplete<Item>(
-          initialValue: TextEditingValue(text: _name),
-          displayStringForOption: (Item option) => option.name,
-          optionsBuilder: (TextEditingValue textEditingValue) {
-            if (textEditingValue.text.isEmpty) {
-              return const Iterable<Item>.empty();
-            }
-            final query = textEditingValue.text.toLowerCase();
-            return _allItems.where(
-              (Item option) => option.name.toLowerCase().contains(query),
-            );
-          },
-          onSelected: (Item selection) {
-            nameCtrl.text = selection.name;
-            _loadLastPrice(selection.id);
-          },
-          fieldViewBuilder: (context, controller, focusNode, onFieldSubmitted) {
-            controller.addListener(() => nameCtrl.text = controller.text);
-            return TextField(
-              controller: controller,
-              focusNode: focusNode,
-              autofocus: true,
-              decoration: const InputDecoration(
-                hintText: 'Search or enter new item',
-              ),
-              onSubmitted: (_) {
-                setState(() => _name = nameCtrl.text);
-                Navigator.pop(context);
-              },
-            );
-          },
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          FilledButton(
-            onPressed: () {
-              setState(() => _name = nameCtrl.text);
-              Navigator.pop(context);
-            },
-            child: const Text('Save'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showDiscountDialog() {
-    final discCtrl = TextEditingController(
-      text: _discountStr == '0' ? '' : _discountStr,
-    );
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Discount'),
-        content: TextField(
-          controller: discCtrl,
-          keyboardType: const TextInputType.numberWithOptions(decimal: true),
-          autofocus: true,
-          decoration: const InputDecoration(hintText: 'Enter discount amount'),
-          onSubmitted: (_) {
-            setState(
-              () => _discountStr = discCtrl.text.isEmpty ? '0' : discCtrl.text,
-            );
-            Navigator.pop(context);
-          },
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          FilledButton(
-            onPressed: () {
-              setState(
-                () =>
-                    _discountStr = discCtrl.text.isEmpty ? '0' : discCtrl.text,
-              );
-              Navigator.pop(context);
-            },
-            child: const Text('Save'),
-          ),
-        ],
-      ),
-    );
   }
 
   void _submit() async {
     final name = _name.trim();
     if (name.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select an item name')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Please select an item name')));
       _showNameDialog();
       return;
     }
@@ -300,9 +117,9 @@ class _AddPurchasedItemSheetState extends State<AddPurchasedItemSheet> {
     final priceStr = _priceStr.trim();
     final qtyStr = _qtyStr.trim();
     if (priceStr.isEmpty || qtyStr.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please fill in quantity and price')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Please fill in quantity and price')));
       return;
     }
 
@@ -311,9 +128,9 @@ class _AddPurchasedItemSheetState extends State<AddPurchasedItemSheet> {
     final discount = double.tryParse(_discountStr.trim()) ?? 0.0;
 
     if (price <= 0) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Price must be greater than 0')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Price must be greater than 0')));
       return;
     }
 
@@ -338,169 +155,20 @@ class _AddPurchasedItemSheetState extends State<AddPurchasedItemSheet> {
     }
   }
 
-  Widget _buildFieldBox(
-    String label,
-    String value,
-    ActiveField field, {
-    Widget? customContent,
-  }) {
-    final isActive = _activeField == field;
-    final colorScheme = Theme.of(context).colorScheme;
-
-    return Expanded(
-      child: GestureDetector(
-        onTap: () => setState(() => _activeField = field),
-        child: Container(
-          margin: const EdgeInsets.symmetric(horizontal: 4),
-          padding: const EdgeInsets.all(8),
-          height: 80,
-          decoration: BoxDecoration(
-            border: Border.all(
-              color: isActive ? colorScheme.primary : colorScheme.outline,
-              width: isActive ? 2 : 1,
-            ),
-            borderRadius: BorderRadius.circular(8),
-            color: isActive ? colorScheme.primaryContainer : null,
-          ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                label,
-                style: TextStyle(
-                  fontSize: 12,
-                  color: colorScheme.onSurfaceVariant,
-                ),
-              ),
-              const SizedBox(height: 4),
-              if (customContent != null)
-                Expanded(child: customContent)
-              else
-                Expanded(
-                  child: Center(
-                    child: FittedBox(
-                      fit: BoxFit.scaleDown,
-                      child: Text(
-                        value.isEmpty ? '0' : value,
-                        style: const TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildAdjustBtn(IconData icon, VoidCallback onTap) {
-    return InkWell(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(4),
-        decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.secondaryContainer,
-          borderRadius: BorderRadius.circular(4),
-        ),
-        child: Icon(icon, size: 20),
-      ),
-    );
-  }
-
-  Widget _buildActionBtn({
-    String? text,
-    IconData? icon,
-    required Color bg,
-    required Color fg,
-    required VoidCallback onTap,
-  }) {
-    return Expanded(
-      child: Padding(
-        padding: const EdgeInsets.all(4.0),
-        child: Material(
-          color: bg,
-          borderRadius: BorderRadius.circular(8),
-          child: InkWell(
-            onTap: onTap,
-            borderRadius: BorderRadius.circular(8),
-            child: SizedBox(
-              height: 56,
-              child: Center(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      if (icon != null) ...[
-                        Icon(icon, color: fg, size: 24),
-                        if (text != null && text.isNotEmpty)
-                          const SizedBox(width: 8),
-                      ],
-                      if (text != null && text.isNotEmpty)
-                        Text(
-                          text,
-                          style: TextStyle(
-                            color: fg,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildNumBtn(String text) {
-    return Expanded(
-      child: Padding(
-        padding: const EdgeInsets.all(4.0),
-        child: OutlinedButton(
-          style: OutlinedButton.styleFrom(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
-            ),
-            padding: EdgeInsets.zero,
-          ),
-          onPressed: () => _onKeypadPressed(text),
-          child: SizedBox(
-            height: 56,
-            child: Center(
-              child: Text(
-                text,
-                style: TextStyle(
-                  fontSize: 20,
-                  color: Theme.of(context).colorScheme.onSurface,
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
+  void _showNameDialog() {
+    ItemDialogs.showNameDialog(
+      context: context,
+      currentName: _name,
+      allItems: _allItems,
+      onSave: (newName, itemId) {
+        setState(() => _name = newName);
+        if (itemId != null) _loadLastPrice(itemId);
+      },
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    bool isDark = Theme.of(context).brightness == Brightness.dark;
-    Color redBg = isDark ? Colors.red.shade900 : Colors.red.shade100;
-    Color redFg = isDark ? Colors.red.shade100 : Colors.red.shade900;
-    Color greenBg = isDark ? Colors.green.shade900 : Colors.green.shade200;
-    Color greenFg = isDark ? Colors.green.shade100 : Colors.green.shade900;
-    Color blueBg = isDark ? Colors.blue.shade900 : Colors.blue.shade100;
-    Color blueFg = isDark ? Colors.blue.shade100 : Colors.blue.shade900;
-
     return Padding(
       padding: EdgeInsets.only(
         bottom: MediaQuery.of(context).viewInsets.bottom,
@@ -511,179 +179,121 @@ class _AddPurchasedItemSheetState extends State<AddPurchasedItemSheet> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'Add an Item',
-                style: Theme.of(context).textTheme.titleLarge,
-              ),
-              Row(
-                children: [
-                  Text(
-                    'Unit / kg',
-                    style: Theme.of(context).textTheme.bodyMedium,
-                  ),
-                  const SizedBox(width: 8),
-                  Switch(
-                    value: _isWeight,
-                    onChanged: (val) {
-                      setState(() {
-                        _isWeight = val;
-                        if (val) {
-                          _qtyStr = '';
-                          _activeField = ActiveField.quantity;
-                        } else {
-                          _qtyStr = '1';
-                          _activeField = ActiveField.price;
-                        }
-                      });
-                    },
-                  ),
-                ],
-              ),
-            ],
-          ),
+          _buildHeader(),
           const SizedBox(height: 16),
-          Row(
-            children: [
-              if (_isWeight)
-                _buildFieldBox(
-                  'Quantity (Weight)',
-                  _qtyStr,
-                  ActiveField.quantity,
-                )
-              else
-                _buildFieldBox(
-                  'Quantity',
-                  _qtyStr,
-                  ActiveField.quantity,
-                  customContent: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      _buildAdjustBtn(Icons.remove, () {
-                        double q = double.tryParse(_qtyStr) ?? 1;
-                        if (q > 1) {
-                          setState(() => _qtyStr = (q - 1).toInt().toString());
-                        }
-                      }),
-                      Expanded(
-                        child: Center(
-                          child: FittedBox(
-                            fit: BoxFit.scaleDown,
-                            child: Text(
-                              _qtyStr.isEmpty ? '0' : _qtyStr,
-                              style: const TextStyle(
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                      _buildAdjustBtn(Icons.add, () {
-                        double q = double.tryParse(_qtyStr) ?? 1;
-                        setState(() => _qtyStr = (q + 1).toInt().toString());
-                      }),
-                    ],
-                  ),
-                ),
-              _buildFieldBox(
-                'Price (${_isWeight ? 'per kg' : 'per item'})',
-                _priceStr,
-                ActiveField.price,
-              ),
-            ],
-          ),
+          _buildFieldsRow(),
           const SizedBox(height: 16),
-          Row(
-            children: [
-              _buildActionBtn(
-                text: _isLoading
-                    ? 'Loading...'
-                    : (_name.isEmpty ? 'Name' : _name),
-                bg: blueBg,
-                fg: blueFg,
-                onTap: _isLoading ? () {} : _showNameDialog,
-              ),
-              _buildActionBtn(
-                text: _imagePath == null ? 'Image' : 'Img Added',
-                icon: _imagePath == null ? null : Icons.check_circle,
-                bg: blueBg,
-                fg: blueFg,
-                onTap: _showImagePickerOptions,
-              ),
-              _buildActionBtn(
-                text: _discountStr == '0' || _discountStr.isEmpty
-                    ? 'Discount'
-                    : 'Disc: $_discountStr',
-                bg: blueBg,
-                fg: blueFg,
-                onTap: _showDiscountDialog,
-              ),
-              _buildActionBtn(
-                text: 'OK',
-                bg: greenBg,
-                fg: greenFg,
-                onTap: _submit,
-              ),
-            ],
-          ),
-          Row(
-            children: [
-              _buildNumBtn('7'),
-              _buildNumBtn('8'),
-              _buildNumBtn('9'),
-              _buildActionBtn(
-                icon: Icons.backspace,
-                bg: redBg,
-                fg: redFg,
-                onTap: () => _onKeypadPressed('<='),
-              ),
-            ],
-          ),
-          Row(
-            children: [
-              _buildNumBtn('4'),
-              _buildNumBtn('5'),
-              _buildNumBtn('6'),
-              _buildActionBtn(
-                text: 'C',
-                bg: redBg,
-                fg: redFg,
-                onTap: () => _onKeypadPressed('C'),
-              ),
-            ],
-          ),
-          Row(
-            children: [
-              _buildNumBtn('1'),
-              _buildNumBtn('2'),
-              _buildNumBtn('3'),
-              _buildActionBtn(
-                text: '-',
-                bg: redBg,
-                fg: redFg,
-                onTap: () => _onKeypadPressed('-'),
-              ),
-            ],
-          ),
-          Row(
-            children: [
-              _buildNumBtn('0'),
-              _buildNumBtn('.'),
-              _buildNumBtn('.99'),
-              _buildActionBtn(
-                icon: Icons.keyboard_tab,
-                bg: greenBg,
-                fg: greenFg,
-                onTap: () => _onKeypadPressed('=>'),
-              ),
-            ],
+          AddItemKeypad(
+            isLoading: _isLoading,
+            itemName: _name,
+            hasImage: _imagePath != null,
+            discountStr: _discountStr,
+            onKeyPressed: _handleKeypadPress,
+            onNameTap: _showNameDialog,
+            onImageTap: _handleImagePicker,
+            onDiscountTap: () async {
+              final newDiscount = await ItemDialogs.showDiscountDialog(context, _discountStr);
+              if (newDiscount != null) {
+                setState(() => _discountStr = newDiscount.isEmpty ? '0' : newDiscount);
+              }
+            },
+            onSubmit: _submit,
           ),
           const SizedBox(height: 16),
         ],
       ),
+    );
+  }
+
+  Widget _buildHeader() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text('Add an Item', style: Theme.of(context).textTheme.titleLarge),
+        Row(
+          children: [
+            Text('Unit / kg', style: Theme.of(context).textTheme.bodyMedium),
+            const SizedBox(width: 8),
+            Switch(
+              value: _isWeight,
+              onChanged: (val) {
+                setState(() {
+                  _isWeight = val;
+                  if (val) {
+                    _qtyStr = '';
+                    _activeField = ActiveField.quantity;
+                  } else {
+                    _qtyStr = '1';
+                    _activeField = ActiveField.price;
+                  }
+                });
+              },
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildFieldsRow() {
+    return Row(
+      children: [
+        if (_isWeight)
+          InputFieldBox(
+            label: 'Quantity (Weight)',
+            value: _qtyStr,
+            isActive: _activeField == ActiveField.quantity,
+            flex: 6,
+            onTap: () => setState(() => _activeField = ActiveField.quantity),
+          )
+        else
+          InputFieldBox(
+            label: 'Quantity',
+            value: _qtyStr,
+            isActive: _activeField == ActiveField.quantity,
+            flex: 6,
+            onTap: () => setState(() => _activeField = ActiveField.quantity),
+            customContent: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                AdjustButton(
+                  icon: Icons.remove,
+                  onTap: () {
+                    double q = double.tryParse(_qtyStr) ?? 1;
+                    if (q > 1) {
+                      setState(() => _qtyStr = (q - 1).toInt().toString());
+                    }
+                  },
+                ),
+                Expanded(
+                  child: Center(
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text(
+                        _qtyStr.isEmpty ? '0' : _qtyStr,
+                        style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ),
+                ),
+                AdjustButton(
+                  icon: Icons.add,
+                  onTap: () {
+                    double q = double.tryParse(_qtyStr) ?? 1;
+                    setState(() => _qtyStr = (q + 1).toInt().toString());
+                  },
+                ),
+              ],
+            ),
+          ),
+        InputFieldBox(
+          label: 'Price (${_isWeight ? 'per kg' : 'per item'})',
+          value: _priceStr,
+          isActive: _activeField == ActiveField.price,
+          flex: 9,
+          onTap: () => setState(() => _activeField = ActiveField.price),
+        ),
+      ],
     );
   }
 }

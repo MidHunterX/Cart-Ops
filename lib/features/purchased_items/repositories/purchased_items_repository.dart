@@ -57,9 +57,12 @@ class PurchasedItemsRepository {
       );
     }
 
+    final totalPrice = price * qty;
+    final finalPrice = totalPrice - discount;
+
     await _db.purchasedItemsDao.insertPurchasedItem(
       PurchasedItemsCompanion.insert(
-        price: price,
+        price: finalPrice,
         quantity: qty,
         isWeight: Value(isWeight),
         discount: Value(discount),
