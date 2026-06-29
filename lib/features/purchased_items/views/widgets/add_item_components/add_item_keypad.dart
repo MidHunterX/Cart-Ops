@@ -101,33 +101,58 @@ class AddItemKeypad extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
 
+    bool hasDiscount = discountStr.isNotEmpty && discountStr != '0';
+    bool hasText = itemName.isNotEmpty;
+
+    // SEMANTIC HIERARCHY DEFINITIONS
+    // ------------------------------
+    // High Emphasis (Primary Action)
+    Color mainActionBg = colorScheme.primary;
+    Color mainActionFg = colorScheme.onPrimary;
+
+    // Medium Emphasis (Active Inputs / Primary Utilities)
+    Color inputActiveBg = colorScheme.primaryContainer;
+    Color inputActiveFg = colorScheme.onPrimaryContainer;
+
+    // Accent Emphasis (Secondary Utilities / Modifiers)
+    Color functionalBg = colorScheme.tertiaryContainer;
+    Color functionalFg = colorScheme.onTertiaryContainer;
+
+    // Low Emphasis (Inactive / Surface / Numbers)
+    Color inputInactiveBg = colorScheme.surfaceContainerHighest;
+    Color inputInactiveFg = colorScheme.onSurfaceVariant;
+
+    // Alert Emphasis (Destructive)
+    Color destructiveBg = colorScheme.errorContainer;
+    Color destructiveFg = colorScheme.onErrorContainer;
+
     return Column(
       children: [
         Row(
           children: [
             _buildActionBtn(
-              text: isLoading ? 'Loading...' : (itemName.isEmpty ? 'Name' : itemName),
-              backgroundColor: colorScheme.primaryContainer,
-              foregroundColor: colorScheme.onPrimaryContainer,
+              text: isLoading ? 'Loading...' : (hasText ? itemName : 'Name'),
+              backgroundColor: hasText ? inputActiveBg : inputInactiveBg,
+              foregroundColor: hasText ? inputActiveFg : inputInactiveFg,
               onTap: isLoading ? () {} : onNameTap,
             ),
             _buildActionBtn(
               text: !hasImage ? 'Image' : 'Img Added',
               icon: !hasImage ? null : Icons.check_circle,
-              backgroundColor: colorScheme.primaryContainer,
-              foregroundColor: colorScheme.onPrimaryContainer,
+              backgroundColor: hasImage ? inputActiveBg : inputInactiveBg,
+              foregroundColor: hasImage ? inputActiveFg : inputInactiveFg,
               onTap: onImageTap,
             ),
             _buildActionBtn(
-              text: discountStr == '0' || discountStr.isEmpty ? 'Discount' : 'Disc: $discountStr',
-              backgroundColor: colorScheme.primaryContainer,
-              foregroundColor: colorScheme.onPrimaryContainer,
+              text: hasDiscount ? 'Disc: $discountStr' : 'Discount',
+              backgroundColor: hasDiscount ? inputActiveBg : inputInactiveBg,
+              foregroundColor: hasDiscount ? inputActiveFg : inputInactiveFg,
               onTap: onDiscountTap,
             ),
             _buildActionBtn(
               text: 'OK',
-              backgroundColor: colorScheme.primary,
-              foregroundColor: colorScheme.onPrimary,
+              backgroundColor: mainActionBg,
+              foregroundColor: mainActionFg,
               onTap: onSubmit,
             ),
           ],
@@ -138,9 +163,9 @@ class AddItemKeypad extends StatelessWidget {
             _buildNumBtn(context, '8'),
             _buildNumBtn(context, '9'),
             _buildActionBtn(
-              icon: Icons.backspace,
-              backgroundColor: colorScheme.errorContainer,
-              foregroundColor: colorScheme.onErrorContainer,
+              icon: Icons.backspace_outlined,
+              backgroundColor: functionalBg,
+              foregroundColor: functionalFg,
               onTap: () => onKeyPressed('<='),
             ),
           ],
@@ -152,8 +177,8 @@ class AddItemKeypad extends StatelessWidget {
             _buildNumBtn(context, '6'),
             _buildActionBtn(
               text: 'C',
-              backgroundColor: colorScheme.errorContainer,
-              foregroundColor: colorScheme.onErrorContainer,
+              backgroundColor: destructiveBg,
+              foregroundColor: destructiveFg,
               onTap: () => onKeyPressed('C'),
             ),
           ],
@@ -164,9 +189,9 @@ class AddItemKeypad extends StatelessWidget {
             _buildNumBtn(context, '2'),
             _buildNumBtn(context, '3'),
             _buildActionBtn(
-              text: '-',
-              backgroundColor: colorScheme.errorContainer,
-              foregroundColor: colorScheme.onErrorContainer,
+              text: '—',
+              backgroundColor: functionalBg,
+              foregroundColor: functionalFg,
               onTap: () => onKeyPressed('-'),
             ),
           ],
@@ -178,8 +203,8 @@ class AddItemKeypad extends StatelessWidget {
             _buildNumBtn(context, '.99'),
             _buildActionBtn(
               icon: Icons.keyboard_tab,
-              backgroundColor: colorScheme.onPrimary,
-              foregroundColor: colorScheme.primary,
+              backgroundColor: colorScheme.secondaryContainer,
+              foregroundColor: colorScheme.onSecondaryContainer,
               onTap: () => onKeyPressed('=>'),
             ),
           ],

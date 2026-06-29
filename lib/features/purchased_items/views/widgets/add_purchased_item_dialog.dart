@@ -27,7 +27,6 @@ class _AddPurchasedItemSheetState extends State<AddPurchasedItemSheet> {
   String _qtyStr = '1';
   String _discountStr = '0';
   bool _isWeight = false;
-  bool _isFieldSelected = false;
 
   ActiveField _activeField = ActiveField.price;
   List<Item> _allItems = [];
