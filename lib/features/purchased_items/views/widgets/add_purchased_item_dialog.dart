@@ -27,6 +27,7 @@ class _AddPurchasedItemSheetState extends State<AddPurchasedItemSheet> {
   String _qtyStr = '1';
   String _discountStr = '0';
   bool _isWeight = false;
+  bool _isFieldSelected = false;
 
   ActiveField _activeField = ActiveField.price;
   List<Item> _allItems = [];
@@ -121,41 +122,28 @@ class _AddPurchasedItemSheetState extends State<AddPurchasedItemSheet> {
   }
 
   void _handleKeypadPress(String val) {
-    setState(() {
-      if (val == '=>') {
+    if (val == '=>') {
+      setState(() {
         if (_isWeight) {
-          // Weight Mode: Price and Weight Fields
           _activeField = _activeField == ActiveField.price
               ? ActiveField.quantity
               : ActiveField.price;
-        } else {
-          // Unit Mode: Only Price Field
-          return;
         }
+        _activeField == ActiveField.price
+            ? _priceFocusNode.requestFocus()
+            : _qtyFocusNode.requestFocus();
+      });
+      return;
+    }
 
-        // Update focus
-        if (_activeField == ActiveField.price) {
-          _priceFocusNode.requestFocus();
-        } else {
-          _qtyFocusNode.requestFocus();
-        }
-        return;
-      }
+    final targetController = (_activeField == ActiveField.price)
+        ? _priceController
+        : _qtyController;
 
-      if (_isWeight && _activeField == ActiveField.quantity) {
-        String current = _qtyStr;
-        String updated = KeypadLogic.calculateNewValue(current, val);
-        _qtyStr = updated;
-        _qtyController.text = updated;
-        return;
-      }
-
-      if (_activeField == ActiveField.price) {
-        String current = _priceStr;
-        String updated = KeypadLogic.calculateNewValue(current, val);
-        _priceStr = updated;
-        _priceController.text = updated;
-      }
+    setState(() {
+      KeypadLogic.handleInput(targetController, val);
+      _priceStr = _priceController.text;
+      _qtyStr = _qtyController.text;
     });
   }
 
