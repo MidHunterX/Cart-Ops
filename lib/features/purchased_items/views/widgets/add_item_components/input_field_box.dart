@@ -6,9 +6,9 @@ class InputFieldBox extends StatelessWidget {
   final String label;
   final String value;
   final bool isActive;
-  final int flex;
   final VoidCallback onTap;
-  final Widget? customContent;
+  final TextEditingController? controller;
+  final FocusNode? focusNode;
 
   const InputFieldBox({
     super.key,
@@ -16,83 +16,54 @@ class InputFieldBox extends StatelessWidget {
     required this.value,
     required this.isActive,
     required this.onTap,
-    this.flex = 9,
-    this.customContent,
+    this.controller,
+    this.focusNode,
   });
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
 
-    return Expanded(
-      flex: flex,
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 4.0),
       child: GestureDetector(
         onTap: onTap,
-        child: Container(
-          margin: const EdgeInsets.symmetric(horizontal: 4),
-          padding: const EdgeInsets.all(8),
-          height: 80,
-          decoration: BoxDecoration(
-            border: Border.all(
-              color: isActive ? colorScheme.primary : colorScheme.outline,
-              width: isActive ? 2 : 1,
+        child: TextFormField(
+          controller: controller,
+          focusNode: focusNode,
+          readOnly: true,
+          showCursor: true,
+          style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+          decoration: InputDecoration(
+            labelText: label,
+            labelStyle: textTheme.bodySmall?.copyWith(
+              color: isActive ? colorScheme.primary : colorScheme.onSurfaceVariant,
             ),
-            borderRadius: BorderRadius.circular(8),
-            color: isActive ? colorScheme.primaryContainer : null,
-          ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                label,
-                style: TextStyle(
-                  fontSize: 12,
-                  color: colorScheme.onSurfaceVariant,
-                ),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: BorderSide(
+                color: isActive ? colorScheme.primary : colorScheme.outline,
+                width: isActive ? 2 : 1,
               ),
-              const SizedBox(height: 4),
-              if (customContent != null)
-                Expanded(child: customContent!)
-              else
-                Expanded(
-                  child: Center(
-                    child: FittedBox(
-                      fit: BoxFit.scaleDown,
-                      child: Text(
-                        value.isEmpty ? '0' : value,
-                        style: const TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-            ],
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: BorderSide(
+                color: isActive ? colorScheme.primary : colorScheme.outline,
+                width: isActive ? 2 : 1,
+              ),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: BorderSide(color: colorScheme.primary, width: 2),
+            ),
+            filled: isActive,
+            fillColor: isActive ? colorScheme.primaryContainer : null,
+            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
           ),
+          onTap: onTap,
         ),
-      ),
-    );
-  }
-}
-
-class AdjustButton extends StatelessWidget {
-  final IconData icon;
-  final VoidCallback onTap;
-
-  const AdjustButton({super.key, required this.icon, required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(4),
-        decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.secondaryContainer,
-          borderRadius: BorderRadius.circular(4),
-        ),
-        child: Icon(icon, size: 20),
       ),
     );
   }

@@ -16,7 +16,7 @@ class ItemDialogs {
     await showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Item Name'),
+        title: Text('Item Name', style: Theme.of(context).textTheme.titleLarge),
         content: Autocomplete<Item>(
           initialValue: TextEditingValue(text: currentName),
           displayStringForOption: (Item option) => option.name,
@@ -25,9 +25,7 @@ class ItemDialogs {
               return const Iterable<Item>.empty();
             }
             final query = textEditingValue.text.toLowerCase();
-            return allItems.where(
-              (Item option) => option.name.toLowerCase().contains(query),
-            );
+            return allItems.where((Item option) => option.name.toLowerCase().contains(query));
           },
           onSelected: (Item selection) {
             nameCtrl.text = selection.name;
@@ -39,7 +37,10 @@ class ItemDialogs {
               controller: controller,
               focusNode: focusNode,
               autofocus: true,
-              decoration: const InputDecoration(hintText: 'Search or enter new item'),
+              decoration: const InputDecoration(
+                hintText: 'Search or enter new item',
+                border: OutlineInputBorder(),
+              ),
               onSubmitted: (_) {
                 onSave(nameCtrl.text, selectedItemId);
                 Navigator.pop(context);
@@ -48,10 +49,7 @@ class ItemDialogs {
           },
         ),
         actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
           FilledButton(
             onPressed: () {
               onSave(nameCtrl.text, selectedItemId);
@@ -65,25 +63,23 @@ class ItemDialogs {
   }
 
   static Future<String?> showDiscountDialog(BuildContext context, String currentDiscount) async {
-    final discCtrl = TextEditingController(
-      text: currentDiscount == '0' ? '' : currentDiscount,
-    );
+    final discCtrl = TextEditingController(text: currentDiscount == '0' ? '' : currentDiscount);
     return showDialog<String>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Discount'),
+        title: Text('Discount', style: Theme.of(context).textTheme.titleLarge),
         content: TextField(
           controller: discCtrl,
           keyboardType: const TextInputType.numberWithOptions(decimal: true),
           autofocus: true,
-          decoration: const InputDecoration(hintText: 'Enter discount amount'),
+          decoration: const InputDecoration(
+            hintText: 'Enter discount amount',
+            border: OutlineInputBorder(),
+          ),
           onSubmitted: (_) => Navigator.pop(context, discCtrl.text),
         ),
         actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
           FilledButton(
             onPressed: () => Navigator.pop(context, discCtrl.text),
             child: const Text('Save'),
@@ -93,7 +89,10 @@ class ItemDialogs {
     );
   }
 
-  static Future<ImagePickerAction?> showImagePickerOptions(BuildContext context, bool hasImage) async {
+  static Future<ImagePickerAction?> showImagePickerOptions(
+    BuildContext context,
+    bool hasImage,
+  ) async {
     return showModalBottomSheet<ImagePickerAction>(
       context: context,
       builder: (context) => SafeArea(
@@ -111,11 +110,8 @@ class ItemDialogs {
             ),
             if (hasImage)
               ListTile(
-                leading: const Icon(Icons.delete, color: Colors.red),
-                title: const Text(
-                  'Remove Image',
-                  style: TextStyle(color: Colors.red),
-                ),
+                leading: const Icon(Icons.delete_outline),
+                title: const Text('Remove Image'),
                 onTap: () => Navigator.pop(context, ImagePickerAction.remove),
               ),
           ],

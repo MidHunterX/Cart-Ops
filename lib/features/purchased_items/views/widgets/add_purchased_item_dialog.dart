@@ -4,7 +4,6 @@ import 'package:image_picker/image_picker.dart';
 import 'package:shopping_assist/core/database/database.dart';
 import 'package:shopping_assist/features/items/repositories/items_repository.dart';
 import 'package:shopping_assist/features/purchased_items/repositories/purchased_items_repository.dart';
-
 import 'add_item_components/input_field_box.dart';
 import 'add_item_components/add_item_keypad.dart';
 import 'add_item_components/item_dialogs.dart';
@@ -34,10 +33,29 @@ class _AddPurchasedItemSheetState extends State<AddPurchasedItemSheet> {
   bool _isLoading = true;
   String? _imagePath;
 
+  // Controllers for input fields
+  late TextEditingController _priceController;
+  late TextEditingController _qtyController;
+  late FocusNode _priceFocusNode;
+  late FocusNode _qtyFocusNode;
+
   @override
   void initState() {
     super.initState();
+    _priceController = TextEditingController(text: _priceStr);
+    _qtyController = TextEditingController(text: _qtyStr);
+    _priceFocusNode = FocusNode();
+    _qtyFocusNode = FocusNode();
     _fetchItems();
+  }
+
+  @override
+  void dispose() {
+    _priceController.dispose();
+    _qtyController.dispose();
+    _priceFocusNode.dispose();
+    _qtyFocusNode.dispose();
+    super.dispose();
   }
 
   Future<void> _fetchItems() async {
@@ -71,13 +89,16 @@ class _AddPurchasedItemSheetState extends State<AddPurchasedItemSheet> {
       if (lastPurchase != null && mounted) {
         setState(() {
           _priceStr = lastPurchase.price.toString();
+          _priceController.text = _priceStr;
           _isWeight = lastPurchase.isWeight;
 
           if (_isWeight) {
             _qtyStr = '';
+            _qtyController.text = '';
             _activeField = ActiveField.quantity;
           } else {
             _qtyStr = '1';
+            _qtyController.text = '1';
             _activeField = ActiveField.price;
           }
         });
@@ -103,16 +124,48 @@ class _AddPurchasedItemSheetState extends State<AddPurchasedItemSheet> {
     setState(() {
       if (val == '=>') {
         _activeField = _activeField == ActiveField.price ? ActiveField.quantity : ActiveField.price;
+        // Update focus
+        if (_activeField == ActiveField.price) {
+          _priceFocusNode.requestFocus();
+        } else {
+          _qtyFocusNode.requestFocus();
+        }
         return;
       }
 
-      String current = _activeField == ActiveField.price ? _priceStr : _qtyStr;
-      String updated = KeypadLogic.calculateNewValue(current, val);
+      if (_isWeight && _activeField == ActiveField.quantity) {
+        String current = _qtyStr;
+        String updated = KeypadLogic.calculateNewValue(current, val);
+        _qtyStr = updated;
+        _qtyController.text = updated;
+        return;
+      }
 
       if (_activeField == ActiveField.price) {
+        String current = _priceStr;
+        String updated = KeypadLogic.calculateNewValue(current, val);
         _priceStr = updated;
-      } else {
-        _qtyStr = updated;
+        _priceController.text = updated;
+      }
+    });
+  }
+
+  void _incrementQuantity() {
+    setState(() {
+      int currentQty = int.tryParse(_qtyStr) ?? 1;
+      currentQty++;
+      _qtyStr = currentQty.toString();
+      _qtyController.text = _qtyStr;
+    });
+  }
+
+  void _decrementQuantity() {
+    setState(() {
+      int currentQty = int.tryParse(_qtyStr) ?? 1;
+      if (currentQty > 1) {
+        currentQty--;
+        _qtyStr = currentQty.toString();
+        _qtyController.text = _qtyStr;
       }
     });
   }
@@ -218,6 +271,8 @@ class _AddPurchasedItemSheetState extends State<AddPurchasedItemSheet> {
               }
             },
             onSubmit: _submit,
+            onIncrement: _incrementQuantity,
+            onDecrement: _decrementQuantity,
           ),
           const SizedBox(height: 16),
         ],
@@ -227,6 +282,7 @@ class _AddPurchasedItemSheetState extends State<AddPurchasedItemSheet> {
 
   Widget _buildHeader() {
     final currencySymbol = context.read<SettingsProvider>().currencySymbol;
+    final colorScheme = Theme.of(context).colorScheme;
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -238,7 +294,7 @@ class _AddPurchasedItemSheetState extends State<AddPurchasedItemSheet> {
               '$currencySymbol/kg',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 fontWeight: FontWeight.bold,
-                color: Theme.of(context).colorScheme.primary,
+                color: colorScheme.primary,
               ),
             ),
             const SizedBox(width: 8),
@@ -249,9 +305,11 @@ class _AddPurchasedItemSheetState extends State<AddPurchasedItemSheet> {
                   _isWeight = val;
                   if (val) {
                     _qtyStr = '';
+                    _qtyController.text = '';
                     _activeField = ActiveField.quantity;
                   } else {
                     _qtyStr = '1';
+                    _qtyController.text = '1';
                     _activeField = ActiveField.price;
                   }
                 });
@@ -266,62 +324,95 @@ class _AddPurchasedItemSheetState extends State<AddPurchasedItemSheet> {
   Widget _buildFieldsRow() {
     return Row(
       children: [
-        if (_isWeight)
-          InputFieldBox(
-            label: 'Quantity (kg)',
-            value: _qtyStr,
-            isActive: _activeField == ActiveField.quantity,
-            flex: 6,
-            onTap: () => setState(() => _activeField = ActiveField.quantity),
-          )
-        else
-          InputFieldBox(
-            label: 'Quantity',
-            value: _qtyStr,
-            isActive: _activeField == ActiveField.quantity,
-            flex: 6,
-            onTap: () => setState(() => _activeField = ActiveField.quantity),
-            customContent: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                AdjustButton(
-                  icon: Icons.remove,
+        Expanded(
+          flex: 5,
+          child: _isWeight
+              ? InputFieldBox(
+                  label: 'Quantity (kg)',
+                  value: _qtyStr,
+                  isActive: _activeField == ActiveField.quantity,
                   onTap: () {
-                    double q = double.tryParse(_qtyStr) ?? 1;
-                    if (q > 1) {
-                      setState(() => _qtyStr = (q - 1).toInt().toString());
-                    }
+                    setState(() => _activeField = ActiveField.quantity);
+                    _qtyFocusNode.requestFocus();
                   },
-                ),
-                Expanded(
-                  child: Center(
-                    child: FittedBox(
-                      fit: BoxFit.scaleDown,
-                      child: Text(
-                        _qtyStr.isEmpty ? '0' : _qtyStr,
-                        style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                      ),
-                    ),
-                  ),
-                ),
-                AdjustButton(
-                  icon: Icons.add,
-                  onTap: () {
-                    double q = double.tryParse(_qtyStr) ?? 1;
-                    setState(() => _qtyStr = (q + 1).toInt().toString());
-                  },
-                ),
-              ],
-            ),
+                  controller: _qtyController,
+                  focusNode: _qtyFocusNode,
+                )
+              : _buildUnitQuantityDisplay(),
+        ),
+        Expanded(
+          flex: 10,
+          child: InputFieldBox(
+            label: 'Price (per unit)',
+            value: _priceStr,
+            isActive: _activeField == ActiveField.price,
+            onTap: () {
+              setState(() => _activeField = ActiveField.price);
+              _priceFocusNode.requestFocus();
+            },
+            controller: _priceController,
+            focusNode: _priceFocusNode,
           ),
-        InputFieldBox(
-          label: _isWeight ? 'Price (per kg)' : 'Price (per unit)',
-          value: _priceStr,
-          isActive: _activeField == ActiveField.price,
-          flex: 9,
-          onTap: () => setState(() => _activeField = ActiveField.price),
         ),
       ],
+    );
+  }
+
+  Widget _buildUnitQuantityDisplay() {
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 4.0),
+      child: Container(
+        decoration: BoxDecoration(
+          border: Border.all(color: colorScheme.outline, width: 1),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Row(
+          children: [
+            IconButton(
+              icon: const Icon(Icons.remove, size: 20),
+              onPressed: _decrementQuantity,
+              style: IconButton.styleFrom(
+                backgroundColor: colorScheme.secondaryContainer,
+                shape: const RoundedRectangleBorder(
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(8),
+                    bottomLeft: Radius.circular(8),
+                  ),
+                ),
+                padding: EdgeInsets.zero,
+                minimumSize: const Size(40, 48),
+              ),
+            ),
+            Expanded(
+              child: Container(
+                alignment: Alignment.center,
+                child: Text(
+                  _qtyStr,
+                  style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                ),
+              ),
+            ),
+            IconButton(
+              icon: const Icon(Icons.add, size: 20),
+              onPressed: _incrementQuantity,
+              style: IconButton.styleFrom(
+                backgroundColor: colorScheme.secondaryContainer,
+                shape: const RoundedRectangleBorder(
+                  borderRadius: BorderRadius.only(
+                    topRight: Radius.circular(8),
+                    bottomRight: Radius.circular(8),
+                  ),
+                ),
+                padding: EdgeInsets.zero,
+                minimumSize: const Size(40, 48),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

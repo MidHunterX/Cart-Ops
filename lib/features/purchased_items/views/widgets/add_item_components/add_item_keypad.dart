@@ -10,6 +10,8 @@ class AddItemKeypad extends StatelessWidget {
   final VoidCallback onImageTap;
   final VoidCallback onDiscountTap;
   final VoidCallback onSubmit;
+  final VoidCallback onIncrement;
+  final VoidCallback onDecrement;
 
   const AddItemKeypad({
     super.key,
@@ -22,53 +24,51 @@ class AddItemKeypad extends StatelessWidget {
     required this.onImageTap,
     required this.onDiscountTap,
     required this.onSubmit,
+    required this.onIncrement,
+    required this.onDecrement,
   });
 
   Widget _buildActionBtn({
-    required BuildContext context,
     String? text,
     IconData? icon,
-    required Color bg,
-    required Color fg,
     required VoidCallback onTap,
+    Color? backgroundColor,
+    Color? foregroundColor,
   }) {
     return Expanded(
       child: Padding(
         padding: const EdgeInsets.all(4.0),
-        child: Material(
-          color: bg,
-          borderRadius: BorderRadius.circular(8),
-          child: InkWell(
-            onTap: onTap,
-            borderRadius: BorderRadius.circular(8),
-            child: SizedBox(
-              height: 56,
-              child: Center(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      if (icon != null) ...[
-                        Icon(icon, color: fg, size: 24),
-                        if (text != null && text.isNotEmpty)
-                          const SizedBox(width: 8),
-                      ],
-                      if (text != null && text.isNotEmpty)
-                        Flexible(
-                          child: Text(
-                            text,
-                            style: TextStyle(
-                              color: fg,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
+        child: ElevatedButton(
+          onPressed: onTap,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: backgroundColor,
+            foregroundColor: foregroundColor,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            padding: EdgeInsets.zero,
+            elevation: 0,
+          ),
+          child: SizedBox(
+            height: 56,
+            child: Center(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (icon != null) ...[
+                      Icon(icon, size: 24),
+                      if (text != null && text.isNotEmpty) const SizedBox(width: 8),
                     ],
-                  ),
+                    if (text != null && text.isNotEmpty)
+                      Flexible(
+                        child: Text(
+                          text,
+                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                  ],
                 ),
               ),
             ),
@@ -83,24 +83,14 @@ class AddItemKeypad extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.all(4.0),
         child: OutlinedButton(
+          onPressed: () => onKeyPressed(text),
           style: OutlinedButton.styleFrom(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
-            ),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
             padding: EdgeInsets.zero,
           ),
-          onPressed: () => onKeyPressed(text),
           child: SizedBox(
             height: 56,
-            child: Center(
-              child: Text(
-                text,
-                style: TextStyle(
-                  fontSize: 20,
-                  color: Theme.of(context).colorScheme.onSurface,
-                ),
-              ),
-            ),
+            child: Center(child: Text(text, style: Theme.of(context).textTheme.titleMedium)),
           ),
         ),
       ),
@@ -109,49 +99,35 @@ class AddItemKeypad extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    bool isDark = Theme.of(context).brightness == Brightness.dark;
-    Color redBg = isDark ? Colors.red.shade900 : Colors.red.shade100;
-    Color redFg = isDark ? Colors.red.shade100 : Colors.red.shade900;
-    Color greenBg = isDark ? Colors.green.shade900 : Colors.green.shade200;
-    Color greenFg = isDark ? Colors.green.shade100 : Colors.green.shade900;
-    Color blueBg = isDark ? Colors.blue.shade900 : Colors.blue.shade100;
-    Color blueFg = isDark ? Colors.blue.shade100 : Colors.blue.shade900;
+    final colorScheme = Theme.of(context).colorScheme;
 
     return Column(
       children: [
         Row(
           children: [
             _buildActionBtn(
-              context: context,
-              text: isLoading
-                  ? 'Loading...'
-                  : (itemName.isEmpty ? 'Name' : itemName),
-              bg: blueBg,
-              fg: blueFg,
+              text: isLoading ? 'Loading...' : (itemName.isEmpty ? 'Name' : itemName),
+              backgroundColor: colorScheme.primaryContainer,
+              foregroundColor: colorScheme.onPrimaryContainer,
               onTap: isLoading ? () {} : onNameTap,
             ),
             _buildActionBtn(
-              context: context,
               text: !hasImage ? 'Image' : 'Img Added',
               icon: !hasImage ? null : Icons.check_circle,
-              bg: blueBg,
-              fg: blueFg,
+              backgroundColor: colorScheme.primaryContainer,
+              foregroundColor: colorScheme.onPrimaryContainer,
               onTap: onImageTap,
             ),
             _buildActionBtn(
-              context: context,
-              text: discountStr == '0' || discountStr.isEmpty
-                  ? 'Discount'
-                  : 'Disc: $discountStr',
-              bg: blueBg,
-              fg: blueFg,
+              text: discountStr == '0' || discountStr.isEmpty ? 'Discount' : 'Disc: $discountStr',
+              backgroundColor: colorScheme.primaryContainer,
+              foregroundColor: colorScheme.onPrimaryContainer,
               onTap: onDiscountTap,
             ),
             _buildActionBtn(
-              context: context,
               text: 'OK',
-              bg: greenBg,
-              fg: greenFg,
+              backgroundColor: colorScheme.primary,
+              foregroundColor: colorScheme.onPrimary,
               onTap: onSubmit,
             ),
           ],
@@ -162,10 +138,9 @@ class AddItemKeypad extends StatelessWidget {
             _buildNumBtn(context, '8'),
             _buildNumBtn(context, '9'),
             _buildActionBtn(
-              context: context,
               icon: Icons.backspace,
-              bg: redBg,
-              fg: redFg,
+              backgroundColor: colorScheme.errorContainer,
+              foregroundColor: colorScheme.onErrorContainer,
               onTap: () => onKeyPressed('<='),
             ),
           ],
@@ -176,10 +151,9 @@ class AddItemKeypad extends StatelessWidget {
             _buildNumBtn(context, '5'),
             _buildNumBtn(context, '6'),
             _buildActionBtn(
-              context: context,
               text: 'C',
-              bg: redBg,
-              fg: redFg,
+              backgroundColor: colorScheme.errorContainer,
+              foregroundColor: colorScheme.onErrorContainer,
               onTap: () => onKeyPressed('C'),
             ),
           ],
@@ -190,10 +164,9 @@ class AddItemKeypad extends StatelessWidget {
             _buildNumBtn(context, '2'),
             _buildNumBtn(context, '3'),
             _buildActionBtn(
-              context: context,
               text: '-',
-              bg: redBg,
-              fg: redFg,
+              backgroundColor: colorScheme.errorContainer,
+              foregroundColor: colorScheme.onErrorContainer,
               onTap: () => onKeyPressed('-'),
             ),
           ],
@@ -204,10 +177,9 @@ class AddItemKeypad extends StatelessWidget {
             _buildNumBtn(context, '.'),
             _buildNumBtn(context, '.99'),
             _buildActionBtn(
-              context: context,
               icon: Icons.keyboard_tab,
-              bg: greenBg,
-              fg: greenFg,
+              backgroundColor: colorScheme.primary,
+              foregroundColor: colorScheme.onPrimary,
               onTap: () => onKeyPressed('=>'),
             ),
           ],
