@@ -32,9 +32,7 @@ class PurchasedItemsRepository {
 
     Item? targetItem;
     try {
-      targetItem = items.firstWhere(
-        (item) => item.name.toLowerCase() == name.toLowerCase(),
-      );
+      targetItem = items.firstWhere((item) => item.name.toLowerCase() == name.toLowerCase());
     } catch (_) {
       targetItem = null;
     }
@@ -43,17 +41,13 @@ class PurchasedItemsRepository {
     if (targetItem != null) {
       itemId = targetItem.id;
       if (imagePath != null) {
-        await (_db.update(_db.items)..where((t) => t.id.equals(itemId))).write(
-          ItemsCompanion(imagePath: Value(imagePath)),
-        );
+        await (_db.update(
+          _db.items,
+        )..where((t) => t.id.equals(itemId))).write(ItemsCompanion(imagePath: Value(imagePath)));
       }
     } else {
       itemId = await _itemsRepository.insertItem(
-        ItemsCompanion.insert(
-          name: name,
-          groupId: Value(group?.id),
-          imagePath: Value(imagePath),
-        ),
+        ItemsCompanion.insert(name: name, groupId: Value(group?.id), imagePath: Value(imagePath)),
       );
     }
 
@@ -72,6 +66,23 @@ class PurchasedItemsRepository {
     );
   }
 
-  Future<void> deletePurchasedItem(int id) =>
-      _db.purchasedItemsDao.deletePurchasedItem(id);
+  Future<void> updatePurchasedItem({
+    required int id,
+    required double price,
+    required double qty,
+    required double discount,
+    required bool isWeight,
+  }) async {
+    await _db.purchasedItemsDao.updatePurchasedItem(
+      PurchasedItemsCompanion(
+        id: Value(id),
+        price: Value(price),
+        quantity: Value(qty),
+        discount: Value(discount),
+        isWeight: Value(isWeight),
+      ),
+    );
+  }
+
+  Future<void> deletePurchasedItem(int id) => _db.purchasedItemsDao.deletePurchasedItem(id);
 }
