@@ -28,8 +28,8 @@ void main() {
         ProxyProvider<AppDatabase, PurchasesRepository>(
           update: (_, db, _) => PurchasesRepository(db),
         ),
-        ProxyProvider<AppDatabase, PurchasedItemsRepository>(
-          update: (_, db, _) => PurchasedItemsRepository(db),
+        ProxyProvider2<AppDatabase, ItemsRepository, PurchasedItemsRepository>(
+          update: (_, db, itemsRepo, _) => PurchasedItemsRepository(db, itemsRepo),
         ),
       ],
       child: const ShoppingApp(),

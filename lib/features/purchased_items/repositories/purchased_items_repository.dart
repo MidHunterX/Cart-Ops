@@ -6,7 +6,7 @@ class PurchasedItemsRepository {
   final AppDatabase _db;
   final ItemsRepository _itemsRepository;
 
-  PurchasedItemsRepository(this._db) : _itemsRepository = ItemsRepository(_db);
+  PurchasedItemsRepository(this._db, this._itemsRepository);
 
   Stream<List<PurchasedItemWithDetails>> watchPurchasedItems(int purchaseId) {
     return _db.purchasedItemsDao.watchPurchasedItems(purchaseId);
