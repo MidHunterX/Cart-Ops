@@ -115,8 +115,8 @@ class AddItemKeypad extends StatelessWidget {
     Color inputActiveFg = colorScheme.onPrimaryContainer;
 
     // Accent Emphasis (Secondary Utilities / Modifiers)
-    Color functionalBg = colorScheme.tertiaryContainer;
-    Color functionalFg = colorScheme.onTertiaryContainer;
+    Color functionalBg = colorScheme.secondaryContainer;
+    Color functionalFg = colorScheme.onSecondaryContainer;
 
     // Low Emphasis (Inactive / Surface / Numbers)
     Color inputInactiveBg = colorScheme.surfaceContainerHighest;
@@ -203,8 +203,8 @@ class AddItemKeypad extends StatelessWidget {
             _buildNumBtn(context, '.99'),
             _buildActionBtn(
               icon: Icons.keyboard_tab,
-              backgroundColor: colorScheme.secondaryContainer,
-              foregroundColor: colorScheme.onSecondaryContainer,
+              backgroundColor: functionalBg,
+              foregroundColor: functionalFg,
               onTap: () => onKeyPressed('=>'),
             ),
           ],

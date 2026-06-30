@@ -6,6 +6,8 @@ class PurchaseSummaryCard extends StatelessWidget {
   final int itemCount;
   final double total;
 
+  final double headerIconSize = 28;
+
   const PurchaseSummaryCard({super.key, required this.itemCount, required this.total});
 
   @override
@@ -25,7 +27,11 @@ class PurchaseSummaryCard extends StatelessWidget {
           // Items Count
           Row(
             children: [
-              Icon(Icons.shopping_bag_outlined, color: colorScheme.onPrimaryContainer, size: 28),
+              Icon(
+                Icons.shopping_cart_outlined,
+                color: colorScheme.onPrimaryContainer,
+                size: headerIconSize,
+              ),
               const SizedBox(width: 12),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -51,11 +57,17 @@ class PurchaseSummaryCard extends StatelessWidget {
           // Total
           Row(
             children: [
+              Icon(
+                Icons.payments_outlined,
+                color: colorScheme.onPrimaryContainer,
+                size: headerIconSize,
+              ),
+              const SizedBox(width: 12),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    '$currency ${total.toStringAsFixed(2)}',
+                    '$currency${total.toStringAsFixed(2)}',
                     style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                       fontWeight: FontWeight.bold,
                       color: colorScheme.onPrimaryContainer,
