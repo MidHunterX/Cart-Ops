@@ -15,16 +15,9 @@ void main() {
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => SettingsProvider()),
-        Provider<AppDatabase>(
-          create: (_) => AppDatabase(),
-          dispose: (_, db) => db.close(),
-        ),
-        ProxyProvider<AppDatabase, GroupsRepository>(
-          update: (_, db, _) => GroupsRepository(db),
-        ),
-        ProxyProvider<AppDatabase, ItemsRepository>(
-          update: (_, db, _) => ItemsRepository(db),
-        ),
+        Provider<AppDatabase>(create: (_) => AppDatabase(), dispose: (_, db) => db.close()),
+        ProxyProvider<AppDatabase, GroupsRepository>(update: (_, db, _) => GroupsRepository(db)),
+        ProxyProvider<AppDatabase, ItemsRepository>(update: (_, db, _) => ItemsRepository(db)),
         ProxyProvider<AppDatabase, PurchasesRepository>(
           update: (_, db, _) => PurchasesRepository(db),
         ),
