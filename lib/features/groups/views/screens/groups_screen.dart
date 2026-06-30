@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shopping_assist/core/database/database.dart';
+import 'package:shopping_assist/core/widgets/delete_confirmation_dialog.dart';
 import 'package:shopping_assist/core/widgets/empty_state.dart';
 import 'package:shopping_assist/features/groups/repositories/groups_repository.dart';
 import 'package:shopping_assist/features/groups/views/widgets/add_group_dialog.dart';
@@ -219,46 +220,25 @@ class GroupsScreen extends StatelessWidget {
   }
 
   void _confirmDeleteGroup(BuildContext context, Group group) {
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Delete Group?'),
-        content: Text(
+    DeleteConfirmationDialog.show(
+      context,
+      title: 'Delete Group?',
+      message:
           'Are you sure you want to delete "${group.name}"? This will also remove all its purchase history.',
-        ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
-          FilledButton(
-            style: FilledButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.error),
-            onPressed: () {
-              context.read<GroupsRepository>().deleteGroup(group.id);
-              Navigator.pop(ctx);
-            },
-            child: const Text('Delete'),
-          ),
-        ],
-      ),
+      onDelete: () {
+        context.read<GroupsRepository>().deleteGroup(group.id);
+      },
     );
   }
 
   void _confirmDeletePurchase(BuildContext context, Purchase purchase) {
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Delete Purchase Event?'),
-        content: Text('Are you sure you want to delete "${purchase.name}"?'),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
-          FilledButton(
-            style: FilledButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.error),
-            onPressed: () {
-              context.read<PurchasesRepository>().deletePurchase(purchase.id);
-              Navigator.pop(ctx);
-            },
-            child: const Text('Delete'),
-          ),
-        ],
-      ),
+    DeleteConfirmationDialog.show(
+      context,
+      title: 'Delete Purchase Event?',
+      message: 'Are you sure you want to delete "${purchase.name}"?',
+      onDelete: () {
+        context.read<PurchasesRepository>().deletePurchase(purchase.id);
+      },
     );
   }
 }

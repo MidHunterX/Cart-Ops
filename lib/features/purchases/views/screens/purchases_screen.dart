@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shopping_assist/core/database/database.dart';
+import 'package:shopping_assist/core/widgets/delete_confirmation_dialog.dart';
 import 'package:shopping_assist/core/widgets/empty_state.dart';
 import 'package:shopping_assist/features/purchased_items/views/screens/purchased_items_screen.dart';
 import 'package:shopping_assist/features/purchases/repositories/purchases_repository.dart';
@@ -65,7 +66,7 @@ class PurchasesScreen extends StatelessWidget {
                     ),
                     trailing: IconButton(
                       icon: Icon(Icons.delete_outline, color: colorScheme.error),
-                      onPressed: () => _confirmDelete(context, repo, purchase, colorScheme),
+                      onPressed: () => _confirmDelete(context, repo, purchase),
                     ),
                     onTap: () => Navigator.push(
                       context,
@@ -92,29 +93,14 @@ class PurchasesScreen extends StatelessWidget {
     );
   }
 
-  void _confirmDelete(
-    BuildContext context,
-    PurchasesRepository repo,
-    Purchase purchase,
-    ColorScheme colorScheme,
-  ) {
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Delete Purchase Event?'),
-        content: Text('Are you sure you want to delete "${purchase.name}"?'),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
-          FilledButton(
-            style: FilledButton.styleFrom(backgroundColor: colorScheme.error),
-            onPressed: () {
-              repo.deletePurchase(purchase.id);
-              Navigator.pop(ctx);
-            },
-            child: const Text('Delete'),
-          ),
-        ],
-      ),
+  void _confirmDelete(BuildContext context, PurchasesRepository repo, Purchase purchase) {
+    DeleteConfirmationDialog.show(
+      context,
+      title: 'Delete Purchase Event?',
+      message: 'Are you sure you want to delete "${purchase.name}"?',
+      onDelete: () {
+        repo.deletePurchase(purchase.id);
+      },
     );
   }
 }

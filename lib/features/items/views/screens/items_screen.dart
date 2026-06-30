@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shopping_assist/core/database/database.dart';
+import 'package:shopping_assist/core/widgets/delete_confirmation_dialog.dart';
 import 'package:shopping_assist/core/widgets/empty_state.dart';
 import 'package:shopping_assist/features/items/repositories/items_repository.dart';
 import 'package:shopping_assist/features/items/views/widgets/add_item_dialog.dart';
@@ -17,14 +18,9 @@ class ItemsScreen extends StatelessWidget {
     final title = group == null ? 'General Items' : '${group!.name} Items';
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(title),
-        backgroundColor: colorScheme.primaryContainer,
-      ),
+      appBar: AppBar(title: Text(title), backgroundColor: colorScheme.primaryContainer),
       body: StreamBuilder<List<Item>>(
-        stream: group == null
-            ? repo.watchItemsWithoutGroup()
-            : repo.watchItemsInGroup(group!.id),
+        stream: group == null ? repo.watchItemsWithoutGroup() : repo.watchItemsInGroup(group!.id),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -50,10 +46,7 @@ class ItemsScreen extends StatelessWidget {
                     leading: const Icon(Icons.label_outline),
                     title: Text(item.name),
                     trailing: IconButton(
-                      icon: Icon(
-                        Icons.delete_outline,
-                        color: colorScheme.error,
-                      ),
+                      icon: Icon(Icons.delete_outline, color: colorScheme.error),
                       onPressed: () => _confirmDelete(context, repo, item),
                     ),
                   ),
@@ -76,41 +69,24 @@ class ItemsScreen extends StatelessWidget {
   }
 
   void _confirmDelete(BuildContext context, ItemsRepository repo, Item item) {
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Delete Item?'),
-        content: Text('Are you sure you want to delete "${item.name}"?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancel'),
-          ),
-          FilledButton(
-            style: FilledButton.styleFrom(
-              backgroundColor: Theme.of(context).colorScheme.error,
-            ),
-            onPressed: () async {
-              Navigator.pop(ctx); // Close dialog
-              try {
-                await repo.deleteItem(item.id);
-              } catch (e) {
-                if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text(
-                        'Cannot delete item because it has been purchased before.',
-                      ),
-                      behavior: SnackBarBehavior.floating,
-                    ),
-                  );
-                }
-              }
-            },
-            child: const Text('Delete'),
-          ),
-        ],
-      ),
+    DeleteConfirmationDialog.show(
+      context,
+      title: 'Delete Item?',
+      message: 'Are you sure you want to delete "${item.name}"?',
+      onDelete: () async {
+        try {
+          await repo.deleteItem(item.id);
+        } catch (e) {
+          if (context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Cannot delete item because it has been purchased before.'),
+                behavior: SnackBarBehavior.floating,
+              ),
+            );
+          }
+        }
+      },
     );
   }
 }
