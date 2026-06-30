@@ -146,7 +146,7 @@ class PurchasedItemTile extends StatelessWidget {
                           ),
                         ),
                         Text(
-                          '-$currency${pItem.discount.toStringAsFixed(2)}',
+                          '-$currency${(pItem.discount * pItem.quantity).toStringAsFixed(2)}',
                           style: Theme.of(
                             context,
                           ).textTheme.bodySmall?.copyWith(color: colorScheme.error),

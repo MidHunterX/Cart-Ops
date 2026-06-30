@@ -51,14 +51,9 @@ class AppDatabase extends _$AppDatabase {
 
   // Database connection
   static QueryExecutor _openConnection() {
-    /*getApplicationSupportDirectory().then((dir) {
-      print("DATABASE DIR: ${dir.path}");
-    });*/
     return driftDatabase(
       name: 'shopping_assist.db',
-      native: const DriftNativeOptions(
-        databaseDirectory: getApplicationSupportDirectory,
-      ),
+      native: const DriftNativeOptions(databaseDirectory: getApplicationSupportDirectory),
     );
   }
 }
