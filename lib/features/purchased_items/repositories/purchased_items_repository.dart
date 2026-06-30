@@ -28,14 +28,7 @@ class PurchasedItemsRepository {
     required Group? group,
     String? imagePath,
   }) async {
-    final items = await getAvailableItems(group?.id);
-
-    Item? targetItem;
-    try {
-      targetItem = items.firstWhere((item) => item.name.toLowerCase() == name.toLowerCase());
-    } catch (_) {
-      targetItem = null;
-    }
+    final targetItem = await _itemsRepository.findItemByNameAndGroup(name, group?.id);
 
     int itemId;
     if (targetItem != null) {

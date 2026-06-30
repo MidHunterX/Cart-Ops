@@ -21,6 +21,10 @@ class ItemsRepository {
     return _db.itemsDao.getItemsWithoutGroup();
   }
 
+  Future<Item?> findItemByNameAndGroup(String name, int? groupId) {
+    return _db.itemsDao.findItemByNameAndGroup(name, groupId);
+  }
+
   Future<int> insertItem(ItemsCompanion item) {
     return _db.itemsDao.insertItem(item);
   }
