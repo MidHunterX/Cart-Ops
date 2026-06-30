@@ -1,3 +1,4 @@
+import 'package:drift/drift.dart';
 import 'package:shopping_assist/core/database/database.dart';
 import 'package:shopping_assist/core/database/daos/items_dao.dart';
 
@@ -26,8 +27,10 @@ class ItemsRepository {
     return _itemsDao.findItemByNameAndGroup(name, groupId);
   }
 
-  Future<int> insertItem(ItemsCompanion item) {
-    return _itemsDao.insertItem(item);
+  Future<int> insertItem({required String name, int? groupId, String? imagePath}) {
+    return _itemsDao.insertItem(
+      ItemsCompanion.insert(name: name, groupId: Value(groupId), imagePath: Value(imagePath)),
+    );
   }
 
   Future<PurchasedItem?> getLastPurchasedDetails(int itemId) {

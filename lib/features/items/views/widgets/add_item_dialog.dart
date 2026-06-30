@@ -1,8 +1,6 @@
 import 'dart:io';
-import 'package:drift/drift.dart' hide Column;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:shopping_assist/core/database/database.dart';
 import 'package:shopping_assist/features/items/repositories/items_repository.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
@@ -37,8 +35,7 @@ class _AddItemDialogState extends State<AddItemDialog> {
     if (pickedFile != null) {
       final directory = await getApplicationDocumentsDirectory();
       final fileName = '${const Uuid().v4()}.jpg';
-      final savedImage =
-          await File(pickedFile.path).copy('${directory.path}/$fileName');
+      final savedImage = await File(pickedFile.path).copy('${directory.path}/$fileName');
 
       setState(() {
         _imagePath = savedImage.path;
@@ -78,11 +75,9 @@ class _AddItemDialogState extends State<AddItemDialog> {
     final name = _controller.text.trim();
     if (name.isNotEmpty) {
       context.read<ItemsRepository>().insertItem(
-        ItemsCompanion.insert(
-          name: name,
-          groupId: Value(widget.groupId),
-          imagePath: Value(_imagePath),
-        ),
+        name: name,
+        groupId: widget.groupId,
+        imagePath: _imagePath,
       );
       Navigator.pop(context);
     }
@@ -136,10 +131,7 @@ class _AddItemDialogState extends State<AddItemDialog> {
         ],
       ),
       actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: const Text('Cancel'),
-        ),
+        TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
         FilledButton(onPressed: _submit, child: const Text('Add')),
       ],
     );
