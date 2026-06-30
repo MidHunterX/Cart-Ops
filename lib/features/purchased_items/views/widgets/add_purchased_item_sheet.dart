@@ -25,6 +25,7 @@ class AddPurchasedItemSheet extends StatefulWidget {
 
 class _AddPurchasedItemSheetState extends State<AddPurchasedItemSheet> {
   String _name = '';
+  int? _itemId;
   String _priceStr = '';
   String _qtyStr = '1';
   String _discountStr = '0';
@@ -216,6 +217,7 @@ class _AddPurchasedItemSheetState extends State<AddPurchasedItemSheet> {
 
     try {
       await context.read<PurchasedItemsRepository>().addPurchasedItem(
+        itemId: _itemId,
         name: name,
         price: pricePerUnit,
         qty: qty,
@@ -243,6 +245,7 @@ class _AddPurchasedItemSheetState extends State<AddPurchasedItemSheet> {
       onSave: (newName, itemId) {
         setState(() {
           _name = newName;
+          _itemId = itemId;
           if (itemId != null) {
             try {
               final selectedItem = _allItems.firstWhere((item) => item.id == itemId);

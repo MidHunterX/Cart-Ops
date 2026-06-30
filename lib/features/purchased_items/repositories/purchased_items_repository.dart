@@ -18,6 +18,7 @@ class PurchasedItemsRepository {
   }
 
   Future<void> addPurchasedItem({
+    int? itemId,
     required String name,
     required double price,
     required double qty,
@@ -27,16 +28,20 @@ class PurchasedItemsRepository {
     required Group? group,
     Value<String?> imagePath = const Value.absent(),
   }) async {
-    final targetItem = await _itemsDao.findItemByNameAndGroup(name, group?.id);
+    Item? targetItem;
 
-    int itemId;
+    if (itemId != null) {
+      targetItem = await _itemsDao.findItemByIdAndGroup(itemId, group?.id);
+    }
+
+    int finalItemId;
     if (targetItem != null) {
-      itemId = targetItem.id;
+      finalItemId = targetItem.id;
       if (imagePath.present) {
-        await _itemsDao.updateItemImage(itemId, imagePath.value);
+        await _itemsDao.updateItemImage(finalItemId, imagePath.value);
       }
     } else {
-      itemId = await _itemsDao.insertItem(
+      finalItemId = await _itemsDao.insertItem(
         ItemsCompanion.insert(name: name, groupId: Value(group?.id), imagePath: imagePath),
       );
     }
@@ -48,7 +53,7 @@ class PurchasedItemsRepository {
         isWeight: Value(isWeight),
         discount: Value(discount),
         purchaseId: purchaseId,
-        itemId: itemId,
+        itemId: finalItemId,
       ),
     );
   }
