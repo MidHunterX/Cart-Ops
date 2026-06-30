@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:drift/drift.dart' as drift;
 import 'package:image_picker/image_picker.dart';
 import 'package:shopping_assist/core/database/database.dart';
 import 'package:shopping_assist/features/items/repositories/items_repository.dart';
 import 'package:shopping_assist/features/purchased_items/repositories/purchased_items_repository.dart';
+import 'package:shopping_assist/core/utils/image_picker_util.dart';
 import 'add_item_components/input_field_box.dart';
 import 'add_item_components/add_item_keypad.dart';
 import 'add_item_components/item_dialogs.dart';
 import 'add_item_utils/keypad_logic.dart';
-import 'add_item_utils/image_picker.dart';
 import 'common/purchased_item_form_header.dart';
 import 'common/unit_quantity_selector.dart';
 
@@ -33,6 +34,7 @@ class _AddPurchasedItemSheetState extends State<AddPurchasedItemSheet> {
   List<Item> _allItems = [];
   bool _isLoading = true;
   String? _imagePath;
+  bool _imageChanged = false;
 
   // Controllers for input fields
   late TextEditingController _priceController;
@@ -110,14 +112,22 @@ class _AddPurchasedItemSheetState extends State<AddPurchasedItemSheet> {
   }
 
   void _handleImagePicker() async {
-    final action = await ItemDialogs.showImagePickerOptions(context, _imagePath != null);
+    final action = await ImagePickerUtil.showImagePickerOptions(context, _imagePath != null);
 
     if (action == ImagePickerAction.remove) {
-      setState(() => _imagePath = null);
+      setState(() {
+        _imagePath = null;
+        _imageChanged = true;
+      });
     } else if (action == ImagePickerAction.gallery || action == ImagePickerAction.camera) {
       final source = action == ImagePickerAction.gallery ? ImageSource.gallery : ImageSource.camera;
       final path = await ImagePickerUtil.pickAndSaveImage(source);
-      if (path != null) setState(() => _imagePath = path);
+      if (path != null) {
+        setState(() {
+          _imagePath = path;
+          _imageChanged = true;
+        });
+      }
     }
   }
 
@@ -213,7 +223,7 @@ class _AddPurchasedItemSheetState extends State<AddPurchasedItemSheet> {
         isWeight: _isWeight,
         purchaseId: widget.purchase.id,
         group: widget.group,
-        imagePath: _imagePath,
+        imagePath: _imageChanged ? drift.Value(_imagePath) : const drift.Value.absent(),
       );
       if (mounted) Navigator.pop(context);
     } catch (e) {
@@ -231,7 +241,16 @@ class _AddPurchasedItemSheetState extends State<AddPurchasedItemSheet> {
       currentName: _name,
       allItems: _allItems,
       onSave: (newName, itemId) {
-        setState(() => _name = newName);
+        setState(() {
+          _name = newName;
+          if (itemId != null) {
+            try {
+              final selectedItem = _allItems.firstWhere((item) => item.id == itemId);
+              _imagePath = selectedItem.imagePath;
+              _imageChanged = false;
+            } catch (_) {}
+          }
+        });
         if (itemId != null) _loadLastPurchaseDetails(itemId);
       },
     );

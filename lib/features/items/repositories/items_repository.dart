@@ -38,8 +38,15 @@ class ItemsRepository {
 
   Future<int> countPurchasesForItem(int itemId) => _itemsDao.countPurchasesForItem(itemId);
 
-  Future<void> updateItem(int id, {String? name, String? imagePath}) =>
-      _itemsDao.updateItem(id, name: name, imagePath: imagePath);
+  Future<void> updateItem(
+    int id, {
+    String? name,
+    Value<String?> imagePath = const Value.absent(),
+  }) => _itemsDao.updateItem(id, name: name, imagePath: imagePath);
+
+  Future<void> updateItemImage(int itemId, String? imagePath) {
+    return _itemsDao.updateItemImage(itemId, imagePath);
+  }
 
   Future<PurchasedItem?> getLastPurchasedDetails(int itemId) {
     return _itemsDao.getLastPurchasedDetails(itemId);

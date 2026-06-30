@@ -25,19 +25,19 @@ class PurchasedItemsRepository {
     required bool isWeight,
     required int purchaseId,
     required Group? group,
-    String? imagePath,
+    Value<String?> imagePath = const Value.absent(),
   }) async {
     final targetItem = await _itemsDao.findItemByNameAndGroup(name, group?.id);
 
     int itemId;
     if (targetItem != null) {
       itemId = targetItem.id;
-      if (imagePath != null) {
-        await _itemsDao.updateItemImage(itemId, imagePath);
+      if (imagePath.present) {
+        await _itemsDao.updateItemImage(itemId, imagePath.value);
       }
     } else {
       itemId = await _itemsDao.insertItem(
-        ItemsCompanion.insert(name: name, groupId: Value(group?.id), imagePath: Value(imagePath)),
+        ItemsCompanion.insert(name: name, groupId: Value(group?.id), imagePath: imagePath),
       );
     }
 

@@ -27,7 +27,7 @@ dart run build_runner build
 - [x] CRUD General purchases + Groups Screen
 - [x] CRUD purchase Screen
 - [x] CRUD PurchasedItems Screen
-- [ ] CRUD reusable items
+- [x] CRUD reusable items
 - [x] Settings Screen
 
 ## Future Requirements
@@ -47,8 +47,10 @@ dart run build_runner build
 
 ### QOL
 
+- [x] Item details autocompletion while typing
 - [ ] Item details autocompletion with Camera identification (tensorflow)
 - [ ] Item duplication
 - [x] Item suggestions while typing based on history
-- [ ] Easy price per item/quantity toggle
+- [x] Easy price per item/quantity toggle
+- [x] Basic Numpad
 - [ ] Numpad type (top to bottom, bottom to top)

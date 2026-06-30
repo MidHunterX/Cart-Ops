@@ -60,15 +60,15 @@ class ItemsDao extends DatabaseAccessor<AppDatabase> with _$ItemsDaoMixin {
     return await query.get().then((list) => list.length);
   }
 
-  Future<void> updateItem(int id, {String? name, String? imagePath}) {
+  Future<void> updateItem(int id, {String? name, Value<String?> imagePath = const Value.absent()}) {
     final companion = ItemsCompanion(
       name: name != null ? Value(name) : const Value.absent(),
-      imagePath: imagePath != null ? Value(imagePath) : const Value.absent(),
+      imagePath: imagePath,
     );
     return (update(items)..where((t) => t.id.equals(id))).write(companion);
   }
 
-  Future<void> updateItemImage(int itemId, String imagePath) async {
+  Future<void> updateItemImage(int itemId, String? imagePath) async {
     await (update(
       items,
     )..where((t) => t.id.equals(itemId))).write(ItemsCompanion(imagePath: Value(imagePath)));

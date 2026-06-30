@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shopping_assist/core/database/database.dart';
 
-enum ImagePickerAction { gallery, camera, remove }
-
 class ItemDialogs {
   static Future<void> showNameDialog({
     required BuildContext context,
@@ -85,37 +83,6 @@ class ItemDialogs {
             child: const Text('Save'),
           ),
         ],
-      ),
-    );
-  }
-
-  static Future<ImagePickerAction?> showImagePickerOptions(
-    BuildContext context,
-    bool hasImage,
-  ) async {
-    return showModalBottomSheet<ImagePickerAction>(
-      context: context,
-      builder: (context) => SafeArea(
-        child: Wrap(
-          children: [
-            ListTile(
-              leading: const Icon(Icons.photo_library),
-              title: const Text('Gallery'),
-              onTap: () => Navigator.pop(context, ImagePickerAction.gallery),
-            ),
-            ListTile(
-              leading: const Icon(Icons.photo_camera),
-              title: const Text('Camera'),
-              onTap: () => Navigator.pop(context, ImagePickerAction.camera),
-            ),
-            if (hasImage)
-              ListTile(
-                leading: const Icon(Icons.delete_outline),
-                title: const Text('Remove Image'),
-                onTap: () => Navigator.pop(context, ImagePickerAction.remove),
-              ),
-          ],
-        ),
       ),
     );
   }

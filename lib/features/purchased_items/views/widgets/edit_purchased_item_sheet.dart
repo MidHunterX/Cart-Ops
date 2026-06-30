@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:shopping_assist/core/database/database.dart';
+import 'package:shopping_assist/features/items/repositories/items_repository.dart';
 import 'package:shopping_assist/features/purchased_items/repositories/purchased_items_repository.dart';
+import 'package:shopping_assist/core/utils/image_picker_util.dart';
 import 'add_item_components/input_field_box.dart';
 import 'add_item_components/add_item_keypad.dart';
 import 'add_item_components/item_dialogs.dart';
@@ -38,6 +41,7 @@ class _EditPurchasedItemSheetState extends State<EditPurchasedItemSheet> {
   late TextEditingController _qtyController;
   late FocusNode _priceFocusNode;
   late FocusNode _qtyFocusNode;
+  String? _imagePath;
 
   String _formatDouble(double val) {
     if (val == val.truncateToDouble()) {
@@ -54,6 +58,7 @@ class _EditPurchasedItemSheetState extends State<EditPurchasedItemSheet> {
     _discountStr = _formatDouble(widget.purchasedItem.discount);
     _isWeight = widget.purchasedItem.isWeight;
     _activeField = widget.initialField;
+    _imagePath = widget.item.imagePath;
 
     _priceController = TextEditingController(text: _priceStr);
     _qtyController = TextEditingController(text: _qtyStr);
@@ -93,6 +98,22 @@ class _EditPurchasedItemSheetState extends State<EditPurchasedItemSheet> {
     _priceFocusNode.dispose();
     _qtyFocusNode.dispose();
     super.dispose();
+  }
+
+  void _handleImagePicker() async {
+    final action = await ImagePickerUtil.showImagePickerOptions(context, _imagePath != null);
+
+    if (action == ImagePickerAction.remove) {
+      setState(() => _imagePath = null);
+      if (mounted) context.read<ItemsRepository>().updateItemImage(widget.item.id, null);
+    } else if (action == ImagePickerAction.gallery || action == ImagePickerAction.camera) {
+      final source = action == ImagePickerAction.gallery ? ImageSource.gallery : ImageSource.camera;
+      final path = await ImagePickerUtil.pickAndSaveImage(source);
+      if (path != null) {
+        setState(() => _imagePath = path);
+        if (mounted) context.read<ItemsRepository>().updateItemImage(widget.item.id, path);
+      }
+    }
   }
 
   void _handleKeypadPress(String val) {
@@ -240,11 +261,11 @@ class _EditPurchasedItemSheetState extends State<EditPurchasedItemSheet> {
           AddItemKeypad(
             isLoading: false,
             itemName: widget.item.name,
-            hasImage: widget.item.imagePath != null,
+            hasImage: _imagePath != null,
             discountStr: _discountStr,
             onKeyPressed: _handleKeypadPress,
             onNameTap: () => _showLockedMsg('Item name cannot be edited here.'),
-            onImageTap: () => _showLockedMsg('Item image cannot be edited here.'),
+            onImageTap: _handleImagePicker,
             onDiscountTap: _handleDiscountTap,
             onSubmit: _submit,
             onIncrement: _incrementQuantity,

@@ -1,10 +1,7 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shopping_assist/features/items/repositories/items_repository.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:uuid/uuid.dart';
+import 'package:shopping_assist/core/widgets/item_image_picker.dart';
 
 class AddItemDialog extends StatefulWidget {
   final int? groupId;
@@ -23,52 +20,6 @@ class _AddItemDialogState extends State<AddItemDialog> {
   void dispose() {
     _controller.dispose();
     super.dispose();
-  }
-
-  Future<void> _pickImage(ImageSource source) async {
-    final picker = ImagePicker();
-    final pickedFile = await picker.pickImage(
-      source: source,
-      imageQuality: 70, // Compresses the image natively
-    );
-
-    if (pickedFile != null) {
-      final directory = await getApplicationDocumentsDirectory();
-      final fileName = '${const Uuid().v4()}.jpg';
-      final savedImage = await File(pickedFile.path).copy('${directory.path}/$fileName');
-
-      setState(() {
-        _imagePath = savedImage.path;
-      });
-    }
-  }
-
-  void _showImagePickerOptions() {
-    showModalBottomSheet(
-      context: context,
-      builder: (context) => SafeArea(
-        child: Wrap(
-          children: [
-            ListTile(
-              leading: const Icon(Icons.photo_library),
-              title: const Text('Gallery'),
-              onTap: () {
-                Navigator.pop(context);
-                _pickImage(ImageSource.gallery);
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.photo_camera),
-              title: const Text('Camera'),
-              onTap: () {
-                Navigator.pop(context);
-                _pickImage(ImageSource.camera);
-              },
-            ),
-          ],
-        ),
-      ),
-    );
   }
 
   void _submit() {
@@ -99,43 +50,10 @@ class _AddItemDialogState extends State<AddItemDialog> {
               onSubmitted: (_) => _submit(),
             ),
             const SizedBox(height: 16),
-            if (_imagePath != null)
-              Stack(
-                alignment: Alignment.topRight,
-                children: [
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(8),
-                    child: Image.file(
-                      File(_imagePath!),
-                      height: 120,
-                      width: double.infinity,
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                  Positioned(
-                    top: 4,
-                    right: 4,
-                    child: CircleAvatar(
-                      radius: 16,
-                      backgroundColor: Colors.black54,
-                      child: IconButton(
-                        padding: EdgeInsets.zero,
-                        icon: const Icon(Icons.close, size: 16, color: Colors.white),
-                        onPressed: () => setState(() => _imagePath = null),
-                      ),
-                    ),
-                  ),
-                ],
-              )
-            else
-              SizedBox(
-                width: double.infinity,
-                child: OutlinedButton.icon(
-                  onPressed: _showImagePickerOptions,
-                  icon: const Icon(Icons.image),
-                  label: const Text('Add Image'),
-                ),
-              ),
+            ItemImagePicker(
+              imagePath: _imagePath,
+              onChanged: (path) => setState(() => _imagePath = path),
+            ),
           ],
         ),
       ),
