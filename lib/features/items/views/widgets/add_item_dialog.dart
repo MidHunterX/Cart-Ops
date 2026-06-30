@@ -87,48 +87,57 @@ class _AddItemDialogState extends State<AddItemDialog> {
   Widget build(BuildContext context) {
     return AlertDialog(
       title: const Text('New Item'),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          TextField(
-            controller: _controller,
-            decoration: const InputDecoration(hintText: 'e.g. Milk, Bread, Tools'),
-            autofocus: true,
-            onSubmitted: (_) => _submit(),
-          ),
-          const SizedBox(height: 16),
-          if (_imagePath != null)
-            Stack(
-              alignment: Alignment.topRight,
-              children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
-                  child: Image.file(
-                    File(_imagePath!),
-                    height: 120,
-                    width: double.infinity,
-                    fit: BoxFit.cover,
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(4.0),
-                  child: CircleAvatar(
-                    backgroundColor: Colors.black54,
-                    child: IconButton(
-                      icon: const Icon(Icons.close, color: Colors.white),
-                      onPressed: () => setState(() => _imagePath = null),
+      content: SizedBox(
+        width: double.maxFinite,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: _controller,
+              decoration: const InputDecoration(hintText: 'e.g. Milk, Bread, Tools'),
+              autofocus: true,
+              onSubmitted: (_) => _submit(),
+            ),
+            const SizedBox(height: 16),
+            if (_imagePath != null)
+              Stack(
+                alignment: Alignment.topRight,
+                children: [
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: Image.file(
+                      File(_imagePath!),
+                      height: 120,
+                      width: double.infinity,
+                      fit: BoxFit.cover,
                     ),
                   ),
+                  Positioned(
+                    top: 4,
+                    right: 4,
+                    child: CircleAvatar(
+                      radius: 16,
+                      backgroundColor: Colors.black54,
+                      child: IconButton(
+                        padding: EdgeInsets.zero,
+                        icon: const Icon(Icons.close, size: 16, color: Colors.white),
+                        onPressed: () => setState(() => _imagePath = null),
+                      ),
+                    ),
+                  ),
+                ],
+              )
+            else
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  onPressed: _showImagePickerOptions,
+                  icon: const Icon(Icons.image),
+                  label: const Text('Add Image'),
                 ),
-              ],
-            )
-          else
-            OutlinedButton.icon(
-              onPressed: _showImagePickerOptions,
-              icon: const Icon(Icons.image),
-              label: const Text('Add Image'),
-            ),
-        ],
+              ),
+          ],
+        ),
       ),
       actions: [
         TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),

@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shopping_assist/core/database/database.dart';
@@ -5,6 +6,8 @@ import 'package:shopping_assist/core/widgets/delete_confirmation_dialog.dart';
 import 'package:shopping_assist/core/widgets/empty_state.dart';
 import 'package:shopping_assist/features/items/repositories/items_repository.dart';
 import 'package:shopping_assist/features/items/views/widgets/add_item_dialog.dart';
+import 'package:shopping_assist/features/items/views/widgets/edit_item_dialog.dart';
+import 'package:shopping_assist/features/items/views/screens/item_detail_screen.dart';
 
 class ItemsScreen extends StatelessWidget {
   final Group? group;
@@ -40,18 +43,36 @@ class ItemsScreen extends StatelessWidget {
             itemCount: items.length,
             itemBuilder: (context, index) {
               final item = items[index];
-              return Column(
-                children: [
-                  ListTile(
-                    leading: const Icon(Icons.label_outline),
-                    title: Text(item.name),
-                    trailing: IconButton(
-                      icon: Icon(Icons.delete_outline, color: colorScheme.error),
-                      onPressed: () => _confirmDelete(context, repo, item),
-                    ),
+              return Card(
+                margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                child: ListTile(
+                  leading: _buildItemImage(item.imagePath),
+                  title: Text(item.name),
+                  subtitle: FutureBuilder<int>(
+                    future: repo.countPurchasesForItem(item.id),
+                    builder: (ctx, snap) {
+                      final count = snap.data ?? 0;
+                      return Text('Bought $count time${count == 1 ? '' : 's'}');
+                    },
                   ),
-                  if (index < items.length - 1) const Divider(height: 1),
-                ],
+                  trailing: PopupMenuButton<String>(
+                    onSelected: (value) {
+                      if (value == 'edit') {
+                        _showEditDialog(context, item);
+                      } else if (value == 'delete') {
+                        _confirmDelete(context, repo, item);
+                      }
+                    },
+                    itemBuilder: (ctx) => [
+                      const PopupMenuItem(value: 'edit', child: Text('Edit')),
+                      const PopupMenuItem(value: 'delete', child: Text('Delete')),
+                    ],
+                  ),
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => ItemDetailScreen(item: item)),
+                  ),
+                ),
               );
             },
           );
@@ -65,6 +86,20 @@ class ItemsScreen extends StatelessWidget {
         icon: const Icon(Icons.add),
         label: const Text('Add Item'),
       ),
+    );
+  }
+
+  Widget _buildItemImage(String? imagePath) {
+    if (imagePath != null && File(imagePath).existsSync()) {
+      return CircleAvatar(backgroundImage: FileImage(File(imagePath)));
+    }
+    return const CircleAvatar(child: Icon(Icons.inventory));
+  }
+
+  void _showEditDialog(BuildContext context, Item item) {
+    showDialog(
+      context: context,
+      builder: (_) => EditItemDialog(item: item),
     );
   }
 

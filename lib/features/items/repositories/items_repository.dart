@@ -33,6 +33,14 @@ class ItemsRepository {
     );
   }
 
+  Future<List<PurchasedItem>> getPurchasedItemsForItem(int itemId) =>
+      _itemsDao.getPurchasedItemsForItem(itemId);
+
+  Future<int> countPurchasesForItem(int itemId) => _itemsDao.countPurchasesForItem(itemId);
+
+  Future<void> updateItem(int id, {String? name, String? imagePath}) =>
+      _itemsDao.updateItem(id, name: name, imagePath: imagePath);
+
   Future<PurchasedItem?> getLastPurchasedDetails(int itemId) {
     return _itemsDao.getLastPurchasedDetails(itemId);
   }
