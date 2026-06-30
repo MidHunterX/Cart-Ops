@@ -35,21 +35,18 @@ class SettingsProvider extends ChangeNotifier {
   void setThemeMode(ThemeMode mode) async {
     _themeMode = mode;
     notifyListeners();
-    final prefs = await SharedPreferences.getInstance();
-    prefs.setInt(_themeKey, mode.index);
+    _prefs.setInt(_themeKey, mode.index);
   }
 
   void setSeedColor(Color color) async {
     _seedColor = color;
     notifyListeners();
-    final prefs = await SharedPreferences.getInstance();
-    prefs.setInt(_colorKey, color.toARGB32());
+    _prefs.setInt(_colorKey, color.toARGB32());
   }
 
   void setCurrency(String code) async {
     _currencyCode = code;
     notifyListeners();
-    final prefs = await SharedPreferences.getInstance();
-    prefs.setString(_currencyKey, code);
+    _prefs.setString(_currencyKey, code);
   }
 }

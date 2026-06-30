@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shopping_assist/core/database/database.dart';
 import 'package:shopping_assist/features/purchased_items/repositories/purchased_items_repository.dart';
-import 'package:shopping_assist/features/settings/providers/settings_provider.dart';
 import 'add_item_components/input_field_box.dart';
 import 'add_item_components/add_item_keypad.dart';
 import 'add_item_components/item_dialogs.dart';
@@ -259,49 +258,6 @@ class _EditPurchasedItemSheetState extends State<EditPurchasedItemSheet> {
 
   void _showLockedMsg(String msg) {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
-  }
-
-  Widget _buildHeader() {
-    final currencySymbol = context.read<SettingsProvider>().currencySymbol;
-    final colorScheme = Theme.of(context).colorScheme;
-
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text('Edit Item', style: Theme.of(context).textTheme.titleLarge),
-        Row(
-          children: [
-            Text(
-              '$currencySymbol/kg',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: colorScheme.primary,
-              ),
-            ),
-            const SizedBox(width: 8),
-            Switch(
-              value: _isWeight,
-              onChanged: (val) {
-                setState(() {
-                  _isWeight = val;
-                  if (val) {
-                    _qtyStr = '';
-                    _qtyController.text = '';
-                    _activeField = ActiveField.quantity;
-                    _qtyFocusNode.requestFocus();
-                  } else {
-                    _qtyStr = '1';
-                    _qtyController.text = '1';
-                    _activeField = ActiveField.price;
-                    _priceFocusNode.requestFocus();
-                  }
-                });
-              },
-            ),
-          ],
-        ),
-      ],
-    );
   }
 
   Widget _buildFieldsRow() {

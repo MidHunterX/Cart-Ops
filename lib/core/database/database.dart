@@ -35,12 +35,8 @@ class AppDatabase extends _$AppDatabase {
         await m.createAll();
       },
       onUpgrade: (Migrator m, int from, int to) async {
-        if (from == 1) {
-          await m.createTable(groups);
-          await m.createTable(purchases);
-          await m.createTable(items);
-          await m.createTable(purchasedItems);
-        }
+        // Future upgrades: add only new tables/columns here.
+        // Example: if (from < 2) await m.createTable(newTable);
       },
       beforeOpen: (details) async {
         // SQLite disables foreign keys by default O_o

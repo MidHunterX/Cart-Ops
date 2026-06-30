@@ -6,7 +6,7 @@ import 'package:shopping_assist/features/purchased_items/repositories/purchased_
 import 'package:shopping_assist/features/settings/providers/settings_provider.dart';
 import 'package:shopping_assist/core/utils/number_formatter.dart';
 import 'edit_purchased_item_sheet.dart';
-import 'add_item_components/input_field_box.dart';
+import 'add_item_components/input_field_box.dart' show ActiveField;
 
 class PurchasedItemTile extends StatelessWidget {
   final PurchasedItemWithDetails details;
