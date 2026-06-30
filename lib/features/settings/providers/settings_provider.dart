@@ -14,28 +14,22 @@ class SettingsProvider extends ChangeNotifier {
   ThemeMode get themeMode => _themeMode;
   Color get seedColor => _seedColor;
   String get currencyCode => _currencyCode;
-  String get currencySymbol =>
-      currencies.firstWhere((c) => c.code == currencyCode).symbol;
+  String get currencySymbol => currencies.firstWhere((c) => c.code == currencyCode).symbol;
 
-  SettingsProvider() {
+  final SharedPreferences _prefs;
+
+  SettingsProvider(this._prefs) {
     _loadSettings();
   }
 
-  Future<void> _loadSettings() async {
-    final prefs = await SharedPreferences.getInstance();
-
-    // Load Theme Mode
-    final themeIndex = prefs.getInt(_themeKey);
+  void _loadSettings() {
+    final themeIndex = _prefs.getInt(_themeKey);
     if (themeIndex != null) _themeMode = ThemeMode.values[themeIndex];
 
-    // Load Color
-    final colorValue = prefs.getInt(_colorKey);
+    final colorValue = _prefs.getInt(_colorKey);
     if (colorValue != null) _seedColor = Color(colorValue);
 
-    // Load Currency Code
-    _currencyCode = prefs.getString(_currencyKey) ?? 'USD';
-
-    notifyListeners();
+    _currencyCode = _prefs.getString(_currencyKey) ?? 'USD';
   }
 
   void setThemeMode(ThemeMode mode) async {

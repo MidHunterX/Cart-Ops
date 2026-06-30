@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shopping_assist/app.dart';
 import 'package:shopping_assist/core/database/database.dart';
 import 'package:shopping_assist/features/groups/repositories/groups_repository.dart';
@@ -8,13 +9,14 @@ import 'package:shopping_assist/features/purchased_items/repositories/purchased_
 import 'package:shopping_assist/features/purchases/repositories/purchases_repository.dart';
 import 'package:shopping_assist/features/settings/providers/settings_provider.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  final prefs = await SharedPreferences.getInstance();
 
   runApp(
     MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => SettingsProvider()),
+        ChangeNotifierProvider(create: (_) => SettingsProvider(prefs)),
         Provider<AppDatabase>(create: (_) => AppDatabase(), dispose: (_, db) => db.close()),
         ProxyProvider<AppDatabase, GroupsRepository>(update: (_, db, _) => GroupsRepository(db)),
         ProxyProvider<AppDatabase, ItemsRepository>(update: (_, db, _) => ItemsRepository(db)),
