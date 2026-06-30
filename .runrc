@@ -3,6 +3,20 @@
 # No need for sidebar. The output will center the code instead
 export NVIM_OPEN_SIDEBAR=0
 
+setup_layout_custom() {
+  if [ -f "./.dart_tool/package_config.json" ]; then
+    # Cache already available > run offline
+    create_window "Cmd" "flutter run --no-pub"
+    create_window "Editor" "$EDITOR"
+    create_window "Test" "flutter test --no-pub"
+  else
+    # First time running > Update via Internet
+    create_window "Cmd" "flutter run"
+    create_window "Editor" "$EDITOR"
+    create_window "Test" "flutter test"
+  fi
+}
+
 setup_post_init_hook() {
   log "📏 Resizing output window..."
   (
