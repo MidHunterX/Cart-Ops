@@ -1,15 +1,16 @@
 import 'package:shopping_assist/core/database/database.dart';
+import 'package:shopping_assist/core/database/daos/groups_dao.dart';
 
 class GroupsRepository {
-  final AppDatabase _db;
+  final GroupsDao _groupsDao;
 
-  GroupsRepository(this._db);
+  GroupsRepository(this._groupsDao);
 
-  Stream<List<Group>> watchGroups() => _db.groupsDao.watchGroups();
+  Stream<List<Group>> watchGroups() => _groupsDao.watchGroups();
 
   Future<int> addGroup(String name) {
-    return _db.groupsDao.insertGroup(GroupsCompanion.insert(name: name));
+    return _groupsDao.insertGroup(GroupsCompanion.insert(name: name));
   }
 
-  Future<void> deleteGroup(int id) => _db.groupsDao.deleteGroup(id);
+  Future<void> deleteGroup(int id) => _groupsDao.deleteGroup(id);
 }

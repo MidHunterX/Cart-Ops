@@ -1,21 +1,20 @@
 import 'package:drift/drift.dart';
 import 'package:shopping_assist/core/database/database.dart';
-import 'package:shopping_assist/features/items/repositories/items_repository.dart';
+import 'package:shopping_assist/core/database/daos/items_dao.dart';
+import 'package:shopping_assist/core/database/daos/purchased_items_dao.dart';
 
 class PurchasedItemsRepository {
-  final AppDatabase _db;
-  final ItemsRepository _itemsRepository;
+  final PurchasedItemsDao _purchasedItemsDao;
+  final ItemsDao _itemsDao;
 
-  PurchasedItemsRepository(this._db, this._itemsRepository);
+  PurchasedItemsRepository(this._purchasedItemsDao, this._itemsDao);
 
   Stream<List<PurchasedItemWithDetails>> watchPurchasedItems(int purchaseId) {
-    return _db.purchasedItemsDao.watchPurchasedItems(purchaseId);
+    return _purchasedItemsDao.watchPurchasedItems(purchaseId);
   }
 
   Future<List<Item>> getAvailableItems(int? groupId) {
-    return groupId == null
-        ? _itemsRepository.getItemsWithoutGroup()
-        : _itemsRepository.getItemsInGroup(groupId);
+    return groupId == null ? _itemsDao.getItemsWithoutGroup() : _itemsDao.getItemsInGroup(groupId);
   }
 
   Future<void> addPurchasedItem({
@@ -28,23 +27,21 @@ class PurchasedItemsRepository {
     required Group? group,
     String? imagePath,
   }) async {
-    final targetItem = await _itemsRepository.findItemByNameAndGroup(name, group?.id);
+    final targetItem = await _itemsDao.findItemByNameAndGroup(name, group?.id);
 
     int itemId;
     if (targetItem != null) {
       itemId = targetItem.id;
       if (imagePath != null) {
-        await (_db.update(
-          _db.items,
-        )..where((t) => t.id.equals(itemId))).write(ItemsCompanion(imagePath: Value(imagePath)));
+        await _itemsDao.updateItemImage(itemId, imagePath);
       }
     } else {
-      itemId = await _itemsRepository.insertItem(
+      itemId = await _itemsDao.insertItem(
         ItemsCompanion.insert(name: name, groupId: Value(group?.id), imagePath: Value(imagePath)),
       );
     }
 
-    await _db.purchasedItemsDao.insertPurchasedItem(
+    await _purchasedItemsDao.insertPurchasedItem(
       PurchasedItemsCompanion.insert(
         price: price,
         quantity: qty,
@@ -63,7 +60,7 @@ class PurchasedItemsRepository {
     required double discount,
     required bool isWeight,
   }) async {
-    await _db.purchasedItemsDao.updatePurchasedItem(
+    await _purchasedItemsDao.updatePurchasedItem(
       PurchasedItemsCompanion(
         id: Value(id),
         price: Value(price),
@@ -74,5 +71,5 @@ class PurchasedItemsRepository {
     );
   }
 
-  Future<void> deletePurchasedItem(int id) => _db.purchasedItemsDao.deletePurchasedItem(id);
+  Future<void> deletePurchasedItem(int id) => _purchasedItemsDao.deletePurchasedItem(id);
 }

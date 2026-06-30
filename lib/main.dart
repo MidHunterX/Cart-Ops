@@ -3,6 +3,10 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shopping_assist/app.dart';
 import 'package:shopping_assist/core/database/database.dart';
+import 'package:shopping_assist/core/database/daos/groups_dao.dart';
+import 'package:shopping_assist/core/database/daos/items_dao.dart';
+import 'package:shopping_assist/core/database/daos/purchased_items_dao.dart';
+import 'package:shopping_assist/core/database/daos/purchases_dao.dart';
 import 'package:shopping_assist/features/groups/repositories/groups_repository.dart';
 import 'package:shopping_assist/features/items/repositories/items_repository.dart';
 import 'package:shopping_assist/features/purchased_items/repositories/purchased_items_repository.dart';
@@ -18,13 +22,28 @@ void main() async {
       providers: [
         ChangeNotifierProvider(create: (_) => SettingsProvider(prefs)),
         Provider<AppDatabase>(create: (_) => AppDatabase(), dispose: (_, db) => db.close()),
-        ProxyProvider<AppDatabase, GroupsRepository>(update: (_, db, _) => GroupsRepository(db)),
-        ProxyProvider<AppDatabase, ItemsRepository>(update: (_, db, _) => ItemsRepository(db)),
-        ProxyProvider<AppDatabase, PurchasesRepository>(
-          update: (_, db, _) => PurchasesRepository(db),
+
+        // Provide DAOs directly
+        Provider<GroupsDao>(create: (context) => context.read<AppDatabase>().groupsDao),
+        Provider<ItemsDao>(create: (context) => context.read<AppDatabase>().itemsDao),
+        Provider<PurchasesDao>(create: (context) => context.read<AppDatabase>().purchasesDao),
+        Provider<PurchasedItemsDao>(
+          create: (context) => context.read<AppDatabase>().purchasedItemsDao,
         ),
-        ProxyProvider2<AppDatabase, ItemsRepository, PurchasedItemsRepository>(
-          update: (_, db, itemsRepo, _) => PurchasedItemsRepository(db, itemsRepo),
+
+        // Repositories should depend on DAOs only
+        ProxyProvider<GroupsDao, GroupsRepository>(
+          update: (_, groupsDao, _) => GroupsRepository(groupsDao),
+        ),
+        ProxyProvider<ItemsDao, ItemsRepository>(
+          update: (_, itemsDao, _) => ItemsRepository(itemsDao),
+        ),
+        ProxyProvider<PurchasesDao, PurchasesRepository>(
+          update: (_, purchasesDao, _) => PurchasesRepository(purchasesDao),
+        ),
+        ProxyProvider2<ItemsDao, PurchasedItemsDao, PurchasedItemsRepository>(
+          update: (_, itemsDao, purchasedItemsDao, _) =>
+              PurchasedItemsRepository(purchasedItemsDao, itemsDao),
         ),
       ],
       child: const ShoppingApp(),
