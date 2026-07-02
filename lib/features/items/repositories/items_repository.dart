@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:drift/drift.dart';
 import 'package:shopping_assist/core/database/database.dart';
 import 'package:shopping_assist/core/database/daos/items_dao.dart';
@@ -56,7 +58,14 @@ class ItemsRepository {
     return _itemsDao.hasPurchasedItems(itemId);
   }
 
-  Future<void> deleteItem(int id) {
+  Future<void> deleteItem(int id) async {
+    final item = await findItem(id, null);
+    if (item?.imagePath != null) {
+      final file = File(item!.imagePath!);
+      if (await file.exists()) {
+        await file.delete();
+      }
+    }
     return _itemsDao.deleteItem(id);
   }
 
