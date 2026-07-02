@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:shopping_assist/core/database/database.dart';
+import 'package:shopping_assist/core/utils/number_formatter.dart';
 import 'package:shopping_assist/features/items/repositories/items_repository.dart';
 import 'package:shopping_assist/features/purchased_items/repositories/purchased_items_repository.dart';
 import 'package:shopping_assist/core/utils/image_picker_util.dart';
@@ -43,19 +44,12 @@ class _EditPurchasedItemSheetState extends State<EditPurchasedItemSheet> {
   late FocusNode _qtyFocusNode;
   String? _imagePath;
 
-  String _formatDouble(double val) {
-    if (val == val.truncateToDouble()) {
-      return val.truncate().toString();
-    }
-    return val.toString();
-  }
-
   @override
   void initState() {
     super.initState();
-    _priceStr = _formatDouble(widget.purchasedItem.price);
-    _qtyStr = _formatDouble(widget.purchasedItem.quantity);
-    _discountStr = _formatDouble(widget.purchasedItem.discount);
+    _priceStr = widget.purchasedItem.price.toPriceString();
+    _qtyStr = widget.purchasedItem.quantity.toPriceString();
+    _discountStr = widget.purchasedItem.discount.toPriceString();
     _isWeight = widget.purchasedItem.isWeight;
     _activeField = widget.initialField;
     _imagePath = widget.item.imagePath;
