@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shopping_assist/core/database/database.dart';
+import 'package:shopping_assist/core/widgets/delete_confirmation_dialog.dart';
 import 'package:shopping_assist/features/purchased_items/repositories/purchased_items_repository.dart';
 import 'package:shopping_assist/features/settings/providers/settings_provider.dart';
 import 'package:shopping_assist/core/utils/number_formatter.dart';
@@ -258,27 +259,13 @@ class PurchasedItemTile extends StatelessWidget {
   }
 
   void _showDeleteConfirmation(BuildContext context) {
-    final repo = context.read<PurchasedItemsRepository>();
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Delete Item'),
-        content: Text('Are you sure you want to delete "${details.item.name}"?'),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
-          FilledButton(
-            onPressed: () {
-              repo.deletePurchasedItem(details.purchasedItem.id);
-              Navigator.pop(context);
-            },
-            style: FilledButton.styleFrom(
-              backgroundColor: Theme.of(context).colorScheme.error,
-              foregroundColor: Theme.of(context).colorScheme.onError,
-            ),
-            child: const Text('Delete'),
-          ),
-        ],
-      ),
+    DeleteConfirmationDialog.show(
+      context,
+      title: 'Delete Item',
+      message: 'Are you sure you want to delete "${details.item.name}"?',
+      onDelete: () {
+        context.read<PurchasedItemsRepository>().deletePurchasedItem(details.purchasedItem.id);
+      },
     );
   }
 }
