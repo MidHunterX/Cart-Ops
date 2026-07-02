@@ -31,7 +31,7 @@ class PurchasedItemsRepository {
     Item? targetItem;
 
     if (itemId != null) {
-      targetItem = await _itemsDao.findItemByIdAndGroup(itemId, group?.id);
+      targetItem = await _itemsDao.findItem(itemId, group?.id);
     }
 
     int finalItemId;

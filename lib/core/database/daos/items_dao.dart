@@ -25,7 +25,7 @@ class ItemsDao extends DatabaseAccessor<AppDatabase> with _$ItemsDaoMixin {
     return (select(items)..where((t) => t.groupId.isNull())).get();
   }
 
-  Future<Item?> findItemByIdAndGroup(int id, int? groupId) {
+  Future<Item?> findItem(int id, int? groupId) {
     final query = select(items)..where((t) => t.id.equals(id));
     if (groupId != null) {
       query.where((t) => t.groupId.equals(groupId));

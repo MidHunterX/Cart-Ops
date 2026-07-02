@@ -25,8 +25,8 @@ class ItemsRepository {
     return _itemsDao.getItemsWithoutGroup();
   }
 
-  Future<Item?> findItemByIdAndGroup(int id, int? groupId) {
-    return _itemsDao.findItemByIdAndGroup(id, groupId);
+  Future<Item?> findItem(int id, int? groupId) {
+    return _itemsDao.findItem(id, groupId);
   }
 
   Future<int> insertItem({required String name, int? groupId, String? imagePath}) {
