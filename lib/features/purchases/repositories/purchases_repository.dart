@@ -12,9 +12,18 @@ class PurchasesRepository {
 
   Stream<List<Purchase>> watchGeneralPurchases() => _purchasesDao.watchPurchasesWithoutGroup();
 
-  Future<int> addPurchase(String name, int? groupId) {
-    return _purchasesDao.insertPurchase(
-      PurchasesCompanion.insert(name: name, purchaseDate: DateTime.now(), groupId: Value(groupId)),
+  Future<Purchase> createPurchase(int? groupId) async {
+    final now = DateTime.now();
+    final defaultName = 'Purchase';
+    final id = await _purchasesDao.insertPurchase(
+      PurchasesCompanion.insert(name: defaultName, purchaseDate: now, groupId: Value(groupId)),
+    );
+    return _purchasesDao.getPurchaseById(id);
+  }
+
+  Future<void> updatePurchase(int id, String name, DateTime date) {
+    return _purchasesDao.updatePurchase(
+      PurchasesCompanion(id: Value(id), name: Value(name), purchaseDate: Value(date)),
     );
   }
 

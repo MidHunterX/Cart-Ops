@@ -5,8 +5,7 @@ import 'package:shopping_assist/core/database/models.dart';
 part 'purchases_dao.g.dart';
 
 @DriftAccessor(tables: [Purchases])
-class PurchasesDao extends DatabaseAccessor<AppDatabase>
-    with _$PurchasesDaoMixin {
+class PurchasesDao extends DatabaseAccessor<AppDatabase> with _$PurchasesDaoMixin {
   PurchasesDao(super.db);
 
   Stream<List<Purchase>> watchPurchasesInGroup(int groupId) {
@@ -21,6 +20,13 @@ class PurchasesDao extends DatabaseAccessor<AppDatabase>
     return into(purchases).insert(purchase);
   }
 
-  Future deletePurchase(int id) =>
-      (delete(purchases)..where((t) => t.id.equals(id))).go();
+  Future<Purchase> getPurchaseById(int id) {
+    return (select(purchases)..where((t) => t.id.equals(id))).getSingle();
+  }
+
+  Future<void> updatePurchase(PurchasesCompanion entry) {
+    return (update(purchases)..where((t) => t.id.equals(entry.id.value))).write(entry);
+  }
+
+  Future deletePurchase(int id) => (delete(purchases)..where((t) => t.id.equals(id))).go();
 }

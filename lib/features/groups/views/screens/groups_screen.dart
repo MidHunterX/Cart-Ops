@@ -8,7 +8,7 @@ import 'package:shopping_assist/features/groups/views/widgets/add_group_dialog.d
 import 'package:shopping_assist/features/purchased_items/views/screens/purchased_items_screen.dart';
 import 'package:shopping_assist/features/purchases/repositories/purchases_repository.dart';
 import 'package:shopping_assist/features/purchases/views/screens/purchases_screen.dart';
-import 'package:shopping_assist/features/purchases/views/widgets/add_purchase_dialog.dart';
+import 'package:shopping_assist/features/purchases/views/widgets/edit_purchase_dialog.dart';
 import 'package:shopping_assist/features/items/views/screens/items_screen.dart';
 import 'package:shopping_assist/features/settings/views/settings_screen.dart';
 
@@ -44,10 +44,17 @@ class GroupsScreen extends StatelessWidget {
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => showDialog(
-          context: context,
-          builder: (context) => const AddPurchaseDialog(groupId: null),
-        ),
+        onPressed: () async {
+          final purchase = await context.read<PurchasesRepository>().createPurchase(null);
+          if (context.mounted) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => PurchasedItemsScreen(purchase: purchase, group: null),
+              ),
+            );
+          }
+        },
         icon: const Icon(Icons.shopping_cart),
         label: const Text('Add Purchase'),
       ),
@@ -121,11 +128,41 @@ class GroupsScreen extends StatelessWidget {
                         leading: const Icon(Icons.receipt_long_outlined),
                         title: Text(purchase.name),
                         subtitle: Text(
-                          '${purchase.purchaseDate.day}/${purchase.purchaseDate.month}/${purchase.purchaseDate.year}',
+                          '${purchase.purchaseDate.day}/${purchase.purchaseDate.month}/${purchase.purchaseDate.year} at ${TimeOfDay.fromDateTime(purchase.purchaseDate).format(context)}',
                         ),
-                        trailing: IconButton(
-                          icon: Icon(Icons.delete_outline, color: colorScheme.error),
-                          onPressed: () => _confirmDeletePurchase(context, purchase),
+                        trailing: PopupMenuButton<String>(
+                          onSelected: (value) {
+                            if (value == 'edit') {
+                              showDialog(
+                                context: context,
+                                builder: (_) => EditPurchaseDialog(purchase: purchase),
+                              );
+                            } else if (value == 'delete') {
+                              _confirmDeletePurchase(context, purchase);
+                            }
+                          },
+                          itemBuilder: (context) => [
+                            const PopupMenuItem(
+                              value: 'edit',
+                              child: Row(
+                                children: [
+                                  Icon(Icons.edit, size: 20),
+                                  SizedBox(width: 8),
+                                  Text('Edit'),
+                                ],
+                              ),
+                            ),
+                            PopupMenuItem(
+                              value: 'delete',
+                              child: Row(
+                                children: [
+                                  Icon(Icons.delete, size: 20, color: colorScheme.error),
+                                  const SizedBox(width: 8),
+                                  Text('Delete', style: TextStyle(color: colorScheme.error)),
+                                ],
+                              ),
+                            ),
+                          ],
                         ),
                         onTap: () => Navigator.push(
                           context,

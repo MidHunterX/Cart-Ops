@@ -5,7 +5,7 @@ import 'package:shopping_assist/core/widgets/delete_confirmation_dialog.dart';
 import 'package:shopping_assist/core/widgets/empty_state.dart';
 import 'package:shopping_assist/features/purchased_items/views/screens/purchased_items_screen.dart';
 import 'package:shopping_assist/features/purchases/repositories/purchases_repository.dart';
-import 'package:shopping_assist/features/purchases/views/widgets/add_purchase_dialog.dart';
+import 'package:shopping_assist/features/purchases/views/widgets/edit_purchase_dialog.dart';
 import 'package:shopping_assist/features/items/views/screens/items_screen.dart';
 
 class PurchasesScreen extends StatelessWidget {
@@ -35,6 +35,21 @@ class PurchasesScreen extends StatelessWidget {
           ),
         ],
       ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () async {
+          final purchase = await repo.createPurchase(group.id);
+          if (context.mounted) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => PurchasedItemsScreen(purchase: purchase, group: group),
+              ),
+            );
+          }
+        },
+        icon: const Icon(Icons.shopping_cart),
+        label: const Text('Add Purchase'),
+      ),
       body: StreamBuilder<List<Purchase>>(
         stream: repo.watchPurchasesInGroup(group.id),
         builder: (context, snapshot) {
@@ -62,11 +77,41 @@ class PurchasesScreen extends StatelessWidget {
                     leading: const Icon(Icons.receipt_long_outlined),
                     title: Text(purchase.name),
                     subtitle: Text(
-                      '${purchase.purchaseDate.day}/${purchase.purchaseDate.month}/${purchase.purchaseDate.year}',
+                      '${purchase.purchaseDate.day}/${purchase.purchaseDate.month}/${purchase.purchaseDate.year} at ${TimeOfDay.fromDateTime(purchase.purchaseDate).format(context)}',
                     ),
-                    trailing: IconButton(
-                      icon: Icon(Icons.delete_outline, color: colorScheme.error),
-                      onPressed: () => _confirmDelete(context, repo, purchase),
+                    trailing: PopupMenuButton<String>(
+                      onSelected: (value) {
+                        if (value == 'edit') {
+                          showDialog(
+                            context: context,
+                            builder: (_) => EditPurchaseDialog(purchase: purchase),
+                          );
+                        } else if (value == 'delete') {
+                          _confirmDelete(context, repo, purchase);
+                        }
+                      },
+                      itemBuilder: (context) => [
+                        const PopupMenuItem(
+                          value: 'edit',
+                          child: Row(
+                            children: [
+                              Icon(Icons.edit, size: 20),
+                              SizedBox(width: 8),
+                              Text('Edit'),
+                            ],
+                          ),
+                        ),
+                        PopupMenuItem(
+                          value: 'delete',
+                          child: Row(
+                            children: [
+                              Icon(Icons.delete, size: 20, color: colorScheme.error),
+                              const SizedBox(width: 8),
+                              Text('Delete', style: TextStyle(color: colorScheme.error)),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
                     onTap: () => Navigator.push(
                       context,
@@ -81,14 +126,6 @@ class PurchasesScreen extends StatelessWidget {
             },
           );
         },
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => showDialog(
-          context: context,
-          builder: (_) => AddPurchaseDialog(groupId: group.id),
-        ),
-        icon: const Icon(Icons.shopping_cart),
-        label: const Text('Add Purchase'),
       ),
     );
   }
