@@ -20,9 +20,17 @@ extension NumberFormatting on double {
     return toString();
   }
 
+  /// Converts a double to a weight string
+  ///
+  /// Example:
+  /// 1.2345 -> "1.2345kg"
+  /// 1.30 -> "1.3kg"
+  /// 1.0 -> "1kg"
   String toWeightString(String? unit) {
-    if (this % 1 == 0) return '${toInt()}$unit';
-    return '${toStringAsFixed(2)}$unit';
+    String unitStr = unit ?? '';
+    if (this % 1 == 0) return '${toInt()}$unitStr';
+    String value = toString();
+    return '$value$unitStr';
   }
 
   String toCurrencyString(String currencySymbol) {

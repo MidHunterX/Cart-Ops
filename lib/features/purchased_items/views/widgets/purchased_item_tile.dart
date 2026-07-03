@@ -50,7 +50,7 @@ class PurchasedItemTile extends StatelessWidget {
                   children: [
                     // Quantity Section
                     SizedBox(
-                      width: 50,
+                      width: 90,
                       child: hasQty
                           ? Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
