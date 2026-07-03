@@ -37,6 +37,7 @@ class PurchasedItemTile extends StatelessWidget {
 
     final hasQty = pItem.quantity != null;
     final hasPrice = pItem.price != null;
+    final isWeight = pItem.isWeight;
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -88,10 +89,38 @@ class PurchasedItemTile extends StatelessWidget {
                               ],
                             )
                           : Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                const SizedBox(height: 6),
-                                Icon(Icons.inventory_2_outlined, color: colorScheme.error),
+                                pItem.isWeight
+                                    ? OutlinedButton.icon(
+                                        style: OutlinedButton.styleFrom(
+                                          padding: EdgeInsets.symmetric(
+                                            horizontal: isSmallScreen ? 4 : 8,
+                                          ),
+                                        ),
+                                        onPressed: () => _showEditSheet(
+                                          context,
+                                          initialField: ActiveField.quantity,
+                                        ),
+                                        label: Text('kg', style: TextStyle(fontSize: 12)),
+                                      )
+                                    : SizedBox(
+                                        height: 40,
+                                        child: UnitQuantitySelector(
+                                          quantity: '0',
+                                          onIncrement: () {
+                                            context
+                                                .read<PurchasedItemsRepository>()
+                                                .updatePurchasedItem(
+                                                  id: pItem.id,
+                                                  price: pItem.price,
+                                                  qty: 1,
+                                                  discount: pItem.discount,
+                                                  isWeight: pItem.isWeight,
+                                                );
+                                          },
+                                          onDecrement: () {},
+                                        ),
+                                      ),
                               ],
                             ),
                     ),
@@ -124,186 +153,115 @@ class PurchasedItemTile extends StatelessWidget {
 
                     // Main Details Section (Name, Unit Price, Total Price)
                     Expanded(
-                      child: Column(
+                      // Top Row: Name/Unit Price + Total Price
+                      child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // Top Row: Name/Unit Price + Total Price
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      item.name,
-                                      style: Theme.of(context).textTheme.titleMedium,
-                                      maxLines: 2,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                    const SizedBox(height: 4),
-                                    if (hasPrice)
-                                      if (discountApplied)
-                                        Wrap(
-                                          spacing: 4,
-                                          crossAxisAlignment: WrapCrossAlignment.center,
-                                          children: [
-                                            Text(
-                                              '$currency${pricePerUnit.toStringAsFixed(2)}',
-                                              style: Theme.of(context).textTheme.bodySmall
-                                                  ?.copyWith(
-                                                    decoration: TextDecoration.lineThrough,
-                                                    color: colorScheme.onSurfaceVariant,
-                                                  ),
-                                            ),
-                                            Text(
-                                              '$currency${(pricePerUnit - pItem.discount).toStringAsFixed(2)}',
-                                              style: Theme.of(context).textTheme.bodySmall
-                                                  ?.copyWith(
-                                                    fontWeight: FontWeight.bold,
-                                                    color: colorScheme.primary,
-                                                  ),
-                                            ),
-                                          ],
-                                        )
-                                      else
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  item.name,
+                                  style: Theme.of(context).textTheme.titleMedium,
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                const SizedBox(height: 4),
+                                if (hasPrice)
+                                  if (discountApplied)
+                                    Wrap(
+                                      spacing: 4,
+                                      crossAxisAlignment: WrapCrossAlignment.center,
+                                      children: [
                                         Text(
-                                          '$currency${pricePerUnit.toStringAsFixed(2)} ${pItem.isWeight ? '/kg' : ''}',
-                                          style: Theme.of(context).textTheme.bodySmall,
-                                        )
-                                    else
-                                      Text(
-                                        'Price not set',
+                                          '$currency${pricePerUnit.toStringAsFixed(2)}',
+                                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                            decoration: TextDecoration.lineThrough,
+                                            color: colorScheme.onSurfaceVariant,
+                                          ),
+                                        ),
+                                        Text(
+                                          '$currency${(pricePerUnit - pItem.discount).toStringAsFixed(2)}',
+                                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                            fontWeight: FontWeight.bold,
+                                            color: colorScheme.primary,
+                                          ),
+                                        ),
+                                      ],
+                                    )
+                                  else
+                                    Text(
+                                      '$currency${pricePerUnit.toStringAsFixed(2)} ${pItem.isWeight ? '/kg' : ''}',
+                                      style: Theme.of(context).textTheme.bodySmall,
+                                    )
+                                else
+                                  Text(
+                                    'Price not set',
+                                    style: Theme.of(
+                                      context,
+                                    ).textTheme.bodySmall?.copyWith(color: colorScheme.error),
+                                  ),
+                              ],
+                            ),
+                          ),
+                          SizedBox(width: spacing),
+
+                          // Total Price
+                          SizedBox(
+                            width: totalAreaWidth,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                if (hasPrice && hasQty) ...[
+                                  if (discountApplied) ...[
+                                    FittedBox(
+                                      fit: BoxFit.scaleDown,
+                                      child: Text(
+                                        '$currency${totalPrice.toStringAsFixed(2)}',
+                                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                          color: colorScheme.primary,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+                                    FittedBox(
+                                      fit: BoxFit.scaleDown,
+                                      child: Text(
+                                        '-$currency${(pItem.discount * qty).toStringAsFixed(2)}',
                                         style: Theme.of(
                                           context,
                                         ).textTheme.bodySmall?.copyWith(color: colorScheme.error),
                                       ),
-                                  ],
-                                ),
-                              ),
-                              SizedBox(width: spacing),
-
-                              // Total Price
-                              SizedBox(
-                                width: totalAreaWidth,
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.end,
-                                  children: [
-                                    if (hasPrice && hasQty) ...[
-                                      if (discountApplied) ...[
-                                        FittedBox(
-                                          fit: BoxFit.scaleDown,
-                                          child: Text(
-                                            '$currency${totalPrice.toStringAsFixed(2)}',
-                                            style: Theme.of(context).textTheme.titleMedium
-                                                ?.copyWith(
-                                                  color: colorScheme.primary,
-                                                  fontWeight: FontWeight.bold,
-                                                ),
-                                          ),
-                                        ),
-                                        FittedBox(
-                                          fit: BoxFit.scaleDown,
-                                          child: Text(
-                                            '-$currency${(pItem.discount * qty).toStringAsFixed(2)}',
-                                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                              color: colorScheme.error,
-                                            ),
-                                          ),
-                                        ),
-                                      ] else
-                                        FittedBox(
-                                          fit: BoxFit.scaleDown,
-                                          child: Text(
-                                            '$currency${totalPrice.toStringAsFixed(2)}',
-                                            style: Theme.of(context).textTheme.titleMedium
-                                                ?.copyWith(fontWeight: FontWeight.bold),
-                                          ),
-                                        ),
-                                    ] else
-                                      Text(
-                                        'TBD',
-                                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                          color: colorScheme.error,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-
-                          // -- Missing Fields Actions (Naturally Nested inside Expanded Block) --
-                          if (!hasQty || !hasPrice)
-                            Padding(
-                              padding: const EdgeInsets.only(top: 10.0),
-                              child: Row(
-                                children: [
-                                  if (!hasQty)
-                                    Expanded(
-                                      child: pItem.isWeight
-                                          ? OutlinedButton.icon(
-                                              style: OutlinedButton.styleFrom(
-                                                padding: EdgeInsets.symmetric(
-                                                  horizontal: isSmallScreen ? 4 : 8,
-                                                ),
-                                              ),
-                                              onPressed: () => _showEditSheet(
-                                                context,
-                                                initialField: ActiveField.quantity,
-                                              ),
-                                              icon: const Icon(Icons.scale, size: 16),
-                                              label: const FittedBox(
-                                                fit: BoxFit.scaleDown,
-                                                child: Text(
-                                                  'Add Weight',
-                                                  style: TextStyle(fontSize: 12),
-                                                ),
-                                              ),
-                                            )
-                                          : SizedBox(
-                                              height: 40,
-                                              child: UnitQuantitySelector(
-                                                quantity: '0',
-                                                onIncrement: () {
-                                                  context
-                                                      .read<PurchasedItemsRepository>()
-                                                      .updatePurchasedItem(
-                                                        id: pItem.id,
-                                                        price: pItem.price,
-                                                        qty: 1,
-                                                        discount: pItem.discount,
-                                                        isWeight: pItem.isWeight,
-                                                      );
-                                                },
-                                                onDecrement: () {},
-                                              ),
-                                            ),
                                     ),
-                                  if (!hasQty && !hasPrice) SizedBox(width: isSmallScreen ? 6 : 10),
-                                  if (!hasPrice)
-                                    Expanded(
-                                      child: OutlinedButton.icon(
-                                        style: OutlinedButton.styleFrom(
-                                          padding: EdgeInsets.symmetric(
-                                            horizontal: isSmallScreen ? 4 : 8,
-                                          ),
-                                        ),
-                                        onPressed: () => _showEditSheet(
-                                          context,
-                                          initialField: ActiveField.price,
-                                        ),
-                                        icon: const Icon(Icons.attach_money, size: 16),
-                                        label: const FittedBox(
-                                          fit: BoxFit.scaleDown,
-                                          child: Text('Set Price', style: TextStyle(fontSize: 12)),
+                                  ] else
+                                    FittedBox(
+                                      fit: BoxFit.scaleDown,
+                                      child: Text(
+                                        '$currency${totalPrice.toStringAsFixed(2)}',
+                                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                          fontWeight: FontWeight.bold,
                                         ),
                                       ),
                                     ),
                                 ],
-                              ),
+                                if (!hasPrice)
+                                  OutlinedButton.icon(
+                                    style: OutlinedButton.styleFrom(
+                                      padding: EdgeInsets.symmetric(
+                                        horizontal: isSmallScreen ? 4 : 8,
+                                      ),
+                                    ),
+                                    onPressed: () =>
+                                        _showEditSheet(context, initialField: ActiveField.price),
+                                    label: Text(
+                                      isWeight ? '$currency/kg' : currency,
+                                      style: TextStyle(fontSize: 12),
+                                    ),
+                                  ),
+                              ],
                             ),
+                          ),
                         ],
                       ),
                     ),
