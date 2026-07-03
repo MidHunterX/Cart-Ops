@@ -936,9 +936,9 @@ class $PurchasedItemsTable extends PurchasedItems
   late final GeneratedColumn<double> price = GeneratedColumn<double>(
     'price',
     aliasedName,
-    false,
+    true,
     type: DriftSqlType.double,
-    requiredDuringInsert: true,
+    requiredDuringInsert: false,
   );
   static const VerificationMeta _isWeightMeta = const VerificationMeta(
     'isWeight',
@@ -962,9 +962,9 @@ class $PurchasedItemsTable extends PurchasedItems
   late final GeneratedColumn<double> quantity = GeneratedColumn<double>(
     'quantity',
     aliasedName,
-    false,
+    true,
     type: DriftSqlType.double,
-    requiredDuringInsert: true,
+    requiredDuringInsert: false,
   );
   static const VerificationMeta _discountMeta = const VerificationMeta(
     'discount',
@@ -1034,8 +1034,6 @@ class $PurchasedItemsTable extends PurchasedItems
         _priceMeta,
         price.isAcceptableOrUnknown(data['price']!, _priceMeta),
       );
-    } else if (isInserting) {
-      context.missing(_priceMeta);
     }
     if (data.containsKey('is_weight')) {
       context.handle(
@@ -1048,8 +1046,6 @@ class $PurchasedItemsTable extends PurchasedItems
         _quantityMeta,
         quantity.isAcceptableOrUnknown(data['quantity']!, _quantityMeta),
       );
-    } else if (isInserting) {
-      context.missing(_quantityMeta);
     }
     if (data.containsKey('discount')) {
       context.handle(
@@ -1089,7 +1085,7 @@ class $PurchasedItemsTable extends PurchasedItems
       price: attachedDatabase.typeMapping.read(
         DriftSqlType.double,
         data['${effectivePrefix}price'],
-      )!,
+      ),
       isWeight: attachedDatabase.typeMapping.read(
         DriftSqlType.bool,
         data['${effectivePrefix}is_weight'],
@@ -1097,7 +1093,7 @@ class $PurchasedItemsTable extends PurchasedItems
       quantity: attachedDatabase.typeMapping.read(
         DriftSqlType.double,
         data['${effectivePrefix}quantity'],
-      )!,
+      ),
       discount: attachedDatabase.typeMapping.read(
         DriftSqlType.double,
         data['${effectivePrefix}discount'],
@@ -1121,17 +1117,17 @@ class $PurchasedItemsTable extends PurchasedItems
 
 class PurchasedItem extends DataClass implements Insertable<PurchasedItem> {
   final int id;
-  final double price;
+  final double? price;
   final bool isWeight;
-  final double quantity;
+  final double? quantity;
   final double discount;
   final int purchaseId;
   final int itemId;
   const PurchasedItem({
     required this.id,
-    required this.price,
+    this.price,
     required this.isWeight,
-    required this.quantity,
+    this.quantity,
     required this.discount,
     required this.purchaseId,
     required this.itemId,
@@ -1140,9 +1136,13 @@ class PurchasedItem extends DataClass implements Insertable<PurchasedItem> {
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
-    map['price'] = Variable<double>(price);
+    if (!nullToAbsent || price != null) {
+      map['price'] = Variable<double>(price);
+    }
     map['is_weight'] = Variable<bool>(isWeight);
-    map['quantity'] = Variable<double>(quantity);
+    if (!nullToAbsent || quantity != null) {
+      map['quantity'] = Variable<double>(quantity);
+    }
     map['discount'] = Variable<double>(discount);
     map['purchase_id'] = Variable<int>(purchaseId);
     map['item_id'] = Variable<int>(itemId);
@@ -1152,9 +1152,13 @@ class PurchasedItem extends DataClass implements Insertable<PurchasedItem> {
   PurchasedItemsCompanion toCompanion(bool nullToAbsent) {
     return PurchasedItemsCompanion(
       id: Value(id),
-      price: Value(price),
+      price: price == null && nullToAbsent
+          ? const Value.absent()
+          : Value(price),
       isWeight: Value(isWeight),
-      quantity: Value(quantity),
+      quantity: quantity == null && nullToAbsent
+          ? const Value.absent()
+          : Value(quantity),
       discount: Value(discount),
       purchaseId: Value(purchaseId),
       itemId: Value(itemId),
@@ -1168,9 +1172,9 @@ class PurchasedItem extends DataClass implements Insertable<PurchasedItem> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return PurchasedItem(
       id: serializer.fromJson<int>(json['id']),
-      price: serializer.fromJson<double>(json['price']),
+      price: serializer.fromJson<double?>(json['price']),
       isWeight: serializer.fromJson<bool>(json['isWeight']),
-      quantity: serializer.fromJson<double>(json['quantity']),
+      quantity: serializer.fromJson<double?>(json['quantity']),
       discount: serializer.fromJson<double>(json['discount']),
       purchaseId: serializer.fromJson<int>(json['purchaseId']),
       itemId: serializer.fromJson<int>(json['itemId']),
@@ -1181,9 +1185,9 @@ class PurchasedItem extends DataClass implements Insertable<PurchasedItem> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
-      'price': serializer.toJson<double>(price),
+      'price': serializer.toJson<double?>(price),
       'isWeight': serializer.toJson<bool>(isWeight),
-      'quantity': serializer.toJson<double>(quantity),
+      'quantity': serializer.toJson<double?>(quantity),
       'discount': serializer.toJson<double>(discount),
       'purchaseId': serializer.toJson<int>(purchaseId),
       'itemId': serializer.toJson<int>(itemId),
@@ -1192,17 +1196,17 @@ class PurchasedItem extends DataClass implements Insertable<PurchasedItem> {
 
   PurchasedItem copyWith({
     int? id,
-    double? price,
+    Value<double?> price = const Value.absent(),
     bool? isWeight,
-    double? quantity,
+    Value<double?> quantity = const Value.absent(),
     double? discount,
     int? purchaseId,
     int? itemId,
   }) => PurchasedItem(
     id: id ?? this.id,
-    price: price ?? this.price,
+    price: price.present ? price.value : this.price,
     isWeight: isWeight ?? this.isWeight,
-    quantity: quantity ?? this.quantity,
+    quantity: quantity.present ? quantity.value : this.quantity,
     discount: discount ?? this.discount,
     purchaseId: purchaseId ?? this.purchaseId,
     itemId: itemId ?? this.itemId,
@@ -1253,9 +1257,9 @@ class PurchasedItem extends DataClass implements Insertable<PurchasedItem> {
 
 class PurchasedItemsCompanion extends UpdateCompanion<PurchasedItem> {
   final Value<int> id;
-  final Value<double> price;
+  final Value<double?> price;
   final Value<bool> isWeight;
-  final Value<double> quantity;
+  final Value<double?> quantity;
   final Value<double> discount;
   final Value<int> purchaseId;
   final Value<int> itemId;
@@ -1270,15 +1274,13 @@ class PurchasedItemsCompanion extends UpdateCompanion<PurchasedItem> {
   });
   PurchasedItemsCompanion.insert({
     this.id = const Value.absent(),
-    required double price,
+    this.price = const Value.absent(),
     this.isWeight = const Value.absent(),
-    required double quantity,
+    this.quantity = const Value.absent(),
     this.discount = const Value.absent(),
     required int purchaseId,
     required int itemId,
-  }) : price = Value(price),
-       quantity = Value(quantity),
-       purchaseId = Value(purchaseId),
+  }) : purchaseId = Value(purchaseId),
        itemId = Value(itemId);
   static Insertable<PurchasedItem> custom({
     Expression<int>? id,
@@ -1302,9 +1304,9 @@ class PurchasedItemsCompanion extends UpdateCompanion<PurchasedItem> {
 
   PurchasedItemsCompanion copyWith({
     Value<int>? id,
-    Value<double>? price,
+    Value<double?>? price,
     Value<bool>? isWeight,
-    Value<double>? quantity,
+    Value<double?>? quantity,
     Value<double>? discount,
     Value<int>? purchaseId,
     Value<int>? itemId,
@@ -2528,9 +2530,9 @@ typedef $$ItemsTableProcessedTableManager =
 typedef $$PurchasedItemsTableCreateCompanionBuilder =
     PurchasedItemsCompanion Function({
       Value<int> id,
-      required double price,
+      Value<double?> price,
       Value<bool> isWeight,
-      required double quantity,
+      Value<double?> quantity,
       Value<double> discount,
       required int purchaseId,
       required int itemId,
@@ -2538,9 +2540,9 @@ typedef $$PurchasedItemsTableCreateCompanionBuilder =
 typedef $$PurchasedItemsTableUpdateCompanionBuilder =
     PurchasedItemsCompanion Function({
       Value<int> id,
-      Value<double> price,
+      Value<double?> price,
       Value<bool> isWeight,
-      Value<double> quantity,
+      Value<double?> quantity,
       Value<double> discount,
       Value<int> purchaseId,
       Value<int> itemId,
@@ -2853,9 +2855,9 @@ class $$PurchasedItemsTableTableManager
           updateCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
-                Value<double> price = const Value.absent(),
+                Value<double?> price = const Value.absent(),
                 Value<bool> isWeight = const Value.absent(),
-                Value<double> quantity = const Value.absent(),
+                Value<double?> quantity = const Value.absent(),
                 Value<double> discount = const Value.absent(),
                 Value<int> purchaseId = const Value.absent(),
                 Value<int> itemId = const Value.absent(),
@@ -2871,9 +2873,9 @@ class $$PurchasedItemsTableTableManager
           createCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
-                required double price,
+                Value<double?> price = const Value.absent(),
                 Value<bool> isWeight = const Value.absent(),
-                required double quantity,
+                Value<double?> quantity = const Value.absent(),
                 Value<double> discount = const Value.absent(),
                 required int purchaseId,
                 required int itemId,

@@ -47,8 +47,8 @@ class _EditPurchasedItemSheetState extends State<EditPurchasedItemSheet> {
   @override
   void initState() {
     super.initState();
-    _priceStr = widget.purchasedItem.price.toPriceString();
-    _qtyStr = widget.purchasedItem.quantity.toPriceString();
+    _priceStr = widget.purchasedItem.price?.toPriceString() ?? '';
+    _qtyStr = widget.purchasedItem.quantity?.toPriceString() ?? '';
     _discountStr = widget.purchasedItem.discount.toPriceString();
     _isWeight = widget.purchasedItem.isWeight;
     _activeField = widget.initialField;
@@ -160,32 +160,25 @@ class _EditPurchasedItemSheetState extends State<EditPurchasedItemSheet> {
     final priceStr = _priceStr.trim();
     final qtyStr = _qtyStr.trim();
 
-    if (priceStr.isEmpty || qtyStr.isEmpty) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Please fill in quantity and price')));
-      return;
-    }
-
-    final pricePerUnit = double.tryParse(priceStr) ?? 0.0;
-    final qty = double.tryParse(qtyStr) ?? 1.0;
+    final pricePerUnit = priceStr.isEmpty ? null : double.tryParse(priceStr);
+    final qty = qtyStr.isEmpty ? null : double.tryParse(qtyStr);
     final discount = double.tryParse(_discountStr.trim()) ?? 0.0;
 
-    if (pricePerUnit <= 0) {
+    if (pricePerUnit != null && pricePerUnit <= 0) {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(const SnackBar(content: Text('Price must be greater than 0')));
       return;
     }
 
-    if (qty <= 0) {
+    if (qty != null && qty <= 0) {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(const SnackBar(content: Text('Quantity must be greater than 0')));
       return;
     }
 
-    if (discount < 0 || discount >= pricePerUnit) {
+    if (pricePerUnit != null && (discount < 0 || discount >= pricePerUnit)) {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(const SnackBar(content: Text('Invalid discount amount')));

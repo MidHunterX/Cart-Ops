@@ -42,8 +42,8 @@ class PurchasedItemsScreen extends StatelessWidget {
             0.0,
             (sum, details) =>
                 sum +
-                ((details.purchasedItem.price - details.purchasedItem.discount) *
-                    details.purchasedItem.quantity),
+                (((details.purchasedItem.price ?? 0.0) - details.purchasedItem.discount) *
+                    (details.purchasedItem.quantity ?? 0.0)),
           );
 
           return CustomScrollView(

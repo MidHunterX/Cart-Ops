@@ -179,6 +179,7 @@ class _AddPurchasedItemSheetState extends State<AddPurchasedItemSheet> {
   }
 
   void _submit() async {
+    // TODO: Name is required for now because purchased_items connects to itemId
     final name = _name.trim();
     if (name.isEmpty) {
       ScaffoldMessenger.of(
@@ -190,25 +191,18 @@ class _AddPurchasedItemSheetState extends State<AddPurchasedItemSheet> {
 
     final priceStr = _priceStr.trim();
     final qtyStr = _qtyStr.trim();
-    if (priceStr.isEmpty || qtyStr.isEmpty) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Please fill in quantity and price')));
-      return;
-    }
-
-    final pricePerUnit = double.tryParse(priceStr) ?? 0.0;
-    final qty = double.tryParse(qtyStr) ?? 1.0;
+    final pricePerUnit = priceStr.isEmpty ? null : double.tryParse(priceStr);
+    final qty = qtyStr.isEmpty ? null : double.tryParse(qtyStr);
     final discount = double.tryParse(_discountStr.trim()) ?? 0.0;
 
-    if (pricePerUnit <= 0) {
+    if (pricePerUnit != null && pricePerUnit <= 0) {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(const SnackBar(content: Text('Price must be greater than 0')));
       return;
     }
 
-    if (qty <= 0) {
+    if (qty != null && qty <= 0) {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(const SnackBar(content: Text('Quantity must be greater than 0')));

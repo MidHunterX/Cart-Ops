@@ -89,14 +89,14 @@ class ItemDetailScreen extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             const SizedBox(height: 4),
-                            Text('Quantity: ${p.quantity.toWeightString(p.isWeight ? 'kg' : '')}'),
+                            Text('Quantity: ${p.quantity?.toWeightString(p.isWeight ? 'kg' : '')}'),
                           ],
                         ),
                         trailing: Column(
                           crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
                             Text(
-                              p.price.toCurrencyString(currency),
+                               p.price!.toCurrencyString(currency),
                               style: Theme.of(context).textTheme.titleLarge?.copyWith(
                                 color: colorScheme.primary,
                                 fontWeight: FontWeight.bold,

@@ -20,8 +20,8 @@ class PurchasedItemsRepository {
   Future<void> addPurchasedItem({
     int? itemId,
     required String name,
-    required double price,
-    required double qty,
+    required double? price,
+    required double? qty,
     required double discount,
     required bool isWeight,
     required int purchaseId,
@@ -48,8 +48,8 @@ class PurchasedItemsRepository {
 
     await _purchasedItemsDao.insertPurchasedItem(
       PurchasedItemsCompanion.insert(
-        price: price,
-        quantity: qty,
+        price: Value(price),
+        quantity: Value(qty),
         isWeight: Value(isWeight),
         discount: Value(discount),
         purchaseId: purchaseId,
@@ -60,8 +60,8 @@ class PurchasedItemsRepository {
 
   Future<void> updatePurchasedItem({
     required int id,
-    required double price,
-    required double qty,
+    required double? price,
+    required double? qty,
     required double discount,
     required bool isWeight,
   }) async {
