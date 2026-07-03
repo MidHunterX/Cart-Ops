@@ -17,6 +17,12 @@ class PurchasedItemWithDetails {
   PurchasedItemWithDetails(this.purchasedItem, this.item);
 }
 
+class PurchasedItemWithPurchase {
+  final PurchasedItem purchasedItem;
+  final Purchase purchase;
+  PurchasedItemWithPurchase(this.purchasedItem, this.purchase);
+}
+
 @DriftDatabase(
   tables: [Groups, Purchases, Items, PurchasedItems],
   daos: [GroupsDao, PurchasesDao, ItemsDao, PurchasedItemsDao],

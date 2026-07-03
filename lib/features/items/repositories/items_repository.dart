@@ -38,6 +38,9 @@ class ItemsRepository {
   Future<List<PurchasedItem>> getPurchasedItemsForItem(int itemId) =>
       _itemsDao.getPurchasedItemsForItem(itemId);
 
+  Future<List<PurchasedItemWithPurchase>> getPurchaseHistoryForItem(int itemId) =>
+      _itemsDao.getPurchaseHistoryForItem(itemId);
+
   Future<int> countPurchasesForItem(int itemId) => _itemsDao.countPurchasesForItem(itemId);
 
   Future<void> updateItem(

@@ -55,6 +55,22 @@ class ItemsDao extends DatabaseAccessor<AppDatabase> with _$ItemsDaoMixin {
     return (select(purchasedItems)..where((t) => t.itemId.equals(itemId))).get();
   }
 
+  Future<List<PurchasedItemWithPurchase>> getPurchaseHistoryForItem(int itemId) async {
+    final purchases = attachedDatabase.purchases;
+    final query = select(purchasedItems).join([
+      innerJoin(purchases, purchases.id.equalsExp(purchasedItems.purchaseId)),
+    ])
+      ..where(purchasedItems.itemId.equals(itemId))
+      ..orderBy([OrderingTerm.desc(purchases.purchaseDate)]);
+    final rows = await query.get();
+    return rows.map((row) {
+      return PurchasedItemWithPurchase(
+        row.readTable(purchasedItems),
+        row.readTable(purchases),
+      );
+    }).toList();
+  }
+
   Future<int> countPurchasesForItem(int itemId) async {
     final query = select(purchasedItems)..where((t) => t.itemId.equals(itemId));
     return await query.get().then((list) => list.length);
