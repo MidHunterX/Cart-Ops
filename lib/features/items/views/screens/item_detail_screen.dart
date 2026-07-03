@@ -15,7 +15,7 @@ class ItemDetailScreen extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
-      appBar: AppBar(title: Text(item.name)),
+      appBar: AppBar(title: Text(item.name), backgroundColor: colorScheme.primaryContainer),
       body: FutureBuilder(
         future: Future.wait([
           repo.countPurchasesForItem(item.id),
@@ -38,12 +38,17 @@ class ItemDetailScreen extends StatelessWidget {
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(12),
                     child: item.imagePath != null && File(item.imagePath!).existsSync()
-                        ? Image.file(File(item.imagePath!), height: 200, fit: BoxFit.cover)
+                        ? Image.file(
+                            File(item.imagePath!),
+                            height: 200,
+                            width: double.maxFinite,
+                            fit: BoxFit.cover,
+                          )
                         : Container(
                             height: 200,
-                            width: double.infinity,
+                            width: double.maxFinite,
                             color: colorScheme.surfaceContainerHighest,
-                            child: Icon(Icons.image_not_supported, size: 80),
+                            child: const Icon(Icons.image_not_supported, size: 80),
                           ),
                   ),
                 ),

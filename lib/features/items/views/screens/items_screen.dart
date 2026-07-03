@@ -39,41 +39,18 @@ class ItemsScreen extends StatelessWidget {
             );
           }
 
-          return ListView.builder(
+          return GridView.builder(
+            padding: const EdgeInsets.all(16),
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              crossAxisSpacing: 16,
+              mainAxisSpacing: 16,
+              childAspectRatio: 0.85,
+            ),
             itemCount: items.length,
             itemBuilder: (context, index) {
               final item = items[index];
-              return Card(
-                margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-                child: ListTile(
-                  leading: _buildItemImage(item.imagePath),
-                  title: Text(item.name),
-                  subtitle: FutureBuilder<int>(
-                    future: repo.countPurchasesForItem(item.id),
-                    builder: (ctx, snap) {
-                      final count = snap.data ?? 0;
-                      return Text('Bought $count time${count == 1 ? '' : 's'}');
-                    },
-                  ),
-                  trailing: PopupMenuButton<String>(
-                    onSelected: (value) {
-                      if (value == 'edit') {
-                        _showEditDialog(context, item);
-                      } else if (value == 'delete') {
-                        _confirmDelete(context, repo, item);
-                      }
-                    },
-                    itemBuilder: (ctx) => [
-                      const PopupMenuItem(value: 'edit', child: Text('Edit')),
-                      const PopupMenuItem(value: 'delete', child: Text('Delete')),
-                    ],
-                  ),
-                  onTap: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => ItemDetailScreen(item: item)),
-                  ),
-                ),
-              );
+              return _buildItemCard(context, item, repo);
             },
           );
         },
@@ -89,11 +66,97 @@ class ItemsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildItemImage(String? imagePath) {
+  Widget _buildItemCard(BuildContext context, Item item, ItemsRepository repo) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Card(
+      clipBehavior: Clip.antiAlias, // Internal image doesn't overflow the rounded corners
+      elevation: 2,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: InkWell(
+        onTap: () => Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => ItemDetailScreen(item: item)),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Expanded(
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  _buildItemImage(item.imagePath, colorScheme),
+                  Positioned(
+                    top: 4,
+                    right: 4,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: colorScheme.surface.withValues(alpha: 0.8),
+                        shape: BoxShape.circle,
+                      ),
+                      child: PopupMenuButton<String>(
+                        icon: const Icon(Icons.more_vert, size: 20),
+                        padding: EdgeInsets.zero,
+                        onSelected: (value) {
+                          if (value == 'edit') {
+                            _showEditDialog(context, item);
+                          } else if (value == 'delete') {
+                            _confirmDelete(context, repo, item);
+                          }
+                        },
+                        itemBuilder: (ctx) => [
+                          const PopupMenuItem(value: 'edit', child: Text('Edit')),
+                          const PopupMenuItem(value: 'delete', child: Text('Delete')),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(12.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    item.name,
+                    style: Theme.of(
+                      context,
+                    ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 4),
+                  FutureBuilder<int>(
+                    future: repo.countPurchasesForItem(item.id),
+                    builder: (ctx, snap) {
+                      final count = snap.data ?? 0;
+                      return Text(
+                        'Bought $count time${count == 1 ? '' : 's'}',
+                        style: Theme.of(
+                          context,
+                        ).textTheme.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant),
+                      );
+                    },
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildItemImage(String? imagePath, ColorScheme colorScheme) {
     if (imagePath != null && File(imagePath).existsSync()) {
-      return CircleAvatar(backgroundImage: FileImage(File(imagePath)));
+      return Image.file(File(imagePath), fit: BoxFit.cover);
     }
-    return const CircleAvatar(child: Icon(Icons.inventory));
+    return Container(
+      color: colorScheme.surfaceContainerHighest,
+      child: Icon(Icons.inventory_2_rounded, size: 48, color: colorScheme.onSurfaceVariant),
+    );
   }
 
   void _showEditDialog(BuildContext context, Item item) {
