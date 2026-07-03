@@ -47,7 +47,17 @@ class ItemsRepository {
     int id, {
     String? name,
     Value<String?> imagePath = const Value.absent(),
-  }) => _itemsDao.updateItem(id, name: name, imagePath: imagePath);
+  }) async {
+    final oldItem = await findItem(id, null);
+    final oldImagePath = oldItem?.imagePath;
+    if (oldImagePath != null) {
+      final oldFile = File(oldImagePath);
+      if (await oldFile.exists()) {
+        await oldFile.delete();
+      }
+    }
+    await _itemsDao.updateItem(id, name: name, imagePath: imagePath);
+  }
 
   Future<void> updateItemImage(int itemId, String? imagePath) {
     return _itemsDao.updateItemImage(itemId, imagePath);
@@ -63,13 +73,12 @@ class ItemsRepository {
 
   Future<void> deleteItem(int id) async {
     final item = await findItem(id, null);
-    if (item?.imagePath != null) {
+    final deleted = await _itemsDao.deleteItem(id);
+    if (item?.imagePath != null && deleted) {
       final file = File(item!.imagePath!);
-      if (await file.exists()) {
-        await file.delete();
-      }
+      if (await file.exists()) await file.delete();
     }
-    return _itemsDao.deleteItem(id);
+    return deleted;
   }
 
   Future<List<Item>> searchItems(String query, {int? groupId}) async {

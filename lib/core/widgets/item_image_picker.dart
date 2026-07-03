@@ -36,11 +36,11 @@ class ItemImagePicker extends StatelessWidget {
             child: Image.file(
               File(imagePath!),
               height: 120,
-              width: double.maxFinite, // <-- Changed from double.infinity
+              width: double.maxFinite,
               fit: BoxFit.cover,
               errorBuilder: (_, _, _) => Container(
                 height: 120,
-                width: double.maxFinite, // <-- Changed from double.infinity
+                width: double.maxFinite,
                 color: Theme.of(context).colorScheme.surfaceContainerHighest,
                 child: const Icon(Icons.image_not_supported, size: 40),
               ),
@@ -64,7 +64,7 @@ class ItemImagePicker extends StatelessWidget {
     }
 
     return SizedBox(
-      width: double.maxFinite, // <-- Changed from double.infinity
+      width: double.maxFinite,
       child: OutlinedButton.icon(
         onPressed: () => _handleImageTap(context),
         icon: const Icon(Icons.image),
