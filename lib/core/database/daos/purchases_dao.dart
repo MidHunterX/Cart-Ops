@@ -9,11 +9,17 @@ class PurchasesDao extends DatabaseAccessor<AppDatabase> with _$PurchasesDaoMixi
   PurchasesDao(super.db);
 
   Stream<List<Purchase>> watchPurchasesInGroup(int groupId) {
-    return (select(purchases)..where((t) => t.groupId.equals(groupId))).watch();
+    return (select(purchases)
+          ..where((t) => t.groupId.equals(groupId))
+          ..orderBy([(t) => OrderingTerm.desc(t.purchaseDate)]))
+        .watch();
   }
 
   Stream<List<Purchase>> watchPurchasesWithoutGroup() {
-    return (select(purchases)..where((t) => t.groupId.isNull())).watch();
+    return (select(purchases)
+          ..where((t) => t.groupId.isNull())
+          ..orderBy([(t) => OrderingTerm.desc(t.purchaseDate)]))
+        .watch();
   }
 
   Future<int> insertPurchase(PurchasesCompanion purchase) {
