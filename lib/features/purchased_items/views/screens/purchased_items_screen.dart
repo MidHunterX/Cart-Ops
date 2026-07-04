@@ -28,15 +28,6 @@ class PurchasedItemsScreen extends StatelessWidget {
           }
 
           final purchasedItems = snapshot.data ?? [];
-
-          if (purchasedItems.isEmpty) {
-            return const EmptyState(
-              icon: Icons.shopping_cart_outlined,
-              title: 'Your Cart is Ready',
-              message: 'Add items to your purchase to see the running total.',
-            );
-          }
-
           final totalItems = purchasedItems.length;
           final totalPrice = purchasedItems.fold<double>(
             0.0,
@@ -51,12 +42,25 @@ class PurchasedItemsScreen extends StatelessWidget {
               SliverToBoxAdapter(
                 child: PurchaseSummaryCard(itemCount: totalItems, total: totalPrice),
               ),
-              SliverList(
-                delegate: SliverChildBuilderDelegate((context, index) {
-                  final details = purchasedItems[index];
-                  return PurchasedItemTile(details: details, index: index, totalItems: totalItems);
-                }, childCount: purchasedItems.length),
-              ),
+              if (purchasedItems.isEmpty)
+                SliverFillRemaining(
+                  child: const EmptyState(
+                    icon: Icons.shopping_cart_outlined,
+                    title: 'Your Cart is Ready',
+                    message: 'Add items to your purchase to see the running total.',
+                  ),
+                )
+              else
+                SliverList(
+                  delegate: SliverChildBuilderDelegate((context, index) {
+                    final details = purchasedItems[index];
+                    return PurchasedItemTile(
+                      details: details,
+                      index: index,
+                      totalItems: totalItems,
+                    );
+                  }, childCount: purchasedItems.length),
+                ),
             ],
           );
         },
