@@ -1,3 +1,4 @@
+// lib/features/settings/providers/settings_provider.dart
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../data/settings_data.dart';
@@ -6,15 +7,18 @@ class SettingsProvider extends ChangeNotifier {
   static const String _themeKey = 'theme_mode';
   static const String _colorKey = 'seed_color';
   static const String _currencyKey = 'currency_code';
+  static const String _weightUnitKey = 'weight_unit';
 
   ThemeMode _themeMode = ThemeMode.system;
   Color _seedColor = Colors.greenAccent;
   String _currencyCode = 'USD';
+  String _weightUnit = 'kg';
 
   ThemeMode get themeMode => _themeMode;
   Color get seedColor => _seedColor;
   String get currencyCode => _currencyCode;
   String get currencySymbol => currencies.firstWhere((c) => c.code == currencyCode).symbol;
+  String get weightUnit => _weightUnit;
 
   final SharedPreferences _prefs;
 
@@ -30,6 +34,7 @@ class SettingsProvider extends ChangeNotifier {
     if (colorValue != null) _seedColor = Color(colorValue);
 
     _currencyCode = _prefs.getString(_currencyKey) ?? 'USD';
+    _weightUnit = _prefs.getString(_weightUnitKey) ?? 'kg';
   }
 
   void setThemeMode(ThemeMode mode) async {
@@ -48,5 +53,11 @@ class SettingsProvider extends ChangeNotifier {
     _currencyCode = code;
     notifyListeners();
     _prefs.setString(_currencyKey, code);
+  }
+
+  void setWeightUnit(String unit) async {
+    _weightUnit = unit;
+    notifyListeners();
+    _prefs.setString(_weightUnitKey, unit);
   }
 }

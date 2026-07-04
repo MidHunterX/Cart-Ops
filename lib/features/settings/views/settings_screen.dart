@@ -5,6 +5,7 @@ import './widgets/theme_colorpicker_v2.dart';
 import './widgets/section_header.dart';
 import './widgets/currency_picker.dart';
 import './widgets/theme_mode_selector.dart';
+import './widgets/weight_unit_picker.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -55,6 +56,18 @@ class SettingsScreen extends StatelessWidget {
               isScrollControlled: true, // makes sheet full screen
               builder: (context) {
                 return CurrencyPicker(settings: settings);
+              },
+            ),
+          ),
+
+          ListTile(
+            title: const Text('Weight Unit'),
+            subtitle: Text(settings.weightUnit),
+            trailing: const Icon(Icons.arrow_drop_down),
+            onTap: () => showModalBottomSheet(
+              context: context,
+              builder: (context) {
+                return WeightUnitPicker(settings: settings);
               },
             ),
           ),

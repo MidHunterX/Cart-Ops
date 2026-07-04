@@ -28,6 +28,7 @@ class PurchasedItemTile extends StatelessWidget {
     final item = details.item;
     final settings = context.watch<SettingsProvider>();
     final currency = settings.currencySymbol;
+    final weightUnit = settings.weightUnit;
     final colorScheme = Theme.of(context).colorScheme;
 
     final pricePerUnit = pItem.price ?? 0.0;
@@ -73,7 +74,7 @@ class PurchasedItemTile extends StatelessWidget {
                                   fit: BoxFit.scaleDown,
                                   child: Text(
                                     pItem.isWeight
-                                        ? pItem.quantity!.toWeightString('kg')
+                                        ? pItem.quantity!.toWeightString(weightUnit)
                                         : pItem.quantity!.toWeightString(''),
                                     style: Theme.of(
                                       context,
@@ -101,7 +102,7 @@ class PurchasedItemTile extends StatelessWidget {
                                           context,
                                           initialField: ActiveField.quantity,
                                         ),
-                                        label: Text('kg', style: TextStyle(fontSize: 12)),
+                                        label: Text(weightUnit, style: TextStyle(fontSize: 12)),
                                       )
                                     : SizedBox(
                                         height: 40,
@@ -192,7 +193,7 @@ class PurchasedItemTile extends StatelessWidget {
                                     )
                                   else
                                     Text(
-                                      '$currency${pricePerUnit.toStringAsFixed(2)} ${pItem.isWeight ? '/kg' : ''}',
+                                      '$currency${pricePerUnit.toStringAsFixed(2)} ${pItem.isWeight ? '/$weightUnit' : ''}',
                                       style: Theme.of(context).textTheme.bodySmall,
                                     )
                                 else
@@ -255,7 +256,7 @@ class PurchasedItemTile extends StatelessWidget {
                                     onPressed: () =>
                                         _showEditSheet(context, initialField: ActiveField.price),
                                     label: Text(
-                                      isWeight ? '$currency/kg' : currency,
+                                      isWeight ? '$currency/$weightUnit' : currency,
                                       style: TextStyle(fontSize: 12),
                                     ),
                                   ),

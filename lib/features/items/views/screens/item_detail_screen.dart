@@ -15,6 +15,7 @@ class ItemDetailScreen extends StatelessWidget {
     final repo = context.watch<ItemsRepository>();
     final settings = context.watch<SettingsProvider>();
     final currency = settings.currencySymbol;
+    final weightUnit = settings.weightUnit;
     final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
@@ -89,7 +90,7 @@ class ItemDetailScreen extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             const SizedBox(height: 4),
-                            Text('Quantity: ${p.quantity?.toWeightString(p.isWeight ? 'kg' : '')}'),
+                            Text('Quantity: ${p.quantity?.toWeightString(p.isWeight ? weightUnit : '')}'),
                           ],
                         ),
                         trailing: Column(

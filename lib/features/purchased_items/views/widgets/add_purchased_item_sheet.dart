@@ -7,6 +7,7 @@ import 'package:shopping_assist/features/items/repositories/items_repository.dar
 import 'package:shopping_assist/features/purchased_items/repositories/purchased_items_repository.dart';
 import 'package:shopping_assist/core/utils/image_picker_util.dart';
 import 'package:shopping_assist/features/purchased_items/utils/keypad_logic.dart';
+import 'package:shopping_assist/features/settings/providers/settings_provider.dart';
 import 'add_item_components/input_field_box.dart';
 import 'add_item_components/add_item_keypad.dart';
 import 'add_item_components/item_dialogs.dart';
@@ -279,6 +280,7 @@ class _AddPurchasedItemSheetState extends State<AddPurchasedItemSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final weightUnit = context.watch<SettingsProvider>().weightUnit;
     return Padding(
       padding: EdgeInsets.only(
         bottom: MediaQuery.of(context).viewInsets.bottom,
@@ -295,7 +297,7 @@ class _AddPurchasedItemSheetState extends State<AddPurchasedItemSheet> {
             onWeightChanged: _handleWeightToggle,
           ),
           const SizedBox(height: 16),
-          _buildFieldsRow(),
+          _buildFieldsRow(weightUnit),
           const SizedBox(height: 16),
           AddItemKeypad(
             isLoading: _isLoading,
@@ -316,7 +318,7 @@ class _AddPurchasedItemSheetState extends State<AddPurchasedItemSheet> {
     );
   }
 
-  Widget _buildFieldsRow() {
+  Widget _buildFieldsRow(String weightUnit) {
     return IntrinsicHeight(
       child: Row(
         children: [
@@ -324,7 +326,7 @@ class _AddPurchasedItemSheetState extends State<AddPurchasedItemSheet> {
             flex: 5,
             child: _isWeight
                 ? InputFieldBox(
-                    label: 'Quantity (kg)',
+                    label: 'Quantity ($weightUnit)',
                     value: _qtyStr,
                     isActive: _activeField == ActiveField.quantity,
                     onTap: () {

@@ -16,7 +16,9 @@ class PurchasedItemFormHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final currencySymbol = context.read<SettingsProvider>().currencySymbol;
+    final settings = context.watch<SettingsProvider>();
+    final currencySymbol = settings.currencySymbol;
+    final weightUnit = settings.weightUnit;
     final colorScheme = Theme.of(context).colorScheme;
 
     return Row(
@@ -26,7 +28,7 @@ class PurchasedItemFormHeader extends StatelessWidget {
         Row(
           children: [
             Text(
-              '$currencySymbol/kg',
+              '$currencySymbol/$weightUnit',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 fontWeight: FontWeight.bold,
                 color: colorScheme.primary,

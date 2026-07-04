@@ -22,7 +22,7 @@ dart run build_runner build
 
 - [x] Globally Set Currency Symbol
 - [x] Globally Set Theme Colors
-- [ ] Globally Set Weight Unit (Metric, Imperial or Both)
+- [x] Globally Set Weight Unit (Metric, Imperial or Both)
 - [ ] Globally Set Tax Rate (0-100) for countries that display prices without tax
 - [x] CRUD General purchases + Groups Screen
 - [x] CRUD purchase Screen
@@ -34,7 +34,8 @@ dart run build_runner build
 
 ### Analytics
 
-- [ ] Purchase history graph
+- [x] Purchase history
+- [x] Price history for individual items
 - [ ] Price history graph for individual items
 - [ ] Price history graph for all items timeline
 - [ ] Monthly spend

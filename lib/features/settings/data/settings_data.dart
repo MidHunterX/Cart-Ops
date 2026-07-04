@@ -91,3 +91,15 @@ final List<Currency> currencies = [
   Currency('ETH', 'Ξ', 'Ethereum', '🌐'),
   Currency('USDT', '₮', 'Tether', '🌐'),
 ];
+
+class WeightUnitOption {
+  final String unit;
+  final String system;
+  final String name;
+  const WeightUnitOption(this.unit, this.system, this.name);
+}
+
+const List<WeightUnitOption> weightUnitOptions = [
+  WeightUnitOption('kg', 'Metric', 'Kilograms'),
+  WeightUnitOption('lb', 'Imperial', 'Pounds'),
+];
