@@ -54,4 +54,5 @@ dart run build_runner build
 - [x] Item suggestions while typing based on history
 - [x] Easy price per item/quantity toggle
 - [x] Basic Numpad
-- [ ] Numpad type (top to bottom, bottom to top)
+- [x] Numpad UI
+- [ ] Numpad Variants (top to bottom, bottom to top)

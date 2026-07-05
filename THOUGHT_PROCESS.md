@@ -61,9 +61,27 @@ features.
 
 ## Re-Inventing a better wheel
 
-### Items List Style
+### Main Screen
 
-On adding items to a purchase, every single attribute is optional.
+The main screen is divided into two sections:
+
+#### Purchases List
+
+Clicking `Add purchase` Creates a new purchase event with 'Purchase' as
+default name along with current date and time then immediately takes you into
+the next interface, ready to add Purchased Items. This is for those spontaneous
+people who just wants to create purchased items right now.
+
+#### My Groups
+
+A horizontally scrollable list of created groups. Each group have it's own
+separate item autocompletion and purchases list. With this you can track prices
+of items from one store to another. This is for those people who wants to
+organize their shopping.
+
+### Purchased Items List
+
+On adding items to a purchase, every single attribute is optional for spontaneity.
 
 - Weight/Unit
 - Item Name
