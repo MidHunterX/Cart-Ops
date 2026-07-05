@@ -297,7 +297,7 @@ class PurchasedItemTile extends StatelessWidget {
         crossAxisAlignment: WrapCrossAlignment.center,
         children: [
           Text(
-            '$currency${pricePerUnit.toStringAsFixed(2)}',
+            '$currency${pricePerUnit.toPriceString()}',
             style: settings.compactItemList == false || item.name != ''
                 ? Theme.of(context).textTheme.bodySmall?.copyWith(
                     decoration: TextDecoration.lineThrough,
@@ -309,7 +309,8 @@ class PurchasedItemTile extends StatelessWidget {
                   ),
           ),
           Text(
-            '$currency${(pricePerUnit - pItem.discount).toStringAsFixed(2)}',
+            '$currency${(pricePerUnit - pItem.discount).toPriceString()}'
+            '${pItem.isWeight ? ' /$weightUnit' : ''}',
             style: settings.compactItemList == false || item.name != ''
                 ? Theme.of(context).textTheme.bodySmall?.copyWith(
                     fontWeight: FontWeight.bold,
@@ -325,7 +326,8 @@ class PurchasedItemTile extends StatelessWidget {
     }
 
     return Text(
-      '$currency${pricePerUnit.toStringAsFixed(2)} ${pItem.isWeight ? '/$weightUnit' : ''}',
+      '$currency${pricePerUnit.toPriceString()}'
+      '${pItem.isWeight ? ' /$weightUnit' : ''}',
       style: item.name == '' && settings.compactItemList == true
           ? Theme.of(context).textTheme.titleMedium
           : Theme.of(context).textTheme.bodySmall,
