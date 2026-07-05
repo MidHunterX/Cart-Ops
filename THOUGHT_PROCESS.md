@@ -58,3 +58,49 @@ and I want to group all of those purchases separate from the other purchases?
 Since this is proprietary and closed source, I cannot take it and modify it for
 myself and I'll have to depend on the developer to implement all of those
 features.
+
+## Re-Inventing a better wheel
+
+### Items List Style
+
+On adding items to a purchase, every single attribute is optional.
+
+- Weight/Unit
+- Item Name
+- Item Price per Unit
+- Image
+- Discount
+
+Items Style can be toggled in settings. There are two options:
+
+#### Dynamic List
+
+This list style is meant to latch on to the 'Mere-exposure effect' for
+cognitive familiarity by designing item entry in a way similar to school
+mathematics `Items x Price = Total Price`.
+
+So for each item, the UI is composed of three parts: Unit, Price and Total.
+
+In Items Section (Left Side), Items or Weight is shown based on the entry. If
+not present, a button is shown to add weight or unit.
+
+Price Section (Next to Unit Section) shows the **price** with more emphasis to
+read as `Items x Price`. For example, 2 units of amt 10 is 20. But if the
+name is provided, **name** overrides the emphasis to read as: 2 Lemon cost 20.
+Following 'Gestalt Proximity Principle', the price will be under the name as
+it's the cost of the item Lemon. Image is also optionally shown next to name.
+
+Total Section (Right Side) shows the **total** as right aligned. This is the
+standard for calculations. If per item price is not set, a button to input is
+shown here instead of price section. Because this section cannot exist without
+a per item price and also for balancing composition.
+
+#### Structured List
+
+This style is for people who prefers a structured, organized and predictable
+environment. Every single item attribute have a dedicated place in the UI. This
+keeps everything predictable. If you want to look for something, you'll know
+where it is exactly; catering to OCD like tendencies.
+
+For ASD, I'd suggest the Dynamic List to reduce the visual noise and sticking
+to self selected attributes only for not breaking the pattern.
