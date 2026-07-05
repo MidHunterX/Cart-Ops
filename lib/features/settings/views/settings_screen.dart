@@ -33,13 +33,20 @@ class SettingsScreen extends StatelessWidget {
             ),
           ),
 
-          const Divider(),
-
           ListTile(
             title: const Text('Theme Color'),
             subtitle: ThemeColorPicker(
               selectedColor: settings.seedColor,
               onColorSelected: settings.setSeedColor,
+            ),
+          ),
+
+          ListTile(
+            title: const Text('Image Placeholder'),
+            subtitle: Text(settings.itemImagePlaceholder ?? false ? 'Enabled' : 'Disabled'),
+            trailing: Switch(
+              value: settings.itemImagePlaceholder ?? false,
+              onChanged: settings.setItemImagePlaceholder,
             ),
           ),
 

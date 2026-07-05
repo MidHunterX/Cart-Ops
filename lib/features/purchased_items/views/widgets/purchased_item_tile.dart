@@ -128,28 +128,29 @@ class PurchasedItemTile extends StatelessWidget {
                     SizedBox(width: spacing),
 
                     // Image Section
-                    Container(
-                      width: imgSize,
-                      height: imgSize,
-                      decoration: BoxDecoration(
-                        color: colorScheme.surfaceContainerHighest,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: item.imagePath != null
-                          ? ClipRRect(
-                              borderRadius: BorderRadius.circular(8),
-                              child: Image.file(
-                                File(item.imagePath!),
-                                fit: BoxFit.cover,
-                                errorBuilder: (_, _, _) => const Icon(Icons.image_not_supported),
+                    if (item.imagePath != null || settings.itemImagePlaceholder == true)
+                      Container(
+                        width: imgSize,
+                        height: imgSize,
+                        decoration: BoxDecoration(
+                          color: colorScheme.surfaceContainerHighest,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: item.imagePath != null
+                            ? ClipRRect(
+                                borderRadius: BorderRadius.circular(8),
+                                child: Image.file(
+                                  File(item.imagePath!),
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (_, _, _) => const Icon(Icons.image_not_supported),
+                                ),
+                              )
+                            : Icon(
+                                Icons.shopping_bag_outlined,
+                                color: colorScheme.onSurfaceVariant,
+                                size: imgSize * 0.6,
                               ),
-                            )
-                          : Icon(
-                              Icons.shopping_bag_outlined,
-                              color: colorScheme.onSurfaceVariant,
-                              size: imgSize * 0.6,
-                            ),
-                    ),
+                      ),
                     SizedBox(width: spacing),
 
                     // Main Details Section (Name, Unit Price, Total Price)
