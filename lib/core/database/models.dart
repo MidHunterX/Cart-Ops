@@ -30,10 +30,13 @@ class Items extends Table {
 
 class PurchasedItems extends Table {
   IntColumn get id => integer().autoIncrement()();
+  TextColumn get name => text().nullable().withLength(min: 1, max: 100)();
+  TextColumn get imagePath => text().nullable()();
   RealColumn get price => real().nullable()();
   BoolColumn get isWeight => boolean().withDefault(const Constant(false))();
   RealColumn get quantity => real().nullable()(); // int => unit, float => weight
   RealColumn get discount => real().withDefault(const Constant(0.0))();
   IntColumn get purchaseId => integer().references(Purchases, #id, onDelete: KeyAction.cascade)();
-  IntColumn get itemId => integer().references(Items, #id, onDelete: KeyAction.cascade)();
+  IntColumn get itemId =>
+      integer().nullable().references(Items, #id, onDelete: KeyAction.cascade)();
 }

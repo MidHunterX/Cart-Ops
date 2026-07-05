@@ -931,6 +931,30 @@ class $PurchasedItemsTable extends PurchasedItems
       'PRIMARY KEY AUTOINCREMENT',
     ),
   );
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+    'name',
+    aliasedName,
+    true,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 100,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _imagePathMeta = const VerificationMeta(
+    'imagePath',
+  );
+  @override
+  late final GeneratedColumn<String> imagePath = GeneratedColumn<String>(
+    'image_path',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _priceMeta = const VerificationMeta('price');
   @override
   late final GeneratedColumn<double> price = GeneratedColumn<double>(
@@ -997,9 +1021,9 @@ class $PurchasedItemsTable extends PurchasedItems
   late final GeneratedColumn<int> itemId = GeneratedColumn<int>(
     'item_id',
     aliasedName,
-    false,
+    true,
     type: DriftSqlType.int,
-    requiredDuringInsert: true,
+    requiredDuringInsert: false,
     defaultConstraints: GeneratedColumn.constraintIsAlways(
       'REFERENCES items (id) ON DELETE CASCADE',
     ),
@@ -1007,6 +1031,8 @@ class $PurchasedItemsTable extends PurchasedItems
   @override
   List<GeneratedColumn> get $columns => [
     id,
+    name,
+    imagePath,
     price,
     isWeight,
     quantity,
@@ -1028,6 +1054,18 @@ class $PurchasedItemsTable extends PurchasedItems
     final data = instance.toColumns(true);
     if (data.containsKey('id')) {
       context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+        _nameMeta,
+        name.isAcceptableOrUnknown(data['name']!, _nameMeta),
+      );
+    }
+    if (data.containsKey('image_path')) {
+      context.handle(
+        _imagePathMeta,
+        imagePath.isAcceptableOrUnknown(data['image_path']!, _imagePathMeta),
+      );
     }
     if (data.containsKey('price')) {
       context.handle(
@@ -1066,8 +1104,6 @@ class $PurchasedItemsTable extends PurchasedItems
         _itemIdMeta,
         itemId.isAcceptableOrUnknown(data['item_id']!, _itemIdMeta),
       );
-    } else if (isInserting) {
-      context.missing(_itemIdMeta);
     }
     return context;
   }
@@ -1082,6 +1118,14 @@ class $PurchasedItemsTable extends PurchasedItems
         DriftSqlType.int,
         data['${effectivePrefix}id'],
       )!,
+      name: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name'],
+      ),
+      imagePath: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}image_path'],
+      ),
       price: attachedDatabase.typeMapping.read(
         DriftSqlType.double,
         data['${effectivePrefix}price'],
@@ -1105,7 +1149,7 @@ class $PurchasedItemsTable extends PurchasedItems
       itemId: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}item_id'],
-      )!,
+      ),
     );
   }
 
@@ -1117,25 +1161,35 @@ class $PurchasedItemsTable extends PurchasedItems
 
 class PurchasedItem extends DataClass implements Insertable<PurchasedItem> {
   final int id;
+  final String? name;
+  final String? imagePath;
   final double? price;
   final bool isWeight;
   final double? quantity;
   final double discount;
   final int purchaseId;
-  final int itemId;
+  final int? itemId;
   const PurchasedItem({
     required this.id,
+    this.name,
+    this.imagePath,
     this.price,
     required this.isWeight,
     this.quantity,
     required this.discount,
     required this.purchaseId,
-    required this.itemId,
+    this.itemId,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
+    if (!nullToAbsent || name != null) {
+      map['name'] = Variable<String>(name);
+    }
+    if (!nullToAbsent || imagePath != null) {
+      map['image_path'] = Variable<String>(imagePath);
+    }
     if (!nullToAbsent || price != null) {
       map['price'] = Variable<double>(price);
     }
@@ -1145,13 +1199,19 @@ class PurchasedItem extends DataClass implements Insertable<PurchasedItem> {
     }
     map['discount'] = Variable<double>(discount);
     map['purchase_id'] = Variable<int>(purchaseId);
-    map['item_id'] = Variable<int>(itemId);
+    if (!nullToAbsent || itemId != null) {
+      map['item_id'] = Variable<int>(itemId);
+    }
     return map;
   }
 
   PurchasedItemsCompanion toCompanion(bool nullToAbsent) {
     return PurchasedItemsCompanion(
       id: Value(id),
+      name: name == null && nullToAbsent ? const Value.absent() : Value(name),
+      imagePath: imagePath == null && nullToAbsent
+          ? const Value.absent()
+          : Value(imagePath),
       price: price == null && nullToAbsent
           ? const Value.absent()
           : Value(price),
@@ -1161,7 +1221,9 @@ class PurchasedItem extends DataClass implements Insertable<PurchasedItem> {
           : Value(quantity),
       discount: Value(discount),
       purchaseId: Value(purchaseId),
-      itemId: Value(itemId),
+      itemId: itemId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(itemId),
     );
   }
 
@@ -1172,12 +1234,14 @@ class PurchasedItem extends DataClass implements Insertable<PurchasedItem> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return PurchasedItem(
       id: serializer.fromJson<int>(json['id']),
+      name: serializer.fromJson<String?>(json['name']),
+      imagePath: serializer.fromJson<String?>(json['imagePath']),
       price: serializer.fromJson<double?>(json['price']),
       isWeight: serializer.fromJson<bool>(json['isWeight']),
       quantity: serializer.fromJson<double?>(json['quantity']),
       discount: serializer.fromJson<double>(json['discount']),
       purchaseId: serializer.fromJson<int>(json['purchaseId']),
-      itemId: serializer.fromJson<int>(json['itemId']),
+      itemId: serializer.fromJson<int?>(json['itemId']),
     );
   }
   @override
@@ -1185,35 +1249,43 @@ class PurchasedItem extends DataClass implements Insertable<PurchasedItem> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
+      'name': serializer.toJson<String?>(name),
+      'imagePath': serializer.toJson<String?>(imagePath),
       'price': serializer.toJson<double?>(price),
       'isWeight': serializer.toJson<bool>(isWeight),
       'quantity': serializer.toJson<double?>(quantity),
       'discount': serializer.toJson<double>(discount),
       'purchaseId': serializer.toJson<int>(purchaseId),
-      'itemId': serializer.toJson<int>(itemId),
+      'itemId': serializer.toJson<int?>(itemId),
     };
   }
 
   PurchasedItem copyWith({
     int? id,
+    Value<String?> name = const Value.absent(),
+    Value<String?> imagePath = const Value.absent(),
     Value<double?> price = const Value.absent(),
     bool? isWeight,
     Value<double?> quantity = const Value.absent(),
     double? discount,
     int? purchaseId,
-    int? itemId,
+    Value<int?> itemId = const Value.absent(),
   }) => PurchasedItem(
     id: id ?? this.id,
+    name: name.present ? name.value : this.name,
+    imagePath: imagePath.present ? imagePath.value : this.imagePath,
     price: price.present ? price.value : this.price,
     isWeight: isWeight ?? this.isWeight,
     quantity: quantity.present ? quantity.value : this.quantity,
     discount: discount ?? this.discount,
     purchaseId: purchaseId ?? this.purchaseId,
-    itemId: itemId ?? this.itemId,
+    itemId: itemId.present ? itemId.value : this.itemId,
   );
   PurchasedItem copyWithCompanion(PurchasedItemsCompanion data) {
     return PurchasedItem(
       id: data.id.present ? data.id.value : this.id,
+      name: data.name.present ? data.name.value : this.name,
+      imagePath: data.imagePath.present ? data.imagePath.value : this.imagePath,
       price: data.price.present ? data.price.value : this.price,
       isWeight: data.isWeight.present ? data.isWeight.value : this.isWeight,
       quantity: data.quantity.present ? data.quantity.value : this.quantity,
@@ -1229,6 +1301,8 @@ class PurchasedItem extends DataClass implements Insertable<PurchasedItem> {
   String toString() {
     return (StringBuffer('PurchasedItem(')
           ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('imagePath: $imagePath, ')
           ..write('price: $price, ')
           ..write('isWeight: $isWeight, ')
           ..write('quantity: $quantity, ')
@@ -1240,13 +1314,24 @@ class PurchasedItem extends DataClass implements Insertable<PurchasedItem> {
   }
 
   @override
-  int get hashCode =>
-      Object.hash(id, price, isWeight, quantity, discount, purchaseId, itemId);
+  int get hashCode => Object.hash(
+    id,
+    name,
+    imagePath,
+    price,
+    isWeight,
+    quantity,
+    discount,
+    purchaseId,
+    itemId,
+  );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is PurchasedItem &&
           other.id == this.id &&
+          other.name == this.name &&
+          other.imagePath == this.imagePath &&
           other.price == this.price &&
           other.isWeight == this.isWeight &&
           other.quantity == this.quantity &&
@@ -1257,14 +1342,18 @@ class PurchasedItem extends DataClass implements Insertable<PurchasedItem> {
 
 class PurchasedItemsCompanion extends UpdateCompanion<PurchasedItem> {
   final Value<int> id;
+  final Value<String?> name;
+  final Value<String?> imagePath;
   final Value<double?> price;
   final Value<bool> isWeight;
   final Value<double?> quantity;
   final Value<double> discount;
   final Value<int> purchaseId;
-  final Value<int> itemId;
+  final Value<int?> itemId;
   const PurchasedItemsCompanion({
     this.id = const Value.absent(),
+    this.name = const Value.absent(),
+    this.imagePath = const Value.absent(),
     this.price = const Value.absent(),
     this.isWeight = const Value.absent(),
     this.quantity = const Value.absent(),
@@ -1274,16 +1363,19 @@ class PurchasedItemsCompanion extends UpdateCompanion<PurchasedItem> {
   });
   PurchasedItemsCompanion.insert({
     this.id = const Value.absent(),
+    this.name = const Value.absent(),
+    this.imagePath = const Value.absent(),
     this.price = const Value.absent(),
     this.isWeight = const Value.absent(),
     this.quantity = const Value.absent(),
     this.discount = const Value.absent(),
     required int purchaseId,
-    required int itemId,
-  }) : purchaseId = Value(purchaseId),
-       itemId = Value(itemId);
+    this.itemId = const Value.absent(),
+  }) : purchaseId = Value(purchaseId);
   static Insertable<PurchasedItem> custom({
     Expression<int>? id,
+    Expression<String>? name,
+    Expression<String>? imagePath,
     Expression<double>? price,
     Expression<bool>? isWeight,
     Expression<double>? quantity,
@@ -1293,6 +1385,8 @@ class PurchasedItemsCompanion extends UpdateCompanion<PurchasedItem> {
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
+      if (name != null) 'name': name,
+      if (imagePath != null) 'image_path': imagePath,
       if (price != null) 'price': price,
       if (isWeight != null) 'is_weight': isWeight,
       if (quantity != null) 'quantity': quantity,
@@ -1304,15 +1398,19 @@ class PurchasedItemsCompanion extends UpdateCompanion<PurchasedItem> {
 
   PurchasedItemsCompanion copyWith({
     Value<int>? id,
+    Value<String?>? name,
+    Value<String?>? imagePath,
     Value<double?>? price,
     Value<bool>? isWeight,
     Value<double?>? quantity,
     Value<double>? discount,
     Value<int>? purchaseId,
-    Value<int>? itemId,
+    Value<int?>? itemId,
   }) {
     return PurchasedItemsCompanion(
       id: id ?? this.id,
+      name: name ?? this.name,
+      imagePath: imagePath ?? this.imagePath,
       price: price ?? this.price,
       isWeight: isWeight ?? this.isWeight,
       quantity: quantity ?? this.quantity,
@@ -1327,6 +1425,12 @@ class PurchasedItemsCompanion extends UpdateCompanion<PurchasedItem> {
     final map = <String, Expression>{};
     if (id.present) {
       map['id'] = Variable<int>(id.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (imagePath.present) {
+      map['image_path'] = Variable<String>(imagePath.value);
     }
     if (price.present) {
       map['price'] = Variable<double>(price.value);
@@ -1353,6 +1457,8 @@ class PurchasedItemsCompanion extends UpdateCompanion<PurchasedItem> {
   String toString() {
     return (StringBuffer('PurchasedItemsCompanion(')
           ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('imagePath: $imagePath, ')
           ..write('price: $price, ')
           ..write('isWeight: $isWeight, ')
           ..write('quantity: $quantity, ')
@@ -2530,22 +2636,26 @@ typedef $$ItemsTableProcessedTableManager =
 typedef $$PurchasedItemsTableCreateCompanionBuilder =
     PurchasedItemsCompanion Function({
       Value<int> id,
+      Value<String?> name,
+      Value<String?> imagePath,
       Value<double?> price,
       Value<bool> isWeight,
       Value<double?> quantity,
       Value<double> discount,
       required int purchaseId,
-      required int itemId,
+      Value<int?> itemId,
     });
 typedef $$PurchasedItemsTableUpdateCompanionBuilder =
     PurchasedItemsCompanion Function({
       Value<int> id,
+      Value<String?> name,
+      Value<String?> imagePath,
       Value<double?> price,
       Value<bool> isWeight,
       Value<double?> quantity,
       Value<double> discount,
       Value<int> purchaseId,
-      Value<int> itemId,
+      Value<int?> itemId,
     });
 
 final class $$PurchasedItemsTableReferences
@@ -2576,9 +2686,9 @@ final class $$PurchasedItemsTableReferences
   static $ItemsTable _itemIdTable(_$AppDatabase db) =>
       db.items.createAlias('purchased_items__item_id__items__id');
 
-  $$ItemsTableProcessedTableManager get itemId {
-    final $_column = $_itemColumn<int>('item_id')!;
-
+  $$ItemsTableProcessedTableManager? get itemId {
+    final $_column = $_itemColumn<int>('item_id');
+    if ($_column == null) return null;
     final manager = $$ItemsTableTableManager(
       $_db,
       $_db.items,
@@ -2602,6 +2712,16 @@ class $$PurchasedItemsTableFilterComposer
   });
   ColumnFilters<int> get id => $composableBuilder(
     column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get imagePath => $composableBuilder(
+    column: $table.imagePath,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -2686,6 +2806,16 @@ class $$PurchasedItemsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get imagePath => $composableBuilder(
+    column: $table.imagePath,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<double> get price => $composableBuilder(
     column: $table.price,
     builder: (column) => ColumnOrderings(column),
@@ -2764,6 +2894,12 @@ class $$PurchasedItemsTableAnnotationComposer
   });
   GeneratedColumn<int> get id =>
       $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<String> get imagePath =>
+      $composableBuilder(column: $table.imagePath, builder: (column) => column);
 
   GeneratedColumn<double> get price =>
       $composableBuilder(column: $table.price, builder: (column) => column);
@@ -2855,14 +2991,18 @@ class $$PurchasedItemsTableTableManager
           updateCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
+                Value<String?> name = const Value.absent(),
+                Value<String?> imagePath = const Value.absent(),
                 Value<double?> price = const Value.absent(),
                 Value<bool> isWeight = const Value.absent(),
                 Value<double?> quantity = const Value.absent(),
                 Value<double> discount = const Value.absent(),
                 Value<int> purchaseId = const Value.absent(),
-                Value<int> itemId = const Value.absent(),
+                Value<int?> itemId = const Value.absent(),
               }) => PurchasedItemsCompanion(
                 id: id,
+                name: name,
+                imagePath: imagePath,
                 price: price,
                 isWeight: isWeight,
                 quantity: quantity,
@@ -2873,14 +3013,18 @@ class $$PurchasedItemsTableTableManager
           createCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
+                Value<String?> name = const Value.absent(),
+                Value<String?> imagePath = const Value.absent(),
                 Value<double?> price = const Value.absent(),
                 Value<bool> isWeight = const Value.absent(),
                 Value<double?> quantity = const Value.absent(),
                 Value<double> discount = const Value.absent(),
                 required int purchaseId,
-                required int itemId,
+                Value<int?> itemId = const Value.absent(),
               }) => PurchasedItemsCompanion.insert(
                 id: id,
+                name: name,
+                imagePath: imagePath,
                 price: price,
                 isWeight: isWeight,
                 quantity: quantity,

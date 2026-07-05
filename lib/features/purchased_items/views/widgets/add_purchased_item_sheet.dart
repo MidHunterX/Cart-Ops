@@ -180,15 +180,7 @@ class _AddPurchasedItemSheetState extends State<AddPurchasedItemSheet> {
   }
 
   void _submit() async {
-    // TODO: Name is required for now because purchased_items connects to itemId
     final name = _name.trim();
-    if (name.isEmpty) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Please select an item name')));
-      _showNameDialog();
-      return;
-    }
 
     final priceStr = _priceStr.trim();
     final qtyStr = _qtyStr.trim();

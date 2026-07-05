@@ -34,26 +34,32 @@ class PurchasedItemsRepository {
       targetItem = await _itemsDao.findItem(itemId, group?.id);
     }
 
-    int finalItemId;
+    int? finalItemId;
     if (targetItem != null) {
       finalItemId = targetItem.id;
       if (imagePath.present) {
         await _itemsDao.updateItemImage(finalItemId, imagePath.value);
       }
     } else {
-      finalItemId = await _itemsDao.insertItem(
-        ItemsCompanion.insert(name: name, groupId: Value(group?.id), imagePath: imagePath),
-      );
+      final trimmedName = name.trim();
+      // Item entry is created from purchased_items only if it's eligible for tracking:
+      if (trimmedName.isNotEmpty && price != null && qty != null) {
+        finalItemId = await _itemsDao.insertItem(
+          ItemsCompanion.insert(name: trimmedName, groupId: Value(group?.id), imagePath: imagePath),
+        );
+      }
     }
 
     await _purchasedItemsDao.insertPurchasedItem(
       PurchasedItemsCompanion.insert(
+        name: Value(name.trim().isEmpty ? null : name.trim()),
+        imagePath: imagePath,
         price: Value(price),
         quantity: Value(qty),
         isWeight: Value(isWeight),
         discount: Value(discount),
         purchaseId: purchaseId,
-        itemId: finalItemId,
+        itemId: Value(finalItemId),
       ),
     );
   }
@@ -64,6 +70,7 @@ class PurchasedItemsRepository {
     required double? qty,
     required double discount,
     required bool isWeight,
+    Value<String?> imagePath = const Value.absent(),
   }) async {
     await _purchasedItemsDao.updatePurchasedItem(
       PurchasedItemsCompanion(
@@ -72,6 +79,7 @@ class PurchasedItemsRepository {
         quantity: Value(qty),
         discount: Value(discount),
         isWeight: Value(isWeight),
+        imagePath: imagePath,
       ),
     );
   }

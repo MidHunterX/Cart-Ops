@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:drift/drift.dart' as drift;
 import 'package:shopping_assist/core/database/database.dart';
 import 'package:shopping_assist/core/utils/number_formatter.dart';
 import 'package:shopping_assist/features/items/repositories/items_repository.dart';
@@ -44,6 +45,7 @@ class _EditPurchasedItemSheetState extends State<EditPurchasedItemSheet> {
   late FocusNode _priceFocusNode;
   late FocusNode _qtyFocusNode;
   String? _imagePath;
+  bool _imageChanged = false;
 
   @override
   void initState() {
@@ -99,14 +101,24 @@ class _EditPurchasedItemSheetState extends State<EditPurchasedItemSheet> {
     final action = await ImagePickerUtil.showImagePickerOptions(context, _imagePath != null);
 
     if (action == ImagePickerAction.remove) {
-      setState(() => _imagePath = null);
-      if (mounted) context.read<ItemsRepository>().updateItemImage(widget.item.id, null);
+      setState(() {
+        _imagePath = null;
+        _imageChanged = true;
+      });
+      if (widget.item.id != -1 && mounted) {
+        context.read<ItemsRepository>().updateItemImage(widget.item.id, null);
+      }
     } else if (action == ImagePickerAction.gallery || action == ImagePickerAction.camera) {
       final source = action == ImagePickerAction.gallery ? ImageSource.gallery : ImageSource.camera;
       final path = await ImagePickerUtil.pickAndSaveImage(source);
       if (path != null) {
-        setState(() => _imagePath = path);
-        if (mounted) context.read<ItemsRepository>().updateItemImage(widget.item.id, path);
+        setState(() {
+          _imagePath = path;
+          _imageChanged = true;
+        });
+        if (widget.item.id != -1 && mounted) {
+          context.read<ItemsRepository>().updateItemImage(widget.item.id, path);
+        }
       }
     }
   }
@@ -193,6 +205,7 @@ class _EditPurchasedItemSheetState extends State<EditPurchasedItemSheet> {
         qty: qty,
         discount: discount,
         isWeight: _isWeight,
+        imagePath: _imageChanged ? drift.Value(_imagePath) : const drift.Value.absent(),
       );
       if (mounted) Navigator.pop(context);
     } catch (e) {

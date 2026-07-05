@@ -13,8 +13,16 @@ part 'database.g.dart';
 // So, this is kept here in database
 class PurchasedItemWithDetails {
   final PurchasedItem purchasedItem;
-  final Item item;
-  PurchasedItemWithDetails(this.purchasedItem, this.item);
+  final Item? _item;
+
+  PurchasedItemWithDetails(this.purchasedItem, this._item);
+
+  // Custom getter to prevent crashes on screens that try accessing linked Item details.
+  Item get item => _item ?? Item(
+    id: purchasedItem.itemId ?? -1,
+    name: purchasedItem.name ?? 'Unnamed Item',
+    imagePath: purchasedItem.imagePath,
+  );
 }
 
 class PurchasedItemWithPurchase {
