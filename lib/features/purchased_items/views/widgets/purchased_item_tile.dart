@@ -406,7 +406,6 @@ class PurchasedItemTile extends StatelessWidget {
   Widget _buildPopupMenu(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     return PopupMenuButton<String>(
-      padding: EdgeInsets.zero,
       icon: Icon(Icons.more_vert, color: colorScheme.onSurfaceVariant),
       onSelected: (value) {
         switch (value) {

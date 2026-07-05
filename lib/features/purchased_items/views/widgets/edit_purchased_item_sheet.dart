@@ -228,34 +228,32 @@ class _EditPurchasedItemSheetState extends State<EditPurchasedItemSheet> {
   Widget build(BuildContext context) {
     final weightUnit = context.watch<SettingsProvider>().weightUnit;
     return Padding(
-      padding: EdgeInsets.only(
-        bottom: MediaQuery.of(context).viewInsets.bottom,
-        left: 16,
-        right: 16,
-        top: 16,
-      ),
+      padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom, top: 16),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          PurchasedItemFormHeader(
-            title: 'Edit Item',
-            isWeight: _isWeight,
-            onWeightChanged: (val) {
-              setState(() {
-                _isWeight = val;
-                if (val) {
-                  _qtyStr = '';
-                  _qtyController.text = '';
-                  _activeField = ActiveField.quantity;
-                  _qtyFocusNode.requestFocus();
-                } else {
-                  _qtyStr = '1';
-                  _qtyController.text = '1';
-                  _activeField = ActiveField.price;
-                  _priceFocusNode.requestFocus();
-                }
-              });
-            },
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            child: PurchasedItemFormHeader(
+              title: 'Edit Item',
+              isWeight: _isWeight,
+              onWeightChanged: (val) {
+                setState(() {
+                  _isWeight = val;
+                  if (val) {
+                    _qtyStr = '';
+                    _qtyController.text = '';
+                    _activeField = ActiveField.quantity;
+                    _qtyFocusNode.requestFocus();
+                  } else {
+                    _qtyStr = '1';
+                    _qtyController.text = '1';
+                    _activeField = ActiveField.price;
+                    _priceFocusNode.requestFocus();
+                  }
+                });
+              },
+            ),
           ),
           const SizedBox(height: 16),
           _buildFieldsRow(weightUnit),

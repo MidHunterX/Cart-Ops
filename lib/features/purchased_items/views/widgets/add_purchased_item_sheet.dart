@@ -274,19 +274,17 @@ class _AddPurchasedItemSheetState extends State<AddPurchasedItemSheet> {
   Widget build(BuildContext context) {
     final weightUnit = context.watch<SettingsProvider>().weightUnit;
     return Padding(
-      padding: EdgeInsets.only(
-        bottom: MediaQuery.of(context).viewInsets.bottom,
-        left: 16,
-        right: 16,
-        top: 16,
-      ),
+      padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom, top: 16),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          PurchasedItemFormHeader(
-            title: 'Add an Item',
-            isWeight: _isWeight,
-            onWeightChanged: _handleWeightToggle,
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            child: PurchasedItemFormHeader(
+              title: 'Add an Item',
+              isWeight: _isWeight,
+              onWeightChanged: _handleWeightToggle,
+            ),
           ),
           const SizedBox(height: 16),
           _buildFieldsRow(weightUnit),
