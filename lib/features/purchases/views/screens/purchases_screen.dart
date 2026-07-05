@@ -7,6 +7,8 @@ import 'package:shopping_assist/features/purchased_items/views/screens/purchased
 import 'package:shopping_assist/features/purchases/repositories/purchases_repository.dart';
 import 'package:shopping_assist/features/purchases/views/widgets/edit_purchase_dialog.dart';
 import 'package:shopping_assist/features/items/views/screens/items_screen.dart';
+import 'package:shopping_assist/features/settings/providers/settings_provider.dart';
+import 'package:shopping_assist/features/settings/data/settings_data.dart';
 
 class PurchasesScreen extends StatelessWidget {
   final Group group;
@@ -17,6 +19,7 @@ class PurchasesScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final repo = context.watch<PurchasesRepository>();
+    final settings = context.watch<SettingsProvider>();
 
     return Scaffold(
       appBar: AppBar(
@@ -50,6 +53,11 @@ class PurchasesScreen extends StatelessWidget {
         icon: const Icon(Icons.shopping_cart),
         label: const Text('Add Purchase'),
       ),
+      floatingActionButtonLocation: settings.dominantHand == DominantHand.right
+          ? FloatingActionButtonLocation.endFloat
+          : settings.dominantHand == DominantHand.left
+          ? FloatingActionButtonLocation.startFloat
+          : FloatingActionButtonLocation.centerFloat,
       body: StreamBuilder<List<Purchase>>(
         stream: repo.watchPurchasesInGroup(group.id),
         builder: (context, snapshot) {

@@ -8,6 +8,8 @@ import 'package:shopping_assist/features/items/repositories/items_repository.dar
 import 'package:shopping_assist/features/items/views/widgets/add_item_dialog.dart';
 import 'package:shopping_assist/features/items/views/widgets/edit_item_dialog.dart';
 import 'package:shopping_assist/features/items/views/screens/item_detail_screen.dart';
+import 'package:shopping_assist/features/settings/providers/settings_provider.dart';
+import 'package:shopping_assist/features/settings/data/settings_data.dart';
 
 class ItemsScreen extends StatelessWidget {
   final Group? group;
@@ -19,6 +21,7 @@ class ItemsScreen extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final repo = context.watch<ItemsRepository>();
     final title = group == null ? 'General Items' : '${group!.name} Items';
+    final settings = context.watch<SettingsProvider>();
 
     return Scaffold(
       appBar: AppBar(title: Text(title), backgroundColor: colorScheme.primaryContainer),
@@ -63,6 +66,11 @@ class ItemsScreen extends StatelessWidget {
         icon: const Icon(Icons.add),
         label: const Text('Add Item'),
       ),
+      floatingActionButtonLocation: settings.dominantHand == DominantHand.right
+          ? FloatingActionButtonLocation.endFloat
+          : settings.dominantHand == DominantHand.left
+          ? FloatingActionButtonLocation.startFloat
+          : FloatingActionButtonLocation.centerFloat,
     );
   }
 

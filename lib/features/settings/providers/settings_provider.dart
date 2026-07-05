@@ -40,8 +40,7 @@ class SettingsProvider extends ChangeNotifier {
 
   // Compact Item List
 
-  void _loadCompactItemList() =>
-      _compactItemList = _prefs.getBool(_compactItemListKey);
+  void _loadCompactItemList() => _compactItemList = _prefs.getBool(_compactItemListKey);
 
   static const String _compactItemListKey = 'compact_item_list';
   bool? _compactItemList;
@@ -50,6 +49,19 @@ class SettingsProvider extends ChangeNotifier {
     _compactItemList = isCompact;
     notifyListeners();
     _prefs.setBool(_compactItemListKey, isCompact ?? false);
+  }
+
+  // Floating Action Button
+
+  void _loadDominantHandSettings() => _dominantHand = _prefs.getString(_dominantHandKey);
+
+  static const String _dominantHandKey = DominantHand.right;
+  String? _dominantHand;
+  String? get dominantHand => _dominantHand;
+  void setFab(String? fabLocation) async {
+    _dominantHand = fabLocation;
+    notifyListeners();
+    _prefs.setString(_dominantHandKey, fabLocation ?? DominantHand.right);
   }
 
   // █░░ █▀█ █▀▀ ▄▀█ █░░ █ ▀█ ▄▀█ ▀█▀ █ █▀█ █▄░█
@@ -92,5 +104,6 @@ class SettingsProvider extends ChangeNotifier {
     _loadWeightSettings();
     _loadCurrencySettings();
     _loadCompactItemList();
+    _loadDominantHandSettings();
   }
 }

@@ -1,5 +1,11 @@
 import 'package:flutter/material.dart';
 
+class DominantHand {
+  static const String right = 'Right';
+  static const String left = 'Left';
+  static const String center = 'Ambidextrous';
+}
+
 final List<Color> colorOptions = [
   Colors.green,
   Colors.blue,

@@ -11,6 +11,8 @@ import 'package:shopping_assist/features/purchases/views/screens/purchases_scree
 import 'package:shopping_assist/features/purchases/views/widgets/edit_purchase_dialog.dart';
 import 'package:shopping_assist/features/items/views/screens/items_screen.dart';
 import 'package:shopping_assist/features/settings/views/settings_screen.dart';
+import 'package:shopping_assist/features/settings/providers/settings_provider.dart';
+import 'package:shopping_assist/features/settings/data/settings_data.dart';
 
 class GroupsScreen extends StatelessWidget {
   const GroupsScreen({super.key});
@@ -20,6 +22,7 @@ class GroupsScreen extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final groupsRepo = context.watch<GroupsRepository>();
     final purchasesRepo = context.watch<PurchasesRepository>();
+    final settings = context.watch<SettingsProvider>();
 
     return Scaffold(
       appBar: AppBar(
@@ -58,6 +61,11 @@ class GroupsScreen extends StatelessWidget {
         icon: const Icon(Icons.shopping_cart),
         label: const Text('Add Purchase'),
       ),
+      floatingActionButtonLocation: settings.dominantHand == DominantHand.right
+          ? FloatingActionButtonLocation.endFloat
+          : settings.dominantHand == DominantHand.left
+          ? FloatingActionButtonLocation.startFloat
+          : FloatingActionButtonLocation.centerFloat,
       body: ListView(
         padding: const EdgeInsets.only(bottom: 80),
         children: [

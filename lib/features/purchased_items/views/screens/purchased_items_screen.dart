@@ -6,6 +6,8 @@ import 'package:shopping_assist/core/widgets/empty_state.dart';
 import 'package:shopping_assist/features/purchased_items/repositories/purchased_items_repository.dart';
 import 'package:shopping_assist/features/purchased_items/views/widgets/purchased_item_tile.dart';
 import 'package:shopping_assist/features/purchased_items/views/widgets/purchase_summary_card.dart';
+import 'package:shopping_assist/features/settings/providers/settings_provider.dart';
+import 'package:shopping_assist/features/settings/data/settings_data.dart';
 
 class PurchasedItemsScreen extends StatelessWidget {
   final Purchase purchase;
@@ -17,6 +19,7 @@ class PurchasedItemsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final repo = context.watch<PurchasedItemsRepository>();
     final colorScheme = Theme.of(context).colorScheme;
+    final settings = context.watch<SettingsProvider>();
 
     return Scaffold(
       appBar: AppBar(title: Text(purchase.name), backgroundColor: colorScheme.primaryContainer),
@@ -75,6 +78,11 @@ class PurchasedItemsScreen extends StatelessWidget {
         icon: const Icon(Icons.add),
         label: const Text('Add Item'),
       ),
+      floatingActionButtonLocation: settings.dominantHand == DominantHand.right
+          ? FloatingActionButtonLocation.endFloat
+          : settings.dominantHand == DominantHand.left
+          ? FloatingActionButtonLocation.startFloat
+          : FloatingActionButtonLocation.centerFloat,
     );
   }
 }
