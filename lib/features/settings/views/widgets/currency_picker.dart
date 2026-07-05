@@ -54,6 +54,8 @@ class _CurrencyPickerState extends State<CurrencyPicker> {
             itemBuilder: (context, index) {
               final currency = _filteredCurrencies[index];
               return ListTile(
+                selected: currency.code == widget.settings.currencyCode,
+                selectedTileColor: Theme.of(context).colorScheme.primaryContainer,
                 leading: Text(
                   currency.flag,
                   style: const TextStyle(fontSize: 24),
