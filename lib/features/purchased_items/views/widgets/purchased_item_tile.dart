@@ -55,10 +55,7 @@ class PurchasedItemTile extends StatelessWidget {
             InkWell(
               onLongPress: () => _showEditSheet(context),
               child: Padding(
-                padding: EdgeInsets.symmetric(
-                  horizontal: isSmallScreen ? 12.0 : 16.0,
-                  vertical: 12.0,
-                ),
+                padding: EdgeInsets.symmetric(vertical: 12.0),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
