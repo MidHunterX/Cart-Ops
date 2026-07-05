@@ -49,7 +49,8 @@ class SettingsScreen extends StatelessWidget {
             trailing: const Icon(Icons.arrow_drop_down),
             onTap: () => showModalBottomSheet(
               context: context,
-              isScrollControlled: true, // makes sheet full screen
+              isScrollControlled: true,
+              useSafeArea: true,
               builder: (context) {
                 return CurrencyPicker(settings: settings);
               },
