@@ -38,7 +38,6 @@ class PurchasedItemTile extends StatelessWidget {
 
     final hasQty = pItem.quantity != null;
     final hasPrice = pItem.price != null;
-    final isWeight = pItem.isWeight;
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -66,161 +65,40 @@ class PurchasedItemTile extends StatelessWidget {
                     // Quantity Section
                     SizedBox(
                       width: qtyWidth,
-                      child: hasQty
-                          ? Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                FittedBox(
-                                  fit: BoxFit.scaleDown,
-                                  child: Text(
-                                    pItem.isWeight
-                                        ? pItem.quantity!.toWeightString(weightUnit)
-                                        : pItem.quantity!.toWeightString(''),
-                                    style: Theme.of(
-                                      context,
-                                    ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
-                                  ),
-                                ),
-                                Text(
-                                  pItem.isWeight ? 'Weight' : 'Units',
-                                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                    color: colorScheme.onSurfaceVariant,
-                                  ),
-                                ),
-                              ],
-                            )
-                          : Column(
-                              children: [
-                                pItem.isWeight
-                                    ? OutlinedButton.icon(
-                                        style: OutlinedButton.styleFrom(
-                                          padding: EdgeInsets.symmetric(
-                                            horizontal: isSmallScreen ? 4 : 8,
-                                          ),
-                                        ),
-                                        onPressed: () => _showEditSheet(
-                                          context,
-                                          initialField: ActiveField.quantity,
-                                        ),
-                                        label: Text(weightUnit, style: TextStyle(fontSize: 12)),
-                                      )
-                                    : SizedBox(
-                                        height: 40,
-                                        child: UnitQuantitySelector(
-                                          quantity: '0',
-                                          onIncrement: () {
-                                            context
-                                                .read<PurchasedItemsRepository>()
-                                                .updatePurchasedItem(
-                                                  id: pItem.id,
-                                                  price: pItem.price,
-                                                  qty: 1,
-                                                  discount: pItem.discount,
-                                                  isWeight: pItem.isWeight,
-                                                );
-                                          },
-                                          onDecrement: () {},
-                                        ),
-                                      ),
-                              ],
-                            ),
+                      child: _buildQuantitySection(
+                        context,
+                        pItem,
+                        hasQty,
+                        isSmallScreen,
+                        weightUnit,
+                        colorScheme,
+                      ),
                     ),
                     SizedBox(width: spacing),
 
                     // Image Section
-                    if (item.imagePath != null || settings.compactItemList == false)
-                      Container(
-                        width: imgSize,
-                        height: imgSize,
-                        decoration: BoxDecoration(
-                          color: colorScheme.surfaceContainerHighest,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: item.imagePath != null
-                            ? ClipRRect(
-                                borderRadius: BorderRadius.circular(8),
-                                child: Image.file(
-                                  File(item.imagePath!),
-                                  fit: BoxFit.cover,
-                                  errorBuilder: (_, _, _) => const Icon(Icons.image_not_supported),
-                                ),
-                              )
-                            : Icon(
-                                Icons.shopping_bag_outlined,
-                                color: colorScheme.onSurfaceVariant,
-                                size: imgSize * 0.6,
-                              ),
-                      ),
-                    SizedBox(width: spacing),
+                    if (item.imagePath != null || settings.compactItemList == false) ...[
+                      _buildImageSection(item, colorScheme, imgSize),
+                      SizedBox(width: spacing),
+                    ],
 
                     // Main Details Section (Name, Unit Price, Total Price)
                     Expanded(
-                      // Top Row: Name/Unit Price + Total Price
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                if (item.name != '' || settings.compactItemList == false)
-                                  Text(
-                                    item.name == '' && settings.compactItemList == false
-                                        ? '--'
-                                        : item.name,
-                                    style: Theme.of(context).textTheme.titleMedium,
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                if (item.name != '' || settings.compactItemList == false)
-                                  const SizedBox(height: 4),
-                                if (hasPrice)
-                                  if (discountApplied)
-                                    Wrap(
-                                      spacing: 4,
-                                      crossAxisAlignment: WrapCrossAlignment.center,
-                                      children: [
-                                        Text(
-                                          '$currency${pricePerUnit.toStringAsFixed(2)}',
-                                          style: settings.compactItemList == false
-                                              ? Theme.of(context).textTheme.bodySmall?.copyWith(
-                                                  decoration: TextDecoration.lineThrough,
-                                                  color: colorScheme.onSurfaceVariant,
-                                                )
-                                              : Theme.of(context).textTheme.titleMedium?.copyWith(
-                                                  decoration: TextDecoration.lineThrough,
-                                                  color: colorScheme.onSurfaceVariant,
-                                                ),
-                                        ),
-                                        Text(
-                                          '$currency${(pricePerUnit - pItem.discount).toStringAsFixed(2)}',
-                                          style: settings.compactItemList == false
-                                              ? Theme.of(context).textTheme.bodySmall?.copyWith(
-                                                  fontWeight: FontWeight.bold,
-                                                  color: colorScheme.primary,
-                                                )
-                                              : Theme.of(context).textTheme.titleMedium?.copyWith(
-                                                  fontWeight: FontWeight.bold,
-                                                  color: colorScheme.primary,
-                                                ),
-                                        ),
-                                      ],
-                                    )
-                                  else
-                                    Text(
-                                      '$currency${pricePerUnit.toStringAsFixed(2)} ${pItem.isWeight ? '/$weightUnit' : ''}',
-                                      style: item.name == '' && settings.compactItemList == true
-                                          ? Theme.of(context).textTheme.titleMedium
-                                          : Theme.of(context).textTheme.bodySmall,
-                                    )
-                                else
-                                  Text(
-                                    'Price not set',
-                                    style: Theme.of(
-                                      context,
-                                    ).textTheme.bodySmall?.copyWith(color: colorScheme.error),
-                                  ),
-                              ],
+                            child: _buildItemDetails(
+                              context,
+                              item,
+                              pItem,
+                              settings,
+                              colorScheme,
+                              currency,
+                              weightUnit,
+                              hasPrice,
+                              discountApplied,
+                              pricePerUnit,
                             ),
                           ),
                           SizedBox(width: spacing),
@@ -228,56 +106,18 @@ class PurchasedItemTile extends StatelessWidget {
                           // Total Price
                           SizedBox(
                             width: totalAreaWidth,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.end,
-                              children: [
-                                if (hasPrice && hasQty) ...[
-                                  if (discountApplied) ...[
-                                    FittedBox(
-                                      fit: BoxFit.scaleDown,
-                                      child: Text(
-                                        '$currency${totalPrice.toStringAsFixed(2)}',
-                                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                          color: colorScheme.primary,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                    ),
-                                    FittedBox(
-                                      fit: BoxFit.scaleDown,
-                                      child: Text(
-                                        '-$currency${(pItem.discount * qty).toStringAsFixed(2)}',
-                                        style: Theme.of(
-                                          context,
-                                        ).textTheme.bodySmall?.copyWith(color: colorScheme.error),
-                                      ),
-                                    ),
-                                  ] else
-                                    FittedBox(
-                                      fit: BoxFit.scaleDown,
-                                      child: Text(
-                                        '$currency${totalPrice.toStringAsFixed(2)}',
-                                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                    ),
-                                ],
-                                if (!hasPrice)
-                                  OutlinedButton.icon(
-                                    style: OutlinedButton.styleFrom(
-                                      padding: EdgeInsets.symmetric(
-                                        horizontal: isSmallScreen ? 4 : 8,
-                                      ),
-                                    ),
-                                    onPressed: () =>
-                                        _showEditSheet(context, initialField: ActiveField.price),
-                                    label: Text(
-                                      isWeight ? '$currency/$weightUnit' : currency,
-                                      style: TextStyle(fontSize: 12),
-                                    ),
-                                  ),
-                              ],
+                            child: _buildTotalPriceSection(
+                              context,
+                              pItem,
+                              colorScheme,
+                              currency,
+                              weightUnit,
+                              hasPrice,
+                              hasQty,
+                              discountApplied,
+                              totalPrice,
+                              qty,
+                              isSmallScreen,
                             ),
                           ),
                         ],
@@ -287,84 +127,7 @@ class PurchasedItemTile extends StatelessWidget {
                     // Menu Button Section
                     SizedBox(
                       width: 40, // Limits wide trailing spacing
-                      child: Align(
-                        alignment: Alignment.topRight,
-                        child: PopupMenuButton<String>(
-                          padding: EdgeInsets.zero,
-                          icon: Icon(Icons.more_vert, color: colorScheme.onSurfaceVariant),
-                          onSelected: (value) {
-                            switch (value) {
-                              case 'edit':
-                                _showEditSheet(context);
-                                break;
-                              case 'edit_quantity':
-                                _showEditSheet(context, initialField: ActiveField.quantity);
-                                break;
-                              case 'edit_price':
-                                _showEditSheet(context, initialField: ActiveField.price);
-                                break;
-                              case 'edit_discount':
-                                _showEditSheet(context, openDiscount: true);
-                                break;
-                              case 'delete':
-                                _showDeleteConfirmation(context);
-                                break;
-                            }
-                          },
-                          itemBuilder: (context) => [
-                            const PopupMenuItem(
-                              value: 'edit',
-                              child: Row(
-                                children: [
-                                  Icon(Icons.edit_outlined),
-                                  SizedBox(width: 8),
-                                  Text('Edit All'),
-                                ],
-                              ),
-                            ),
-                            const PopupMenuItem(
-                              value: 'edit_quantity',
-                              child: Row(
-                                children: [
-                                  Icon(Icons.numbers),
-                                  SizedBox(width: 8),
-                                  Text('Edit Quantity'),
-                                ],
-                              ),
-                            ),
-                            const PopupMenuItem(
-                              value: 'edit_price',
-                              child: Row(
-                                children: [
-                                  Icon(Icons.attach_money),
-                                  SizedBox(width: 8),
-                                  Text('Edit Price'),
-                                ],
-                              ),
-                            ),
-                            const PopupMenuItem(
-                              value: 'edit_discount',
-                              child: Row(
-                                children: [
-                                  Icon(Icons.local_offer_outlined),
-                                  SizedBox(width: 8),
-                                  Text('Edit Discount'),
-                                ],
-                              ),
-                            ),
-                            const PopupMenuItem(
-                              value: 'delete',
-                              child: Row(
-                                children: [
-                                  Icon(Icons.delete_outline, color: Colors.red),
-                                  SizedBox(width: 8),
-                                  Text('Delete', style: TextStyle(color: Colors.red)),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
+                      child: Align(alignment: Alignment.topRight, child: _buildPopupMenu(context)),
                     ),
                   ],
                 ),
@@ -374,6 +137,327 @@ class PurchasedItemTile extends StatelessWidget {
           ],
         );
       },
+    );
+  }
+
+  Widget _buildQuantitySection(
+    BuildContext context,
+    PurchasedItem pItem,
+    bool hasQty,
+    bool isSmallScreen,
+    String weightUnit,
+    ColorScheme colorScheme,
+  ) {
+    if (hasQty) {
+      return Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              pItem.isWeight
+                  ? pItem.quantity!.toWeightString(weightUnit)
+                  : pItem.quantity!.toWeightString(''),
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+            ),
+          ),
+          Text(
+            pItem.isWeight ? 'Weight' : 'Units',
+            style: Theme.of(
+              context,
+            ).textTheme.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant),
+          ),
+        ],
+      );
+    }
+
+    if (pItem.isWeight) {
+      return Column(
+        children: [
+          OutlinedButton.icon(
+            style: OutlinedButton.styleFrom(
+              padding: EdgeInsets.symmetric(horizontal: isSmallScreen ? 4 : 8),
+            ),
+            onPressed: () => _showEditSheet(context, initialField: ActiveField.quantity),
+            label: Text(weightUnit, style: const TextStyle(fontSize: 12)),
+          ),
+        ],
+      );
+    }
+
+    return Column(
+      children: [
+        SizedBox(
+          height: 40,
+          child: UnitQuantitySelector(
+            quantity: '0',
+            onIncrement: () {
+              context.read<PurchasedItemsRepository>().updatePurchasedItem(
+                id: pItem.id,
+                price: pItem.price,
+                qty: 1,
+                discount: pItem.discount,
+                isWeight: pItem.isWeight,
+              );
+            },
+            onDecrement: () {},
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildImageSection(Item item, ColorScheme colorScheme, double imgSize) {
+    return Container(
+      width: imgSize,
+      height: imgSize,
+      decoration: BoxDecoration(
+        color: colorScheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: item.imagePath != null
+          ? ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: Image.file(
+                File(item.imagePath!),
+                fit: BoxFit.cover,
+                errorBuilder: (_, _, _) => const Icon(Icons.image_not_supported),
+              ),
+            )
+          : Icon(
+              Icons.shopping_bag_outlined,
+              color: colorScheme.onSurfaceVariant,
+              size: imgSize * 0.6,
+            ),
+    );
+  }
+
+  Widget _buildItemDetails(
+    BuildContext context,
+    Item item,
+    PurchasedItem pItem,
+    SettingsProvider settings,
+    ColorScheme colorScheme,
+    String currency,
+    String weightUnit,
+    bool hasPrice,
+    bool discountApplied,
+    double pricePerUnit,
+  ) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (item.name != '' || settings.compactItemList == false) ...[
+          Text(
+            item.name == '' && settings.compactItemList == false ? '--' : item.name,
+            style: Theme.of(context).textTheme.titleMedium,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
+          const SizedBox(height: 4),
+        ],
+        _buildPriceInfo(
+          context,
+          item,
+          pItem,
+          settings,
+          colorScheme,
+          currency,
+          weightUnit,
+          hasPrice,
+          discountApplied,
+          pricePerUnit,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildPriceInfo(
+    BuildContext context,
+    Item item,
+    PurchasedItem pItem,
+    SettingsProvider settings,
+    ColorScheme colorScheme,
+    String currency,
+    String weightUnit,
+    bool hasPrice,
+    bool discountApplied,
+    double pricePerUnit,
+  ) {
+    if (!hasPrice) {
+      return Text(
+        'Price not set',
+        style: Theme.of(context).textTheme.bodySmall?.copyWith(color: colorScheme.error),
+      );
+    }
+
+    if (discountApplied) {
+      return Wrap(
+        spacing: 4,
+        crossAxisAlignment: WrapCrossAlignment.center,
+        children: [
+          Text(
+            '$currency${pricePerUnit.toStringAsFixed(2)}',
+            style: settings.compactItemList == false
+                ? Theme.of(context).textTheme.bodySmall?.copyWith(
+                    decoration: TextDecoration.lineThrough,
+                    color: colorScheme.onSurfaceVariant,
+                  )
+                : Theme.of(context).textTheme.titleMedium?.copyWith(
+                    decoration: TextDecoration.lineThrough,
+                    color: colorScheme.onSurfaceVariant,
+                  ),
+          ),
+          Text(
+            '$currency${(pricePerUnit - pItem.discount).toStringAsFixed(2)}',
+            style: settings.compactItemList == false
+                ? Theme.of(context).textTheme.bodySmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: colorScheme.primary,
+                  )
+                : Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: colorScheme.primary,
+                  ),
+          ),
+        ],
+      );
+    }
+
+    return Text(
+      '$currency${pricePerUnit.toStringAsFixed(2)} ${pItem.isWeight ? '/$weightUnit' : ''}',
+      style: item.name == '' && settings.compactItemList == true
+          ? Theme.of(context).textTheme.titleMedium
+          : Theme.of(context).textTheme.bodySmall,
+    );
+  }
+
+  Widget _buildTotalPriceSection(
+    BuildContext context,
+    PurchasedItem pItem,
+    ColorScheme colorScheme,
+    String currency,
+    String weightUnit,
+    bool hasPrice,
+    bool hasQty,
+    bool discountApplied,
+    double totalPrice,
+    double qty,
+    bool isSmallScreen,
+  ) {
+    if (!hasPrice) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          OutlinedButton.icon(
+            style: OutlinedButton.styleFrom(
+              padding: EdgeInsets.symmetric(horizontal: isSmallScreen ? 4 : 8),
+            ),
+            onPressed: () => _showEditSheet(context, initialField: ActiveField.price),
+            label: Text(
+              pItem.isWeight ? '$currency/$weightUnit' : currency,
+              style: const TextStyle(fontSize: 12),
+            ),
+          ),
+        ],
+      );
+    }
+
+    if (!hasQty) return const SizedBox.shrink();
+
+    if (discountApplied) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              '$currency${totalPrice.toStringAsFixed(2)}',
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                color: colorScheme.primary,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              '-$currency${(pItem.discount * qty).toStringAsFixed(2)}',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(color: colorScheme.error),
+            ),
+          ),
+        ],
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Text(
+            '$currency${totalPrice.toStringAsFixed(2)}',
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildPopupMenu(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return PopupMenuButton<String>(
+      padding: EdgeInsets.zero,
+      icon: Icon(Icons.more_vert, color: colorScheme.onSurfaceVariant),
+      onSelected: (value) {
+        switch (value) {
+          case 'edit':
+            _showEditSheet(context);
+            break;
+          case 'edit_quantity':
+            _showEditSheet(context, initialField: ActiveField.quantity);
+            break;
+          case 'edit_price':
+            _showEditSheet(context, initialField: ActiveField.price);
+            break;
+          case 'edit_discount':
+            _showEditSheet(context, openDiscount: true);
+            break;
+          case 'delete':
+            _showDeleteConfirmation(context);
+            break;
+        }
+      },
+      itemBuilder: (context) => [
+        const PopupMenuItem(
+          value: 'edit',
+          child: Row(children: [Icon(Icons.edit_outlined), SizedBox(width: 8), Text('Edit All')]),
+        ),
+        const PopupMenuItem(
+          value: 'edit_quantity',
+          child: Row(children: [Icon(Icons.numbers), SizedBox(width: 8), Text('Edit Quantity')]),
+        ),
+        const PopupMenuItem(
+          value: 'edit_price',
+          child: Row(children: [Icon(Icons.attach_money), SizedBox(width: 8), Text('Edit Price')]),
+        ),
+        const PopupMenuItem(
+          value: 'edit_discount',
+          child: Row(
+            children: [Icon(Icons.local_offer_outlined), SizedBox(width: 8), Text('Edit Discount')],
+          ),
+        ),
+        const PopupMenuItem(
+          value: 'delete',
+          child: Row(
+            children: [
+              Icon(Icons.delete_outline, color: Colors.red),
+              SizedBox(width: 8),
+              Text('Delete', style: TextStyle(color: Colors.red)),
+            ],
+          ),
+        ),
+      ],
     );
   }
 
