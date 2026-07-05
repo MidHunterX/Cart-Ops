@@ -30,7 +30,7 @@ class SettingsProvider extends ChangeNotifier {
   }
 
   static const String _colorKey = 'seed_color';
-  Color _seedColor = Colors.greenAccent;
+  Color _seedColor = Colors.blue;
   Color get seedColor => _seedColor;
   void setSeedColor(Color color) async {
     _seedColor = color;
@@ -40,28 +40,34 @@ class SettingsProvider extends ChangeNotifier {
 
   // Compact Item List
 
-  void _loadCompactItemList() => _compactItemList = _prefs.getBool(_compactItemListKey);
-
-  static const String _compactItemListKey = 'compact_item_list';
-  bool? _compactItemList;
-  bool? get compactItemList => _compactItemList;
-  void setCompactItemList(bool? isCompact) async {
-    _compactItemList = isCompact;
-    notifyListeners();
-    _prefs.setBool(_compactItemListKey, isCompact ?? false);
+  void _loadCompactItemList() {
+    final compactItemList = _prefs.getBool(_compactItemListKey);
+    if (compactItemList != null) _compactItemList = compactItemList;
   }
 
-  // Floating Action Button
+  static const String _compactItemListKey = 'compact_item_list';
+  bool _compactItemList = false;
+  bool get compactItemList => _compactItemList;
+  void setCompactItemList(bool isCompact) async {
+    _compactItemList = isCompact;
+    notifyListeners();
+    _prefs.setBool(_compactItemListKey, isCompact);
+  }
 
-  void _loadDominantHandSettings() => _dominantHand = _prefs.getString(_dominantHandKey);
+  // Dominant Hand
+
+  void _loadDominantHandSettings() {
+    final dominantHand = _prefs.getString(_dominantHandKey);
+    if (dominantHand != null) _dominantHand = dominantHand;
+  }
 
   static const String _dominantHandKey = DominantHand.right;
-  String? _dominantHand;
-  String? get dominantHand => _dominantHand;
-  void setFab(String? fabLocation) async {
+  String _dominantHand = DominantHand.right;
+  String get dominantHand => _dominantHand;
+  void setFab(String fabLocation) async {
     _dominantHand = fabLocation;
     notifyListeners();
-    _prefs.setString(_dominantHandKey, fabLocation ?? DominantHand.right);
+    _prefs.setString(_dominantHandKey, fabLocation);
   }
 
   // █░░ █▀█ █▀▀ ▄▀█ █░░ █ ▀█ ▄▀█ ▀█▀ █ █▀█ █▄░█

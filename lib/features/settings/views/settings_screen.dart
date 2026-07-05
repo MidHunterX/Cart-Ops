@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:shopping_assist/features/settings/data/settings_data.dart';
 import 'package:shopping_assist/features/settings/providers/settings_provider.dart';
 import './widgets/theme_colorpicker_v2.dart';
 import './widgets/section_header.dart';
@@ -76,17 +75,17 @@ class SettingsScreen extends StatelessWidget {
           ListTile(
             title: const Text('Dynamic Item List'),
             subtitle: Text(
-              settings.compactItemList ?? false ? 'Enabled (Compact)' : 'Disabled (Structured)',
+              settings.compactItemList ? 'Enabled (Compact)' : 'Disabled (Structured)',
             ),
             trailing: Switch(
-              value: settings.compactItemList ?? false,
+              value: settings.compactItemList,
               onChanged: settings.setCompactItemList,
             ),
           ),
 
           ListTile(
             title: const Text('Dominant Hand'),
-            subtitle: Text(settings.dominantHand ?? DominantHand.right),
+            subtitle: Text(settings.dominantHand),
             trailing: const Icon(Icons.arrow_drop_down),
             onTap: () => showModalBottomSheet(
               context: context,

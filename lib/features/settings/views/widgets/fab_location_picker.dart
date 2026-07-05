@@ -2,14 +2,14 @@ import 'package:flutter/material.dart';
 import '../../data/settings_data.dart';
 
 class FabLocationPicker extends StatelessWidget {
-  final String? currentLocation;
-  final Function(String?) onChanged;
+  final String currentLocation;
+  final Function(String) onChanged;
 
   const FabLocationPicker({super.key, required this.currentLocation, required this.onChanged});
 
   @override
   Widget build(BuildContext context) {
-    final current = currentLocation ?? DominantHand.right;
+    final current = currentLocation;
 
     return SafeArea(
       child: Column(
@@ -18,7 +18,7 @@ class FabLocationPicker extends StatelessWidget {
           const Padding(
             padding: EdgeInsets.all(16.0),
             child: Text(
-              'Select FAB Location',
+              'Select Dominant Hand',
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
           ),
@@ -31,17 +31,17 @@ class FabLocationPicker extends StatelessWidget {
           ),
           _buildLocationOption(
             context,
-            value: DominantHand.center,
-            current: current,
-            label: 'Center',
-            icon: Icons.format_align_center,
-          ),
-          _buildLocationOption(
-            context,
             value: DominantHand.right,
             current: current,
             label: 'Right',
             icon: Icons.format_align_right,
+          ),
+          _buildLocationOption(
+            context,
+            value: DominantHand.center,
+            current: current,
+            label: 'Ambidextrous',
+            icon: Icons.format_align_center,
           ),
         ],
       ),

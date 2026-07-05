@@ -1,6 +1,7 @@
 # Cart-Ops
 
-Personal commerce operator tool focusing on the expansion of human abilities through technological assistance.
+Personal commerce operator tool focusing on cognitive delegation of financial
+resource management via technological assistance.
 
 ![Flutter](https://img.shields.io/badge/Flutter-02569B?style=for-the-badge&logo=flutter&logoColor=white)
 ![Dart](https://img.shields.io/badge/Dart-0175C2?style=for-the-badge&logo=dart&logoColor=white)
@@ -53,6 +54,5 @@ dart run build_runner build
 - [ ] Item duplication
 - [x] Item suggestions while typing based on history
 - [x] Easy price per item/quantity toggle
-- [x] Basic Numpad
-- [x] Numpad UI
+- [x] Core Numpad UI
 - [ ] Numpad Variants (top to bottom, bottom to top)
