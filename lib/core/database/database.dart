@@ -20,7 +20,7 @@ class PurchasedItemWithDetails {
   // Custom getter to prevent crashes on screens that try accessing linked Item details.
   Item get item => _item ?? Item(
     id: purchasedItem.itemId ?? -1,
-    name: purchasedItem.name ?? 'Unnamed Item',
+    name: purchasedItem.name ?? '',
     imagePath: purchasedItem.imagePath,
   );
 }

@@ -38,17 +38,18 @@ class SettingsProvider extends ChangeNotifier {
     _prefs.setInt(_colorKey, color.toARGB32());
   }
 
-  // Item Image Placeholder
+  // Compact Item List
 
-  void _loadItemImageSettings() => _itemImagePlaceholder = _prefs.getBool(_itemImagePlaceholderKey);
+  void _loadCompactItemList() =>
+      _compactItemList = _prefs.getBool(_compactItemListKey);
 
-  static const String _itemImagePlaceholderKey = 'item_image_placeholder';
-  bool? _itemImagePlaceholder;
-  bool? get itemImagePlaceholder => _itemImagePlaceholder;
-  void setItemImagePlaceholder(bool? isPlaceholder) async {
-    _itemImagePlaceholder = isPlaceholder;
+  static const String _compactItemListKey = 'compact_item_list';
+  bool? _compactItemList;
+  bool? get compactItemList => _compactItemList;
+  void setCompactItemList(bool? isCompact) async {
+    _compactItemList = isCompact;
     notifyListeners();
-    _prefs.setBool(_itemImagePlaceholderKey, isPlaceholder ?? false);
+    _prefs.setBool(_compactItemListKey, isCompact ?? false);
   }
 
   // █░░ █▀█ █▀▀ ▄▀█ █░░ █ ▀█ ▄▀█ ▀█▀ █ █▀█ █▄░█
@@ -90,6 +91,6 @@ class SettingsProvider extends ChangeNotifier {
     _loadColorSettings();
     _loadWeightSettings();
     _loadCurrencySettings();
-    _loadItemImageSettings();
+    _loadCompactItemList();
   }
 }

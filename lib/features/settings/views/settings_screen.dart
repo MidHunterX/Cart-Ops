@@ -42,11 +42,11 @@ class SettingsScreen extends StatelessWidget {
           ),
 
           ListTile(
-            title: const Text('Image Placeholder'),
-            subtitle: Text(settings.itemImagePlaceholder ?? false ? 'Enabled' : 'Disabled'),
+            title: const Text('Compact Item List'),
+            subtitle: Text(settings.compactItemList ?? false ? 'Enabled' : 'Disabled'),
             trailing: Switch(
-              value: settings.itemImagePlaceholder ?? false,
-              onChanged: settings.setItemImagePlaceholder,
+              value: settings.compactItemList ?? false,
+              onChanged: settings.setCompactItemList,
             ),
           ),
 

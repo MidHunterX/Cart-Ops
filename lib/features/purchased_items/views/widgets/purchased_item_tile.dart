@@ -61,7 +61,7 @@ class PurchasedItemTile extends StatelessWidget {
                   vertical: 12.0,
                 ),
                 child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     // Quantity Section
                     SizedBox(
@@ -128,7 +128,7 @@ class PurchasedItemTile extends StatelessWidget {
                     SizedBox(width: spacing),
 
                     // Image Section
-                    if (item.imagePath != null || settings.itemImagePlaceholder == true)
+                    if (item.imagePath != null || settings.compactItemList == false)
                       Container(
                         width: imgSize,
                         height: imgSize,
@@ -157,19 +157,23 @@ class PurchasedItemTile extends StatelessWidget {
                     Expanded(
                       // Top Row: Name/Unit Price + Total Price
                       child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(
-                                  item.name,
-                                  style: Theme.of(context).textTheme.titleMedium,
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                                const SizedBox(height: 4),
+                                if (item.name != '' || settings.compactItemList == false)
+                                  Text(
+                                    item.name == '' && settings.compactItemList == false
+                                        ? '--'
+                                        : item.name,
+                                    style: Theme.of(context).textTheme.titleMedium,
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                if (item.name != '' || settings.compactItemList == false)
+                                  const SizedBox(height: 4),
                                 if (hasPrice)
                                   if (discountApplied)
                                     Wrap(
@@ -178,24 +182,36 @@ class PurchasedItemTile extends StatelessWidget {
                                       children: [
                                         Text(
                                           '$currency${pricePerUnit.toStringAsFixed(2)}',
-                                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                            decoration: TextDecoration.lineThrough,
-                                            color: colorScheme.onSurfaceVariant,
-                                          ),
+                                          style: settings.compactItemList == false
+                                              ? Theme.of(context).textTheme.bodySmall?.copyWith(
+                                                  decoration: TextDecoration.lineThrough,
+                                                  color: colorScheme.onSurfaceVariant,
+                                                )
+                                              : Theme.of(context).textTheme.titleMedium?.copyWith(
+                                                  decoration: TextDecoration.lineThrough,
+                                                  color: colorScheme.onSurfaceVariant,
+                                                ),
                                         ),
                                         Text(
                                           '$currency${(pricePerUnit - pItem.discount).toStringAsFixed(2)}',
-                                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                            fontWeight: FontWeight.bold,
-                                            color: colorScheme.primary,
-                                          ),
+                                          style: settings.compactItemList == false
+                                              ? Theme.of(context).textTheme.bodySmall?.copyWith(
+                                                  fontWeight: FontWeight.bold,
+                                                  color: colorScheme.primary,
+                                                )
+                                              : Theme.of(context).textTheme.titleMedium?.copyWith(
+                                                  fontWeight: FontWeight.bold,
+                                                  color: colorScheme.primary,
+                                                ),
                                         ),
                                       ],
                                     )
                                   else
                                     Text(
                                       '$currency${pricePerUnit.toStringAsFixed(2)} ${pItem.isWeight ? '/$weightUnit' : ''}',
-                                      style: Theme.of(context).textTheme.bodySmall,
+                                      style: item.name == '' && settings.compactItemList == true
+                                          ? Theme.of(context).textTheme.titleMedium
+                                          : Theme.of(context).textTheme.bodySmall,
                                     )
                                 else
                                   Text(
