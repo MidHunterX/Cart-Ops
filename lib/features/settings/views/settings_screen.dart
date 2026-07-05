@@ -42,7 +42,7 @@ class SettingsScreen extends StatelessWidget {
           ),
 
           ListTile(
-            title: const Text('Compact Item List'),
+            title: const Text('Dynamic Item List'),
             subtitle: Text(settings.compactItemList ?? false ? 'Enabled' : 'Disabled'),
             trailing: Switch(
               value: settings.compactItemList ?? false,

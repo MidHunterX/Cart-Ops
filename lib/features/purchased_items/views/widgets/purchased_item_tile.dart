@@ -298,7 +298,7 @@ class PurchasedItemTile extends StatelessWidget {
         children: [
           Text(
             '$currency${pricePerUnit.toStringAsFixed(2)}',
-            style: settings.compactItemList == false
+            style: settings.compactItemList == false || item.name != ''
                 ? Theme.of(context).textTheme.bodySmall?.copyWith(
                     decoration: TextDecoration.lineThrough,
                     color: colorScheme.onSurfaceVariant,
@@ -310,7 +310,7 @@ class PurchasedItemTile extends StatelessWidget {
           ),
           Text(
             '$currency${(pricePerUnit - pItem.discount).toStringAsFixed(2)}',
-            style: settings.compactItemList == false
+            style: settings.compactItemList == false || item.name != ''
                 ? Theme.of(context).textTheme.bodySmall?.copyWith(
                     fontWeight: FontWeight.bold,
                     color: colorScheme.primary,
