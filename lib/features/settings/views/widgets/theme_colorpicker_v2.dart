@@ -26,8 +26,8 @@ class ThemeColorPicker extends StatelessWidget {
             onTap: () => onColorSelected(color),
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 200),
-              width: 44,
-              height: 44,
+              width: 38,
+              height: 38,
               decoration: ShapeDecoration(
                 color: color,
                 shape: ContinuousRectangleBorder(

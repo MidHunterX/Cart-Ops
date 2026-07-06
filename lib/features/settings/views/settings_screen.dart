@@ -20,7 +20,7 @@ class SettingsScreen extends StatelessWidget {
       appBar: AppBar(title: const Text('Settings'), backgroundColor: colorScheme.primaryContainer),
       body: ListView(
         children: [
-          const SettingsSectionHeader(title: 'Appearance'),
+          const SettingsSectionHeader(title: 'Appearance', icon: Icons.color_lens),
 
           ListTile(
             title: const Text('Theme Mode'),
@@ -41,7 +41,7 @@ class SettingsScreen extends StatelessWidget {
 
           const Divider(),
 
-          const SettingsSectionHeader(title: 'Localization'),
+          const SettingsSectionHeader(title: 'Localization', icon: Icons.language),
 
           ListTile(
             title: const Text('Currency'),
@@ -71,7 +71,7 @@ class SettingsScreen extends StatelessWidget {
 
           const Divider(),
 
-          const SettingsSectionHeader(title: 'Accessibility'),
+          const SettingsSectionHeader(title: 'Accessibility', icon: Icons.accessibility_new),
 
           ListTile(
             title: const Text('Dynamic Item List'),
