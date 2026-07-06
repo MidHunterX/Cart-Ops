@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:shopping_assist/core/database/database.dart';
 import 'package:shopping_assist/core/widgets/delete_confirmation_dialog.dart';
 import 'package:shopping_assist/core/widgets/empty_state.dart';
+import 'package:shopping_assist/core/widgets/dextrous_fab.dart';
 import 'package:shopping_assist/features/items/repositories/items_repository.dart';
 import 'package:shopping_assist/features/items/views/widgets/add_item_dialog.dart';
 import 'package:shopping_assist/features/items/views/widgets/edit_item_dialog.dart';
@@ -58,13 +59,14 @@ class ItemsScreen extends StatelessWidget {
           );
         },
       ),
-      floatingActionButton: FloatingActionButton.extended(
+      floatingActionButton: DextrousFloatingActionButton(
+        isCenter: settings.dominantHand == DominantHand.center,
+        icon: Icons.inventory_2_outlined,
+        label: 'Add Item',
         onPressed: () => showDialog(
           context: context,
           builder: (_) => AddItemDialog(groupId: group?.id),
         ),
-        icon: const Icon(Icons.add),
-        label: const Text('Add Item'),
       ),
       floatingActionButtonLocation: settings.dominantHand == DominantHand.right
           ? FloatingActionButtonLocation.endFloat

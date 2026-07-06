@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:shopping_assist/core/database/database.dart';
 import 'package:shopping_assist/core/widgets/delete_confirmation_dialog.dart';
 import 'package:shopping_assist/core/widgets/empty_state.dart';
+import 'package:shopping_assist/core/widgets/dextrous_fab.dart';
 import 'package:shopping_assist/features/groups/repositories/groups_repository.dart';
 import 'package:shopping_assist/features/groups/views/widgets/add_group_dialog.dart';
 import 'package:shopping_assist/features/purchased_items/views/screens/purchased_items_screen.dart';
@@ -162,7 +163,10 @@ class _GroupsScreenState extends State<GroupsScreen> {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton.extended(
+      floatingActionButton: DextrousFloatingActionButton(
+        isCenter: settings.dominantHand == DominantHand.center,
+        icon: Icons.shopping_cart,
+        label: 'Add Purchase',
         onPressed: () async {
           final purchase = await context.read<PurchasesRepository>().createPurchase(null);
           if (context.mounted) {
@@ -177,8 +181,6 @@ class _GroupsScreenState extends State<GroupsScreen> {
             }
           }
         },
-        icon: const Icon(Icons.shopping_cart),
-        label: const Text('Add Purchase'),
       ),
       floatingActionButtonLocation: settings.dominantHand == DominantHand.right
           ? FloatingActionButtonLocation.endFloat

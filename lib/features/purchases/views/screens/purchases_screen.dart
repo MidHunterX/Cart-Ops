@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:shopping_assist/core/database/database.dart';
 import 'package:shopping_assist/core/widgets/delete_confirmation_dialog.dart';
 import 'package:shopping_assist/core/widgets/empty_state.dart';
+import 'package:shopping_assist/core/widgets/dextrous_fab.dart';
 import 'package:shopping_assist/features/purchased_items/views/screens/purchased_items_screen.dart';
 import 'package:shopping_assist/features/purchases/repositories/purchases_repository.dart';
 import 'package:shopping_assist/features/purchases/views/widgets/edit_purchase_dialog.dart';
@@ -112,7 +113,10 @@ class _PurchasesScreenState extends State<PurchasesScreen> {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton.extended(
+      floatingActionButton: DextrousFloatingActionButton(
+        isCenter: settings.dominantHand == DominantHand.center,
+        icon: Icons.shopping_cart,
+        label: 'Add Purchase',
         onPressed: () async {
           final purchase = await repo.createPurchase(widget.group.id);
           if (context.mounted) {
@@ -127,8 +131,6 @@ class _PurchasesScreenState extends State<PurchasesScreen> {
             }
           }
         },
-        icon: const Icon(Icons.shopping_cart),
-        label: const Text('Add Purchase'),
       ),
       floatingActionButtonLocation: settings.dominantHand == DominantHand.right
           ? FloatingActionButtonLocation.endFloat

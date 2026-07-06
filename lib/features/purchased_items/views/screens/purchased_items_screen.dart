@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:shopping_assist/core/database/database.dart';
 import 'package:shopping_assist/features/purchased_items/views/widgets/add_purchased_item_sheet.dart';
 import 'package:shopping_assist/core/widgets/empty_state.dart';
+import 'package:shopping_assist/core/widgets/dextrous_fab.dart';
 import 'package:shopping_assist/features/purchased_items/repositories/purchased_items_repository.dart';
 import 'package:shopping_assist/features/purchased_items/views/widgets/purchased_item_tile.dart';
 import 'package:shopping_assist/features/purchased_items/views/widgets/purchase_summary_card.dart';
@@ -167,7 +168,10 @@ class _PurchasedItemsScreenState extends State<PurchasedItemsScreen> {
                 ],
               ),
       ),
-      floatingActionButton: FloatingActionButton.extended(
+      floatingActionButton: DextrousFloatingActionButton(
+        isCenter: settings.dominantHand == DominantHand.center,
+        icon: Icons.add,
+        label: 'Add Item',
         onPressed: () => showModalBottomSheet(
           context: context,
           isScrollControlled: true,
@@ -175,8 +179,6 @@ class _PurchasedItemsScreenState extends State<PurchasedItemsScreen> {
           builder: (context) =>
               AddPurchasedItemSheet(purchase: widget.purchase, group: widget.group),
         ),
-        icon: const Icon(Icons.add),
-        label: const Text('Add Item'),
       ),
       floatingActionButtonLocation: settings.dominantHand == DominantHand.right
           ? FloatingActionButtonLocation.endFloat
