@@ -24,17 +24,17 @@ class FabLocationPicker extends StatelessWidget {
           ),
           _buildLocationOption(
             context,
-            value: DominantHand.left,
-            current: current,
-            label: 'Left',
-            icon: Icons.format_align_left,
-          ),
-          _buildLocationOption(
-            context,
             value: DominantHand.right,
             current: current,
             label: 'Right',
             icon: Icons.format_align_right,
+          ),
+          _buildLocationOption(
+            context,
+            value: DominantHand.left,
+            current: current,
+            label: 'Left',
+            icon: Icons.format_align_left,
           ),
           _buildLocationOption(
             context,

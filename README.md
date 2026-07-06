@@ -42,8 +42,8 @@ resource management via technological assistance.
 ### QOL
 
 - [x] Item details autocompletion while typing
-- [ ] Item details autocompletion with Camera identification (tensorflow)
-- [ ] Item duplication
+- [x] ~Item Camera identification (tensorflow)~ Autocompletion works way too well for needing this
+- [x] ~Item duplication~ Can be done quickly with autocompletion
 - [x] Item suggestions while typing based on history
 - [x] Easy price per item/quantity toggle
 - [x] Core Numpad UI

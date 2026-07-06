@@ -100,6 +100,30 @@ class SettingsScreen extends StatelessWidget {
               },
             ),
           ),
+
+          ListTile(
+            title: const Text('Keypad Layout'),
+            subtitle: Text(settings.isTelephoneLayout ? 'Telephone Style' : 'Calculator Style'),
+            trailing: SegmentedButton<String>(
+              segments: const [
+                ButtonSegment(
+                  value: 'calculator',
+                  label: Text('Calc'),
+                  icon: Icon(Icons.calculate),
+                ),
+                ButtonSegment(
+                  value: 'telephone',
+                  label: Text('Phone'),
+                  icon: Icon(Icons.phone_android),
+                ),
+              ],
+              selected: {settings.isTelephoneLayout ? 'telephone' : 'calculator'},
+              onSelectionChanged: (Set<String> newSelection) {
+                final newValue = newSelection.first;
+                settings.setTelephoneLayout(newValue == 'telephone');
+              },
+            ),
+          ),
         ],
       ),
     );

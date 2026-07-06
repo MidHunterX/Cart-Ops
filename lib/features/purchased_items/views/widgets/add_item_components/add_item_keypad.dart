@@ -5,6 +5,7 @@ class AddItemKeypad extends StatelessWidget {
   final String itemName;
   final bool hasImage;
   final String discountStr;
+  final bool isTeleKeypad;
   final Function(String) onKeyPressed;
   final VoidCallback onNameTap;
   final VoidCallback onImageTap;
@@ -19,6 +20,7 @@ class AddItemKeypad extends StatelessWidget {
     required this.itemName,
     required this.hasImage,
     required this.discountStr,
+    required this.isTeleKeypad,
     required this.onKeyPressed,
     required this.onNameTap,
     required this.onImageTap,
@@ -159,9 +161,9 @@ class AddItemKeypad extends StatelessWidget {
         ),
         Row(
           children: [
-            _buildNumBtn(context, '7'),
-            _buildNumBtn(context, '8'),
-            _buildNumBtn(context, '9'),
+            _buildNumBtn(context, isTeleKeypad ? '1' : '7'),
+            _buildNumBtn(context, isTeleKeypad ? '2' : '8'),
+            _buildNumBtn(context, isTeleKeypad ? '3' : '9'),
             _buildActionBtn(
               icon: Icons.backspace_outlined,
               backgroundColor: functionalBg,
@@ -185,9 +187,9 @@ class AddItemKeypad extends StatelessWidget {
         ),
         Row(
           children: [
-            _buildNumBtn(context, '1'),
-            _buildNumBtn(context, '2'),
-            _buildNumBtn(context, '3'),
+            _buildNumBtn(context, isTeleKeypad ? '7' : '1'),
+            _buildNumBtn(context, isTeleKeypad ? '8' : '2'),
+            _buildNumBtn(context, isTeleKeypad ? '9' : '3'),
             _buildActionBtn(
               text: '—',
               backgroundColor: functionalBg,
@@ -198,8 +200,8 @@ class AddItemKeypad extends StatelessWidget {
         ),
         Row(
           children: [
-            _buildNumBtn(context, '0'),
-            _buildNumBtn(context, '.'),
+            _buildNumBtn(context, isTeleKeypad ? '.' : '0'),
+            _buildNumBtn(context, isTeleKeypad ? '0' : '.'),
             _buildNumBtn(context, '.99'),
             _buildActionBtn(
               icon: Icons.keyboard_tab,

@@ -265,7 +265,7 @@ class PurchasedItemFormState extends State<PurchasedItemForm> {
 
   @override
   Widget build(BuildContext context) {
-    final weightUnit = context.watch<SettingsProvider>().weightUnit;
+    final settings = context.watch<SettingsProvider>();
     return Padding(
       padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom, top: 16),
       child: Column(
@@ -280,13 +280,14 @@ class PurchasedItemFormState extends State<PurchasedItemForm> {
             ),
           ),
           const SizedBox(height: 16),
-          _buildFieldsRow(weightUnit),
+          _buildFieldsRow(settings.weightUnit),
           const SizedBox(height: 16),
           AddItemKeypad(
             isLoading: widget.isLoading,
             itemName: widget.itemName,
             hasImage: _imagePath != null,
             discountStr: _discountStr,
+            isTeleKeypad: settings.isTelephoneLayout,
             onKeyPressed: _handleKeypadPress,
             onNameTap: widget.onNameTap,
             onImageTap: _handleImagePicker,

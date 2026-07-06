@@ -40,6 +40,9 @@ zero input at minimum. Add a shopping event with default placeholder name. Add
 bought items with price only. Add extra details later down the road. This
 freedom allows the maximum amount of flexibility.
 
+One standout observation: This app uses Telephone Style Keypad UI. This means,
+the developer probably finds Telephone Style comfortable than Calculator Style.
+
 - Plan a shopping list? Add items with Names and maybe with units and weights.
 - Need to attach extra details? Add those in the same interface.
 - Want a running tracker? Add units/weight along with price in the same UI.
@@ -126,8 +129,13 @@ to self selected attributes only for not breaking the pattern.
 ### Settings
 
 - **Theme Mode**: Light Mode | Dark Mode | System (Default)
-- **Theme Color**: All Material Colors
+  - Respect user's choice first for not breaking the cohesion.
+- **Theme Color**: Material Colors: green, blue (Default), red, orange, purple, teal, pink
+  - In Color Semiotics, Blue is associated with Trust, Stability etc. For early humans, a clear blue sky meant safety and predictable weather. Which is the reason why banks use it often.
 - **Currency**: All Currencies around the World (USD Default)
 - **Weight Unit**: Kg (Default) | Lb
 - **Dynamic Item List**: On - Dynamic List | Off - Structured List (Default)
-- **Dominant Hand**: Left | Right (Default) | Ambidextrous
+- **Dominant Hand**: Right (Default) | Left | Ambidextrous
+  - Right Hand is the most common dominant hand.
+- **Keypad Layout**: Calculator (Default) | Telephone
+  - There are people who are much more accustomed to a telephone style keypad. Cognition, history and muscle memory play a major role in this.

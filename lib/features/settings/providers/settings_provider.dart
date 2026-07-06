@@ -70,6 +70,22 @@ class SettingsProvider extends ChangeNotifier {
     _prefs.setString(_dominantHandKey, fabLocation);
   }
 
+  // Calculator vs Telephone Keypad
+
+  void _loadTelephoneSettings() {
+    final isTelephone = _prefs.getBool(_telephoneLayoutKey);
+    if (isTelephone != null) _useTelephoneLayout = isTelephone;
+  }
+
+  static const String _telephoneLayoutKey = 'use_telephone_layout';
+  bool _useTelephoneLayout = false;
+  bool get isTelephoneLayout => _useTelephoneLayout;
+  void setTelephoneLayout(bool useCalculator) async {
+    _useTelephoneLayout = useCalculator;
+    notifyListeners();
+    _prefs.setBool(_telephoneLayoutKey, useCalculator);
+  }
+
   // █░░ █▀█ █▀▀ ▄▀█ █░░ █ ▀█ ▄▀█ ▀█▀ █ █▀█ █▄░█
   // █▄▄ █▄█ █▄▄ █▀█ █▄▄ █ █▄ █▀█ ░█░ █ █▄█ █░▀█
 
@@ -111,5 +127,6 @@ class SettingsProvider extends ChangeNotifier {
     _loadCurrencySettings();
     _loadCompactItemList();
     _loadDominantHandSettings();
+    _loadTelephoneSettings();
   }
 }
