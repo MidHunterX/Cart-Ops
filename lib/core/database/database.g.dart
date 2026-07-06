@@ -256,6 +256,15 @@ class $PurchasesTable extends Purchases
     type: DriftSqlType.double,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _budgetMeta = const VerificationMeta('budget');
+  @override
+  late final GeneratedColumn<double> budget = GeneratedColumn<double>(
+    'budget',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _groupIdMeta = const VerificationMeta(
     'groupId',
   );
@@ -277,6 +286,7 @@ class $PurchasesTable extends Purchases
     purchaseDate,
     totalPrice,
     taxRate,
+    budget,
     groupId,
   ];
   @override
@@ -325,6 +335,12 @@ class $PurchasesTable extends Purchases
         taxRate.isAcceptableOrUnknown(data['tax_rate']!, _taxRateMeta),
       );
     }
+    if (data.containsKey('budget')) {
+      context.handle(
+        _budgetMeta,
+        budget.isAcceptableOrUnknown(data['budget']!, _budgetMeta),
+      );
+    }
     if (data.containsKey('group_id')) {
       context.handle(
         _groupIdMeta,
@@ -360,6 +376,10 @@ class $PurchasesTable extends Purchases
         DriftSqlType.double,
         data['${effectivePrefix}tax_rate'],
       ),
+      budget: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}budget'],
+      ),
       groupId: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}group_id'],
@@ -379,6 +399,7 @@ class Purchase extends DataClass implements Insertable<Purchase> {
   final DateTime purchaseDate;
   final double? totalPrice;
   final double? taxRate;
+  final double? budget;
   final int? groupId;
   const Purchase({
     required this.id,
@@ -386,6 +407,7 @@ class Purchase extends DataClass implements Insertable<Purchase> {
     required this.purchaseDate,
     this.totalPrice,
     this.taxRate,
+    this.budget,
     this.groupId,
   });
   @override
@@ -399,6 +421,9 @@ class Purchase extends DataClass implements Insertable<Purchase> {
     }
     if (!nullToAbsent || taxRate != null) {
       map['tax_rate'] = Variable<double>(taxRate);
+    }
+    if (!nullToAbsent || budget != null) {
+      map['budget'] = Variable<double>(budget);
     }
     if (!nullToAbsent || groupId != null) {
       map['group_id'] = Variable<int>(groupId);
@@ -417,6 +442,9 @@ class Purchase extends DataClass implements Insertable<Purchase> {
       taxRate: taxRate == null && nullToAbsent
           ? const Value.absent()
           : Value(taxRate),
+      budget: budget == null && nullToAbsent
+          ? const Value.absent()
+          : Value(budget),
       groupId: groupId == null && nullToAbsent
           ? const Value.absent()
           : Value(groupId),
@@ -434,6 +462,7 @@ class Purchase extends DataClass implements Insertable<Purchase> {
       purchaseDate: serializer.fromJson<DateTime>(json['purchaseDate']),
       totalPrice: serializer.fromJson<double?>(json['totalPrice']),
       taxRate: serializer.fromJson<double?>(json['taxRate']),
+      budget: serializer.fromJson<double?>(json['budget']),
       groupId: serializer.fromJson<int?>(json['groupId']),
     );
   }
@@ -446,6 +475,7 @@ class Purchase extends DataClass implements Insertable<Purchase> {
       'purchaseDate': serializer.toJson<DateTime>(purchaseDate),
       'totalPrice': serializer.toJson<double?>(totalPrice),
       'taxRate': serializer.toJson<double?>(taxRate),
+      'budget': serializer.toJson<double?>(budget),
       'groupId': serializer.toJson<int?>(groupId),
     };
   }
@@ -456,6 +486,7 @@ class Purchase extends DataClass implements Insertable<Purchase> {
     DateTime? purchaseDate,
     Value<double?> totalPrice = const Value.absent(),
     Value<double?> taxRate = const Value.absent(),
+    Value<double?> budget = const Value.absent(),
     Value<int?> groupId = const Value.absent(),
   }) => Purchase(
     id: id ?? this.id,
@@ -463,6 +494,7 @@ class Purchase extends DataClass implements Insertable<Purchase> {
     purchaseDate: purchaseDate ?? this.purchaseDate,
     totalPrice: totalPrice.present ? totalPrice.value : this.totalPrice,
     taxRate: taxRate.present ? taxRate.value : this.taxRate,
+    budget: budget.present ? budget.value : this.budget,
     groupId: groupId.present ? groupId.value : this.groupId,
   );
   Purchase copyWithCompanion(PurchasesCompanion data) {
@@ -476,6 +508,7 @@ class Purchase extends DataClass implements Insertable<Purchase> {
           ? data.totalPrice.value
           : this.totalPrice,
       taxRate: data.taxRate.present ? data.taxRate.value : this.taxRate,
+      budget: data.budget.present ? data.budget.value : this.budget,
       groupId: data.groupId.present ? data.groupId.value : this.groupId,
     );
   }
@@ -488,6 +521,7 @@ class Purchase extends DataClass implements Insertable<Purchase> {
           ..write('purchaseDate: $purchaseDate, ')
           ..write('totalPrice: $totalPrice, ')
           ..write('taxRate: $taxRate, ')
+          ..write('budget: $budget, ')
           ..write('groupId: $groupId')
           ..write(')'))
         .toString();
@@ -495,7 +529,7 @@ class Purchase extends DataClass implements Insertable<Purchase> {
 
   @override
   int get hashCode =>
-      Object.hash(id, name, purchaseDate, totalPrice, taxRate, groupId);
+      Object.hash(id, name, purchaseDate, totalPrice, taxRate, budget, groupId);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -505,6 +539,7 @@ class Purchase extends DataClass implements Insertable<Purchase> {
           other.purchaseDate == this.purchaseDate &&
           other.totalPrice == this.totalPrice &&
           other.taxRate == this.taxRate &&
+          other.budget == this.budget &&
           other.groupId == this.groupId);
 }
 
@@ -514,6 +549,7 @@ class PurchasesCompanion extends UpdateCompanion<Purchase> {
   final Value<DateTime> purchaseDate;
   final Value<double?> totalPrice;
   final Value<double?> taxRate;
+  final Value<double?> budget;
   final Value<int?> groupId;
   const PurchasesCompanion({
     this.id = const Value.absent(),
@@ -521,6 +557,7 @@ class PurchasesCompanion extends UpdateCompanion<Purchase> {
     this.purchaseDate = const Value.absent(),
     this.totalPrice = const Value.absent(),
     this.taxRate = const Value.absent(),
+    this.budget = const Value.absent(),
     this.groupId = const Value.absent(),
   });
   PurchasesCompanion.insert({
@@ -529,6 +566,7 @@ class PurchasesCompanion extends UpdateCompanion<Purchase> {
     required DateTime purchaseDate,
     this.totalPrice = const Value.absent(),
     this.taxRate = const Value.absent(),
+    this.budget = const Value.absent(),
     this.groupId = const Value.absent(),
   }) : name = Value(name),
        purchaseDate = Value(purchaseDate);
@@ -538,6 +576,7 @@ class PurchasesCompanion extends UpdateCompanion<Purchase> {
     Expression<DateTime>? purchaseDate,
     Expression<double>? totalPrice,
     Expression<double>? taxRate,
+    Expression<double>? budget,
     Expression<int>? groupId,
   }) {
     return RawValuesInsertable({
@@ -546,6 +585,7 @@ class PurchasesCompanion extends UpdateCompanion<Purchase> {
       if (purchaseDate != null) 'purchase_date': purchaseDate,
       if (totalPrice != null) 'total_price': totalPrice,
       if (taxRate != null) 'tax_rate': taxRate,
+      if (budget != null) 'budget': budget,
       if (groupId != null) 'group_id': groupId,
     });
   }
@@ -556,6 +596,7 @@ class PurchasesCompanion extends UpdateCompanion<Purchase> {
     Value<DateTime>? purchaseDate,
     Value<double?>? totalPrice,
     Value<double?>? taxRate,
+    Value<double?>? budget,
     Value<int?>? groupId,
   }) {
     return PurchasesCompanion(
@@ -564,6 +605,7 @@ class PurchasesCompanion extends UpdateCompanion<Purchase> {
       purchaseDate: purchaseDate ?? this.purchaseDate,
       totalPrice: totalPrice ?? this.totalPrice,
       taxRate: taxRate ?? this.taxRate,
+      budget: budget ?? this.budget,
       groupId: groupId ?? this.groupId,
     );
   }
@@ -586,6 +628,9 @@ class PurchasesCompanion extends UpdateCompanion<Purchase> {
     if (taxRate.present) {
       map['tax_rate'] = Variable<double>(taxRate.value);
     }
+    if (budget.present) {
+      map['budget'] = Variable<double>(budget.value);
+    }
     if (groupId.present) {
       map['group_id'] = Variable<int>(groupId.value);
     }
@@ -600,6 +645,7 @@ class PurchasesCompanion extends UpdateCompanion<Purchase> {
           ..write('purchaseDate: $purchaseDate, ')
           ..write('totalPrice: $totalPrice, ')
           ..write('taxRate: $taxRate, ')
+          ..write('budget: $budget, ')
           ..write('groupId: $groupId')
           ..write(')'))
         .toString();
@@ -1831,6 +1877,7 @@ typedef $$PurchasesTableCreateCompanionBuilder =
       required DateTime purchaseDate,
       Value<double?> totalPrice,
       Value<double?> taxRate,
+      Value<double?> budget,
       Value<int?> groupId,
     });
 typedef $$PurchasesTableUpdateCompanionBuilder =
@@ -1840,6 +1887,7 @@ typedef $$PurchasesTableUpdateCompanionBuilder =
       Value<DateTime> purchaseDate,
       Value<double?> totalPrice,
       Value<double?> taxRate,
+      Value<double?> budget,
       Value<int?> groupId,
     });
 
@@ -1914,6 +1962,11 @@ class $$PurchasesTableFilterComposer
 
   ColumnFilters<double> get taxRate => $composableBuilder(
     column: $table.taxRate,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get budget => $composableBuilder(
+    column: $table.budget,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -2000,6 +2053,11 @@ class $$PurchasesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<double> get budget => $composableBuilder(
+    column: $table.budget,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   $$GroupsTableOrderingComposer get groupId {
     final $$GroupsTableOrderingComposer composer = $composerBuilder(
       composer: this,
@@ -2051,6 +2109,9 @@ class $$PurchasesTableAnnotationComposer
 
   GeneratedColumn<double> get taxRate =>
       $composableBuilder(column: $table.taxRate, builder: (column) => column);
+
+  GeneratedColumn<double> get budget =>
+      $composableBuilder(column: $table.budget, builder: (column) => column);
 
   $$GroupsTableAnnotationComposer get groupId {
     final $$GroupsTableAnnotationComposer composer = $composerBuilder(
@@ -2134,6 +2195,7 @@ class $$PurchasesTableTableManager
                 Value<DateTime> purchaseDate = const Value.absent(),
                 Value<double?> totalPrice = const Value.absent(),
                 Value<double?> taxRate = const Value.absent(),
+                Value<double?> budget = const Value.absent(),
                 Value<int?> groupId = const Value.absent(),
               }) => PurchasesCompanion(
                 id: id,
@@ -2141,6 +2203,7 @@ class $$PurchasesTableTableManager
                 purchaseDate: purchaseDate,
                 totalPrice: totalPrice,
                 taxRate: taxRate,
+                budget: budget,
                 groupId: groupId,
               ),
           createCompanionCallback:
@@ -2150,6 +2213,7 @@ class $$PurchasesTableTableManager
                 required DateTime purchaseDate,
                 Value<double?> totalPrice = const Value.absent(),
                 Value<double?> taxRate = const Value.absent(),
+                Value<double?> budget = const Value.absent(),
                 Value<int?> groupId = const Value.absent(),
               }) => PurchasesCompanion.insert(
                 id: id,
@@ -2157,6 +2221,7 @@ class $$PurchasesTableTableManager
                 purchaseDate: purchaseDate,
                 totalPrice: totalPrice,
                 taxRate: taxRate,
+                budget: budget,
                 groupId: groupId,
               ),
           withReferenceMapper: (p0) => p0

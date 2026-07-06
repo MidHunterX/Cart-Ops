@@ -7,6 +7,7 @@ import 'package:shopping_assist/features/purchased_items/views/widgets/add_purch
 import 'package:shopping_assist/core/widgets/empty_state.dart';
 import 'package:shopping_assist/core/widgets/dextrous_fab.dart';
 import 'package:shopping_assist/features/purchased_items/repositories/purchased_items_repository.dart';
+import 'package:shopping_assist/features/purchases/repositories/purchases_repository.dart';
 import 'package:shopping_assist/features/purchased_items/views/widgets/purchased_item_tile.dart';
 import 'package:shopping_assist/features/purchased_items/views/widgets/purchase_summary_card.dart';
 import 'package:shopping_assist/features/settings/providers/settings_provider.dart';
@@ -26,7 +27,10 @@ class _PurchasedItemsScreenState extends State<PurchasedItemsScreen> {
   final _listKey = GlobalKey<SliverAnimatedListState>();
 
   List<PurchasedItemWithDetails> _purchasedItems = [];
-  StreamSubscription? _subscription;
+  StreamSubscription? _itemsSubscription;
+  StreamSubscription? _purchaseSubscription;
+
+  late Purchase _currentPurchase;
 
   bool _isLoading = true;
   bool _isListEmpty = false;
@@ -34,9 +38,19 @@ class _PurchasedItemsScreenState extends State<PurchasedItemsScreen> {
   @override
   void initState() {
     super.initState();
-    final repo = context.read<PurchasedItemsRepository>();
+    _currentPurchase = widget.purchase;
 
-    _subscription = repo.watchPurchasedItems(widget.purchase.id).listen((newItems) {
+    final itemsRepo = context.read<PurchasedItemsRepository>();
+    final purchasesRepo = context.read<PurchasesRepository>();
+
+    _purchaseSubscription = purchasesRepo.watchPurchaseById(widget.purchase.id).listen((purchase) {
+      if (!mounted) return;
+      setState(() {
+        _currentPurchase = purchase;
+      });
+    });
+
+    _itemsSubscription = itemsRepo.watchPurchasedItems(widget.purchase.id).listen((newItems) {
       if (!mounted) return;
 
       if (_isLoading) {
@@ -53,7 +67,8 @@ class _PurchasedItemsScreenState extends State<PurchasedItemsScreen> {
 
   @override
   void dispose() {
-    _subscription?.cancel();
+    _itemsSubscription?.cancel();
+    _purchaseSubscription?.cancel();
     super.dispose();
   }
 
@@ -110,6 +125,41 @@ class _PurchasedItemsScreenState extends State<PurchasedItemsScreen> {
     }
   }
 
+  void _showBudgetDialog(BuildContext context) {
+    final controller = TextEditingController(
+      text: _currentPurchase.budget != null ? _currentPurchase.budget.toString() : '',
+    );
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Set Budget'),
+        content: TextField(
+          controller: controller,
+          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+          decoration: const InputDecoration(
+            labelText: 'Budget Amount',
+            hintText: 'Enter 0 or leave empty to clear',
+          ),
+          autofocus: true,
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
+          FilledButton(
+            onPressed: () {
+              final budget = double.tryParse(controller.text);
+              context.read<PurchasesRepository>().updatePurchaseBudget(
+                _currentPurchase.id,
+                budget == 0 ? null : budget,
+              );
+              Navigator.pop(context);
+            },
+            child: const Text('Save'),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildItemTile(
     PurchasedItemWithDetails details,
     int index,
@@ -138,8 +188,20 @@ class _PurchasedItemsScreenState extends State<PurchasedItemsScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.purchase.name),
+        title: Text(_currentPurchase.name),
         backgroundColor: colorScheme.primaryContainer,
+        actions: [
+          PopupMenuButton<String>(
+            onSelected: (value) {
+              if (value == 'budget') {
+                _showBudgetDialog(context);
+              }
+            },
+            itemBuilder: (context) => [
+              const PopupMenuItem(value: 'budget', child: Text('Set Budget')),
+            ],
+          ),
+        ],
       ),
       body: AnimatedSwitcher(
         duration: const Duration(milliseconds: 300),
@@ -148,7 +210,11 @@ class _PurchasedItemsScreenState extends State<PurchasedItemsScreen> {
             : CustomScrollView(
                 slivers: [
                   SliverToBoxAdapter(
-                    child: PurchaseSummaryCard(itemCount: totalItems, total: totalPrice),
+                    child: PurchaseSummaryCard(
+                      itemCount: totalItems,
+                      total: totalPrice,
+                      budget: _currentPurchase.budget,
+                    ),
                   ),
                   if (_isListEmpty)
                     const SliverFillRemaining(
@@ -177,7 +243,7 @@ class _PurchasedItemsScreenState extends State<PurchasedItemsScreen> {
           isScrollControlled: true,
           useSafeArea: true,
           builder: (context) =>
-              AddPurchasedItemSheet(purchase: widget.purchase, group: widget.group),
+              AddPurchasedItemSheet(purchase: _currentPurchase, group: widget.group),
         ),
       ),
       floatingActionButtonLocation: settings.dominantHand == DominantHand.right

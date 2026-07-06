@@ -17,8 +17,12 @@ resource management via technological assistance.
 - [x] Globally Set Theme Colors
 - [x] Globally Set Weight Unit (Metric, Imperial or Both)
 - [ ] Globally Set Tax Rate (0-100) for countries that display prices without tax
+
+### Requirements
+
 - [x] CRUD General purchases + Groups Screen
 - [x] CRUD purchase Screen
+- [x] Set per purchase budget
 - [x] CRUD PurchasedItems Screen
 - [x] CRUD reusable items
 - [x] Settings Screen
@@ -47,4 +51,5 @@ resource management via technological assistance.
 - [x] Item suggestions while typing based on history
 - [x] Easy price per item/quantity toggle
 - [x] Core Numpad UI
-- [ ] Numpad Variants (top to bottom, bottom to top)
+- [x] Numpad Variant - Calculator (bottom to top)
+- [x] Numpad Variant - Telephone (top to bottom)

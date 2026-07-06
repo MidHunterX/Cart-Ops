@@ -12,6 +12,8 @@ class PurchasesRepository {
 
   Stream<List<Purchase>> watchGeneralPurchases() => _purchasesDao.watchPurchasesWithoutGroup();
 
+  Stream<Purchase> watchPurchaseById(int id) => _purchasesDao.watchPurchaseById(id);
+
   Future<Purchase> createPurchase(int? groupId) async {
     final now = DateTime.now();
     final defaultName = 'Purchase';
@@ -25,6 +27,10 @@ class PurchasesRepository {
     return _purchasesDao.updatePurchase(
       PurchasesCompanion(id: Value(id), name: Value(name), purchaseDate: Value(date)),
     );
+  }
+
+  Future<void> updatePurchaseBudget(int id, double? budget) {
+    return _purchasesDao.updatePurchase(PurchasesCompanion(id: Value(id), budget: Value(budget)));
   }
 
   Future<void> deletePurchase(int id) => _purchasesDao.deletePurchase(id);

@@ -13,6 +13,7 @@ class Purchases extends Table {
   DateTimeColumn get purchaseDate => dateTime()();
   RealColumn get totalPrice => real().nullable()();
   RealColumn get taxRate => real().nullable()(); // override global tax rate
+  RealColumn get budget => real().nullable()();
   // Optional Group
   IntColumn get groupId =>
       integer().nullable().references(Groups, #id, onDelete: KeyAction.cascade)();

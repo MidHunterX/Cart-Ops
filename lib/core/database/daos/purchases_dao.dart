@@ -22,6 +22,10 @@ class PurchasesDao extends DatabaseAccessor<AppDatabase> with _$PurchasesDaoMixi
         .watch();
   }
 
+  Stream<Purchase> watchPurchaseById(int id) {
+    return (select(purchases)..where((t) => t.id.equals(id))).watchSingle();
+  }
+
   Future<int> insertPurchase(PurchasesCompanion purchase) {
     return into(purchases).insert(purchase);
   }
