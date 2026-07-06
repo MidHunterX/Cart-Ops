@@ -1,3 +1,9 @@
+# Flutter Launcher Icons generated files
+/android/app/src/main/res/mipmap-*/launcher_icon*.png
+/android/app/src/main/res/mipmap-*/launcher_icon*.xml
+/android/app/src/main/res/drawable-*/ic_launcher*.png
+/ios/Runner/Assets.xcassets/AppIcon.appiconset/Contents.json
+
 # Miscellaneous
 *.class
 *.log
