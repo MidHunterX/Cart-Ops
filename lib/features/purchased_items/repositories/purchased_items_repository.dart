@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:drift/drift.dart';
 import 'package:shopping_assist/core/database/database.dart';
 import 'package:shopping_assist/core/database/daos/items_dao.dart';
@@ -84,5 +86,18 @@ class PurchasedItemsRepository {
     );
   }
 
-  Future<void> deletePurchasedItem(int id) => _purchasedItemsDao.deletePurchasedItem(id);
+  Future<void> deletePurchasedItem(int id) async {
+    final purchasedItem = await _purchasedItemsDao.getPurchasedItem(id);
+    if (purchasedItem != null && purchasedItem.imagePath != null) {
+      try {
+        final file = File(purchasedItem.imagePath!);
+        if (await file.exists()) {
+          await file.delete();
+        }
+      } catch (e) {
+        // Silent fail
+      }
+    }
+    await _purchasedItemsDao.deletePurchasedItem(id);
+  }
 }

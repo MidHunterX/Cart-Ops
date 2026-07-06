@@ -20,6 +20,11 @@ class PurchasedItemsDao extends DatabaseAccessor<AppDatabase> with _$PurchasedIt
     });
   }
 
+  Future<PurchasedItem?> getPurchasedItem(int id) async {
+    final query = select(purchasedItems)..where((t) => t.id.equals(id));
+    return await query.getSingleOrNull();
+  }
+
   Future<int> insertPurchasedItem(PurchasedItemsCompanion purchasedItem) {
     return into(purchasedItems).insert(purchasedItem);
   }
