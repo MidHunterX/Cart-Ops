@@ -53,3 +53,17 @@ resource management via technological assistance.
 - [x] Core Numpad UI
 - [x] Numpad Variant - Calculator (bottom to top)
 - [x] Numpad Variant - Telephone (top to bottom)
+
+## Developer Snippets
+
+To generate DAOs:
+
+```bash
+dart run build_runner build
+```
+
+To generate app icons:
+
+```bash
+dart run flutter_launcher_icons
+```

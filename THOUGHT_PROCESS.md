@@ -138,4 +138,15 @@ to self selected attributes only for not breaking the pattern.
 - **Dominant Hand**: Right (Default) | Left | Ambidextrous
   - Right Hand is the most common dominant hand.
 - **Keypad Layout**: Calculator (Default) | Telephone
-  - There are people who are much more accustomed to a telephone style keypad. Cognition, history and muscle memory play a major role in this.
+  - There are people who are much more accustomed to a each keypad. Cognition, history and muscle memory play a major role in this.
+
+#### Keypad Layout
+
+When it comes to keypad layouts, there are mainly two paradigms:
+
+- Bottom-Up (`7 8 9 - 4 5 6 - 1 2 3 - 0`): Personal Computer Keyboards and Calculator uses this style of keypad layout.
+- Top-Down (`1 2 3 - 4 5 6 - 7 8 9 - 0`): Telephones, ATMs and modern Smartphones uses this style of keypad layout.
+
+People like CPAs/Accountants who use keyboards and calculators on a daily basis
+might find the unexpected Top-Down number pad jarring due to muscle memory. The
+same narrative goes to phone users as well.
