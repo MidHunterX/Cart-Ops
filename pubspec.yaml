@@ -19,6 +19,7 @@ dependencies:
   # Picture Stuff
   image_picker: ^1.2.2
   uuid: ^4.5.3
+  flutter_launcher_icons: ^0.14.4
 
 dev_dependencies:
   flutter_test:
