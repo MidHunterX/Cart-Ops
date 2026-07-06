@@ -122,3 +122,12 @@ where it is exactly; catering to OCD like tendencies.
 
 For ASD, I'd suggest the Dynamic List to reduce the visual noise and sticking
 to self selected attributes only for not breaking the pattern.
+
+### Settings
+
+- **Theme Mode**: Light Mode | Dark Mode | System (Default)
+- **Theme Color**: All Material Colors
+- **Currency**: All Currencies around the World (USD Default)
+- **Weight Unit**: Kg (Default) | Lb
+- **Dynamic Item List**: On - Dynamic List | Off - Structured List (Default)
+- **Dominant Hand**: Left | Right (Default) | Ambidextrous

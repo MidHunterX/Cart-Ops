@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shopping_assist/core/database/database.dart';
@@ -14,14 +16,128 @@ import 'package:shopping_assist/features/settings/views/settings_screen.dart';
 import 'package:shopping_assist/features/settings/providers/settings_provider.dart';
 import 'package:shopping_assist/features/settings/data/settings_data.dart';
 
-class GroupsScreen extends StatelessWidget {
+class GroupsScreen extends StatefulWidget {
   const GroupsScreen({super.key});
+
+  @override
+  State<GroupsScreen> createState() => _GroupsScreenState();
+}
+
+class _GroupsScreenState extends State<GroupsScreen> {
+  final _gridKey = GlobalKey<AnimatedGridState>();
+  final _listKey = GlobalKey<AnimatedListState>();
+
+  List<Group> _groups = [];
+  List<Purchase> _purchases = [];
+
+  StreamSubscription? _groupsSub;
+  StreamSubscription? _purchasesSub;
+
+  bool _isLoadingGroups = true;
+  bool _isLoadingPurchases = true;
+
+  @override
+  void initState() {
+    super.initState();
+    final groupsRepo = context.read<GroupsRepository>();
+    final purchasesRepo = context.read<PurchasesRepository>();
+
+    _groupsSub = groupsRepo.watchGroups().listen((newGroups) {
+      if (!mounted) return;
+      if (_isLoadingGroups) {
+        setState(() {
+          _groups = List.from(newGroups);
+          _isLoadingGroups = false;
+        });
+      } else {
+        _updateGroups(newGroups);
+      }
+    });
+
+    _purchasesSub = purchasesRepo.watchGeneralPurchases().listen((newPurchases) {
+      if (!mounted) return;
+      if (_isLoadingPurchases) {
+        setState(() {
+          _purchases = List.from(newPurchases);
+          _isLoadingPurchases = false;
+        });
+      } else {
+        _updatePurchases(newPurchases);
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _groupsSub?.cancel();
+    _purchasesSub?.cancel();
+    super.dispose();
+  }
+
+  void _updateGroups(List<Group> newGroups) {
+    final currentState = _gridKey.currentState;
+    if (currentState == null) return;
+
+    // Handle removals
+    for (int i = _groups.length - 1; i >= 0; i--) {
+      if (!newGroups.any((g) => g.id == _groups[i].id)) {
+        final removed = _groups.removeAt(i);
+        currentState.removeItem(
+          i,
+          (context, animation) =>
+              _buildGroupTile(context, removed, Theme.of(context).colorScheme, animation),
+        );
+      }
+    }
+    // Handle additions
+    for (int i = 0; i < newGroups.length; i++) {
+      if (i >= _groups.length || _groups[i].id != newGroups[i].id) {
+        _groups.insert(i, newGroups[i]);
+        currentState.insertItem(i);
+      }
+    }
+  }
+
+  void _updatePurchases(List<Purchase> newPurchases) {
+    final currentState = _listKey.currentState;
+    if (currentState == null) {
+      setState(() => _purchases = List.from(newPurchases));
+      return;
+    }
+
+    bool hasChanges = false;
+    // Handle removals
+    for (int i = _purchases.length - 1; i >= 0; i--) {
+      if (!newPurchases.any((p) => p.id == _purchases[i].id)) {
+        final removed = _purchases.removeAt(i);
+        hasChanges = true;
+        currentState.removeItem(
+          i,
+          (context, animation) =>
+              _buildPurchaseTile(context, removed, Theme.of(context).colorScheme, animation, false),
+        );
+      }
+    }
+    // Handle additions
+    for (int i = 0; i < newPurchases.length; i++) {
+      if (i >= _purchases.length || _purchases[i].id != newPurchases[i].id) {
+        _purchases.insert(i, newPurchases[i]);
+        hasChanges = true;
+        currentState.insertItem(i);
+      }
+    }
+
+    // Give removal animation time to complete before updating to EmptyState
+    if (hasChanges && _purchases.isEmpty) {
+      Future.delayed(const Duration(milliseconds: 300), () {
+        if (mounted && _purchases.isEmpty) setState(() {});
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final groupsRepo = context.watch<GroupsRepository>();
-    final purchasesRepo = context.watch<PurchasesRepository>();
     final settings = context.watch<SettingsProvider>();
 
     return Scaffold(
@@ -40,7 +156,7 @@ class GroupsScreen extends StatelessWidget {
             ),
           ),
           IconButton(
-            icon: Padding(padding: const EdgeInsets.all(8.0), child: const Icon(Icons.settings)),
+            icon: const Padding(padding: EdgeInsets.all(8.0), child: Icon(Icons.settings)),
             onPressed: () =>
                 Navigator.push(context, MaterialPageRoute(builder: (_) => const SettingsScreen())),
           ),
@@ -50,12 +166,15 @@ class GroupsScreen extends StatelessWidget {
         onPressed: () async {
           final purchase = await context.read<PurchasesRepository>().createPurchase(null);
           if (context.mounted) {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => PurchasedItemsScreen(purchase: purchase, group: null),
-              ),
-            );
+            await Future.delayed(const Duration(milliseconds: 300));
+            if (context.mounted) {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => PurchasedItemsScreen(purchase: purchase, group: null),
+                ),
+              );
+            }
           }
         },
         icon: const Icon(Icons.shopping_cart),
@@ -73,166 +192,189 @@ class GroupsScreen extends StatelessWidget {
             padding: const EdgeInsets.fromLTRB(16, 24, 16, 16),
             child: Text('My Groups', style: Theme.of(context).textTheme.titleLarge),
           ),
-          StreamBuilder<List<Group>>(
-            stream: groupsRepo.watchGroups(),
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Center(child: CircularProgressIndicator());
-              }
-              final groups = snapshot.data ?? [];
-              return SizedBox(
-                height: 150, // Fixed height is required for horizontal grids
-                child: GridView.builder(
-                  scrollDirection: Axis.horizontal,
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    mainAxisSpacing: 16,
-                    crossAxisCount: 1,
-                    crossAxisSpacing: 16,
-                    childAspectRatio: 1.0,
+          AnimatedSwitcher(
+            duration: const Duration(milliseconds: 300),
+            child: _isLoadingGroups
+                ? const SizedBox(height: 150, child: Center(child: CircularProgressIndicator()))
+                : SizedBox(
+                    key: const ValueKey('groups_grid'),
+                    height: 150,
+                    child: AnimatedGrid(
+                      key: _gridKey,
+                      scrollDirection: Axis.horizontal,
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                        mainAxisSpacing: 16,
+                        crossAxisCount: 1,
+                        crossAxisSpacing: 16,
+                        childAspectRatio: 1.0,
+                      ),
+                      initialItemCount: _groups.length + 1,
+                      itemBuilder: (context, index, animation) {
+                        if (index == _groups.length) {
+                          return _buildAddGroupTile(context, colorScheme);
+                        }
+                        return _buildGroupTile(context, _groups[index], colorScheme, animation);
+                      },
+                    ),
                   ),
-                  itemCount: groups.length + 1,
-                  itemBuilder: (context, index) {
-                    if (index == groups.length) {
-                      return _buildAddGroupTile(context, colorScheme);
-                    }
-                    return _buildGroupTile(context, groups[index], colorScheme);
-                  },
-                ),
-              );
-            },
           ),
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 32, 16, 8),
             child: Text('General Purchases', style: Theme.of(context).textTheme.titleLarge),
           ),
-          StreamBuilder<List<Purchase>>(
-            stream: purchasesRepo.watchGeneralPurchases(),
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Center(child: CircularProgressIndicator());
-              }
-              final purchases = snapshot.data ?? [];
-              if (purchases.isEmpty) {
-                return const Padding(
-                  padding: EdgeInsets.only(top: 32.0),
-                  child: EmptyState(
-                    icon: Icons.shopping_bag_outlined,
-                    title: 'No Purchases Yet',
-                    message: 'Start a new shopping event by adding a purchase.',
+          AnimatedSwitcher(
+            duration: const Duration(milliseconds: 300),
+            child: _isLoadingPurchases
+                ? const Padding(
+                    padding: EdgeInsets.all(32.0),
+                    child: Center(child: CircularProgressIndicator()),
+                  )
+                : _purchases.isEmpty
+                ? const Padding(
+                    key: ValueKey('empty_purchases'),
+                    padding: EdgeInsets.only(top: 32.0),
+                    child: EmptyState(
+                      icon: Icons.shopping_bag_outlined,
+                      title: 'No Purchases Yet',
+                      message: 'Start a new shopping event by adding a purchase.',
+                    ),
+                  )
+                : AnimatedList(
+                    key: _listKey,
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    padding: EdgeInsets.zero,
+                    initialItemCount: _purchases.length,
+                    itemBuilder: (context, index, animation) {
+                      return _buildPurchaseTile(
+                        context,
+                        _purchases[index],
+                        colorScheme,
+                        animation,
+                        index <
+                            _purchases.length - 1, // Only show divider if it's not the last item
+                      );
+                    },
                   ),
-                );
-              }
-              return ListView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                padding: EdgeInsets.zero,
-                itemCount: purchases.length,
-                itemBuilder: (context, index) {
-                  final purchase = purchases[index];
-                  return Column(
-                    children: [
-                      ListTile(
-                        leading: const Icon(Icons.receipt_long_outlined),
-                        title: Text(purchase.name),
-                        subtitle: Text(
-                          '${purchase.purchaseDate.day}/${purchase.purchaseDate.month}/${purchase.purchaseDate.year} at ${TimeOfDay.fromDateTime(purchase.purchaseDate).format(context)}',
-                        ),
-                        trailing: PopupMenuButton<String>(
-                          onSelected: (value) {
-                            if (value == 'edit') {
-                              showDialog(
-                                context: context,
-                                builder: (_) => EditPurchaseDialog(purchase: purchase),
-                              );
-                            } else if (value == 'delete') {
-                              _confirmDeletePurchase(context, purchase);
-                            }
-                          },
-                          itemBuilder: (context) => [
-                            const PopupMenuItem(
-                              value: 'edit',
-                              child: Row(
-                                children: [
-                                  Icon(Icons.edit, size: 20),
-                                  SizedBox(width: 8),
-                                  Text('Edit'),
-                                ],
-                              ),
-                            ),
-                            PopupMenuItem(
-                              value: 'delete',
-                              child: Row(
-                                children: [
-                                  Icon(Icons.delete, size: 20, color: colorScheme.error),
-                                  const SizedBox(width: 8),
-                                  Text('Delete', style: TextStyle(color: colorScheme.error)),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                        onTap: () => Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => PurchasedItemsScreen(purchase: purchase, group: null),
-                          ),
-                        ),
-                      ),
-                      if (index < purchases.length - 1) const Divider(height: 1),
-                    ],
-                  );
-                },
-              );
-            },
           ),
         ],
       ),
     );
   }
 
-  Widget _buildGroupTile(BuildContext context, Group group, ColorScheme colorScheme) {
-    return InkWell(
-      onTap: () =>
-          Navigator.push(context, MaterialPageRoute(builder: (_) => PurchasesScreen(group: group))),
-      borderRadius: BorderRadius.circular(24),
-      child: Ink(
-        decoration: BoxDecoration(
-          color: colorScheme.primaryContainer.withValues(alpha: 0.4),
-          borderRadius: BorderRadius.circular(24),
-          border: Border.all(color: colorScheme.primary.withValues(alpha: 0.2)),
+  Widget _buildGroupTile(
+    BuildContext context,
+    Group group,
+    ColorScheme colorScheme,
+    Animation<double> animation,
+  ) {
+    return ScaleTransition(
+      scale: animation,
+      child: InkWell(
+        onTap: () => Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => PurchasesScreen(group: group)),
         ),
-        child: Stack(
-          children: [
-            Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.storefront, size: 36, color: colorScheme.primary),
-                  const SizedBox(height: 12),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                    child: Text(
-                      group.name,
-                      textAlign: TextAlign.center,
-                      style: TextStyle(color: colorScheme.onSurface),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
+        borderRadius: BorderRadius.circular(24),
+        child: Ink(
+          decoration: BoxDecoration(
+            color: colorScheme.primaryContainer.withValues(alpha: 0.4),
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(color: colorScheme.primary.withValues(alpha: 0.2)),
+          ),
+          child: Stack(
+            children: [
+              Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.storefront, size: 36, color: colorScheme.primary),
+                    const SizedBox(height: 12),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                      child: Text(
+                        group.name,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(color: colorScheme.onSurface),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-            Positioned(
-              top: 0,
-              right: 0,
-              child: IconButton(
-                icon: Icon(Icons.close, size: 18, color: colorScheme.onSurfaceVariant),
-                onPressed: () => _confirmDeleteGroup(context, group),
+              Positioned(
+                top: 0,
+                right: 0,
+                child: IconButton(
+                  icon: Icon(Icons.close, size: 18, color: colorScheme.onSurfaceVariant),
+                  onPressed: () => _confirmDeleteGroup(context, group),
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildPurchaseTile(
+    BuildContext context,
+    Purchase purchase,
+    ColorScheme colorScheme,
+    Animation<double> animation,
+    bool showDivider,
+  ) {
+    return SizeTransition(
+      sizeFactor: animation,
+      child: Column(
+        children: [
+          ListTile(
+            leading: const Icon(Icons.receipt_long_outlined),
+            title: Text(purchase.name),
+            subtitle: Text(
+              '${purchase.purchaseDate.day}/${purchase.purchaseDate.month}/${purchase.purchaseDate.year} at ${TimeOfDay.fromDateTime(purchase.purchaseDate).format(context)}',
+            ),
+            trailing: PopupMenuButton<String>(
+              onSelected: (value) {
+                if (value == 'edit') {
+                  showDialog(
+                    context: context,
+                    builder: (_) => EditPurchaseDialog(purchase: purchase),
+                  );
+                } else if (value == 'delete') {
+                  _confirmDeletePurchase(context, purchase);
+                }
+              },
+              itemBuilder: (context) => [
+                const PopupMenuItem(
+                  value: 'edit',
+                  child: Row(
+                    children: [Icon(Icons.edit, size: 20), SizedBox(width: 8), Text('Edit')],
+                  ),
+                ),
+                PopupMenuItem(
+                  value: 'delete',
+                  child: Row(
+                    children: [
+                      Icon(Icons.delete, size: 20, color: colorScheme.error),
+                      const SizedBox(width: 8),
+                      Text('Delete', style: TextStyle(color: colorScheme.error)),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => PurchasedItemsScreen(purchase: purchase, group: null),
+              ),
+            ),
+          ),
+          if (showDivider) const Divider(height: 1),
+        ],
       ),
     );
   }
@@ -267,9 +409,7 @@ class GroupsScreen extends StatelessWidget {
       title: 'Delete Group?',
       message:
           'Are you sure you want to delete "${group.name}"? This will also remove all its purchase history.',
-      onDelete: () {
-        context.read<GroupsRepository>().deleteGroup(group.id);
-      },
+      onDelete: () => context.read<GroupsRepository>().deleteGroup(group.id),
     );
   }
 
@@ -278,9 +418,7 @@ class GroupsScreen extends StatelessWidget {
       context,
       title: 'Delete Purchase Event?',
       message: 'Are you sure you want to delete "${purchase.name}"?',
-      onDelete: () {
-        context.read<PurchasesRepository>().deletePurchase(purchase.id);
-      },
+      onDelete: () => context.read<PurchasesRepository>().deletePurchase(purchase.id),
     );
   }
 }

@@ -7,14 +7,6 @@ resource management via technological assistance.
 ![Dart](https://img.shields.io/badge/Dart-0175C2?style=for-the-badge&logo=dart&logoColor=white)
 ![SQLite](https://img.shields.io/badge/Sqlite-003B57?style=for-the-badge&logo=sqlite&logoColor=white)
 
-## Dev Snippets
-
-On every DB change, run the following command:
-
-```sh
-dart run build_runner build
-```
-
 ## Basic Requirements
 
 ![General Plan](./.assets/Cart-Ops-Mockup.svg)
