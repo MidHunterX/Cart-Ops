@@ -71,7 +71,7 @@ class GroupsScreen extends StatelessWidget {
         children: [
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 24, 16, 16),
-            child: Text('My Groups', style: Theme.of(context).textTheme.headlineMedium),
+            child: Text('My Groups', style: Theme.of(context).textTheme.titleLarge),
           ),
           StreamBuilder<List<Group>>(
             stream: groupsRepo.watchGroups(),
@@ -104,7 +104,7 @@ class GroupsScreen extends StatelessWidget {
           ),
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 32, 16, 8),
-            child: Text('General Purchases', style: Theme.of(context).textTheme.headlineMedium),
+            child: Text('General Purchases', style: Theme.of(context).textTheme.titleLarge),
           ),
           StreamBuilder<List<Purchase>>(
             stream: purchasesRepo.watchGeneralPurchases(),
@@ -215,7 +215,7 @@ class GroupsScreen extends StatelessWidget {
                     child: Text(
                       group.name,
                       textAlign: TextAlign.center,
-                      style: TextStyle(fontWeight: FontWeight.w600, color: colorScheme.onSurface),
+                      style: TextStyle(color: colorScheme.onSurface),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -245,18 +245,15 @@ class GroupsScreen extends StatelessWidget {
         decoration: BoxDecoration(
           color: colorScheme.surface,
           borderRadius: BorderRadius.circular(24),
-          border: Border.all(color: colorScheme.primary.withValues(alpha: 0.4), width: 2),
+          border: Border.all(color: colorScheme.surfaceContainerHighest, width: 2),
         ),
         child: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.add, size: 36, color: colorScheme.primary),
+              Icon(Icons.add, size: 36, color: colorScheme.secondary),
               const SizedBox(height: 12),
-              Text(
-                'Add Group',
-                style: TextStyle(fontWeight: FontWeight.w600, color: colorScheme.primary),
-              ),
+              Text('Add Group', style: TextStyle(color: colorScheme.secondary)),
             ],
           ),
         ),
