@@ -71,12 +71,17 @@ class ItemsRepository {
     return _itemsDao.hasPurchasedItems(itemId);
   }
 
-  Future<void> deleteItem(int id) async {
+  Future<bool> deleteItem(int id) async {
     final item = await findItem(id, null);
     final deleted = await _itemsDao.deleteItem(id);
-    if (item?.imagePath != null && deleted) {
+
+    if (!deleted) throw Exception('Failed to delete item with id: $id');
+
+    if (item?.imagePath != null) {
       final file = File(item!.imagePath!);
-      if (await file.exists()) await file.delete();
+      if (await file.exists()) {
+        await file.delete();
+      }
     }
     return deleted;
   }

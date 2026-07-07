@@ -57,17 +57,15 @@ class ItemsDao extends DatabaseAccessor<AppDatabase> with _$ItemsDaoMixin {
 
   Future<List<PurchasedItemWithPurchase>> getPurchaseHistoryForItem(int itemId) async {
     final purchases = attachedDatabase.purchases;
-    final query = select(purchasedItems).join([
-      innerJoin(purchases, purchases.id.equalsExp(purchasedItems.purchaseId)),
-    ])
-      ..where(purchasedItems.itemId.equals(itemId))
-      ..orderBy([OrderingTerm.desc(purchases.purchaseDate)]);
+    final query =
+        select(
+            purchasedItems,
+          ).join([innerJoin(purchases, purchases.id.equalsExp(purchasedItems.purchaseId))])
+          ..where(purchasedItems.itemId.equals(itemId))
+          ..orderBy([OrderingTerm.desc(purchases.purchaseDate)]);
     final rows = await query.get();
     return rows.map((row) {
-      return PurchasedItemWithPurchase(
-        row.readTable(purchasedItems),
-        row.readTable(purchases),
-      );
+      return PurchasedItemWithPurchase(row.readTable(purchasedItems), row.readTable(purchases));
     }).toList();
   }
 
@@ -90,12 +88,10 @@ class ItemsDao extends DatabaseAccessor<AppDatabase> with _$ItemsDaoMixin {
     )..where((t) => t.id.equals(itemId))).write(ItemsCompanion(imagePath: Value(imagePath)));
   }
 
-  Future deleteItem(int id) async {
+  Future<bool> deleteItem(int id) async {
     final hasPurchases = await hasPurchasedItems(id);
-    if (!hasPurchases) {
-      await (delete(items)..where((t) => t.id.equals(id))).go();
-    } else {
-      throw Exception('Item with id:$id has purchase history');
-    }
+    if (hasPurchases) throw Exception('Item with id:$id has purchase history');
+    final rowsAffected = await (delete(items)..where((t) => t.id.equals(id))).go();
+    return rowsAffected > 0; // Returns true if at least one row was deleted
   }
 }
