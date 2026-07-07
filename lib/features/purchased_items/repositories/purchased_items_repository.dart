@@ -44,7 +44,6 @@ class PurchasedItemsRepository {
       }
     } else {
       final trimmedName = name.trim();
-      // Item entry is created from purchased_items only if it's eligible for tracking:
       if (trimmedName.isNotEmpty && price != null && qty != null) {
         finalItemId = await _itemsDao.insertItem(
           ItemsCompanion.insert(name: trimmedName, groupId: Value(group?.id), imagePath: imagePath),
@@ -68,15 +67,43 @@ class PurchasedItemsRepository {
 
   Future<void> updatePurchasedItem({
     required int id,
+    int? itemId,
+    String? name,
     required double? price,
     required double? qty,
     required double discount,
     required bool isWeight,
+    int? groupId,
     Value<String?> imagePath = const Value.absent(),
   }) async {
+    int? finalItemId = itemId;
+
+    if (name != null) {
+      Item? targetItem;
+      if (itemId != null && itemId != -1) {
+        targetItem = await _itemsDao.findItem(itemId, groupId);
+      }
+
+      if (targetItem != null) {
+        finalItemId = targetItem.id;
+        if (imagePath.present) {
+          await _itemsDao.updateItemImage(finalItemId, imagePath.value);
+        }
+      } else {
+        final trimmedName = name.trim();
+        if (trimmedName.isNotEmpty && price != null && qty != null) {
+          finalItemId = await _itemsDao.insertItem(
+            ItemsCompanion.insert(name: trimmedName, groupId: Value(groupId), imagePath: imagePath),
+          );
+        }
+      }
+    }
+
     await _purchasedItemsDao.updatePurchasedItem(
       PurchasedItemsCompanion(
         id: Value(id),
+        name: name != null ? Value(name.trim().isEmpty ? null : name.trim()) : const Value.absent(),
+        itemId: name != null ? Value(finalItemId) : const Value.absent(),
         price: Value(price),
         quantity: Value(qty),
         discount: Value(discount),
