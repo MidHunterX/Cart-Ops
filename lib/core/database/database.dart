@@ -36,8 +36,11 @@ class PurchasedItemWithPurchase {
   daos: [GroupsDao, PurchasesDao, ItemsDao, PurchasedItemsDao],
 )
 class AppDatabase extends _$AppDatabase {
-  // Just a simple constructor, no singleton. Provider manage instance
+  // Production constructor
   AppDatabase() : super(_openConnection());
+
+  // Named constructor to inject memory instances
+  AppDatabase.forTesting(DatabaseConnection super.connection);
 
   @override
   int get schemaVersion => 1;
