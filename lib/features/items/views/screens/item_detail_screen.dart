@@ -1,8 +1,8 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shopping_assist/core/database/database.dart';
 import 'package:shopping_assist/core/utils/number_formatter.dart';
+import 'package:shopping_assist/core/widgets/item_image_view.dart';
 import 'package:shopping_assist/features/settings/providers/settings_provider.dart';
 import 'package:shopping_assist/features/items/repositories/items_repository.dart';
 
@@ -36,21 +36,13 @@ class ItemDetailScreen extends StatelessWidget {
               children: [
                 // Image
                 Center(
-                  child: ClipRRect(
+                  child: ItemImageView(
+                    imagePath: item.imagePath,
+                    height: 200,
+                    width: double.maxFinite,
                     borderRadius: BorderRadius.circular(12),
-                    child: item.imagePath != null && File(item.imagePath!).existsSync()
-                        ? Image.file(
-                            File(item.imagePath!),
-                            height: 200,
-                            width: double.maxFinite,
-                            fit: BoxFit.cover,
-                          )
-                        : Container(
-                            height: 200,
-                            width: double.maxFinite,
-                            color: colorScheme.surfaceContainerHighest,
-                            child: const Icon(Icons.image_not_supported, size: 80),
-                          ),
+                    placeholderIcon: Icons.image_not_supported,
+                    placeholderIconSize: 80,
                   ),
                 ),
                 const SizedBox(height: 16),

@@ -285,7 +285,7 @@ class PurchasedItemFormState extends State<PurchasedItemForm> {
           AddItemKeypad(
             isLoading: widget.isLoading,
             itemName: widget.itemName,
-            hasImage: _imagePath != null,
+            imagePath: _imagePath,
             discountStr: _discountStr,
             isTeleKeypad: settings.isTelephoneLayout,
             onKeyPressed: _handleKeypadPress,

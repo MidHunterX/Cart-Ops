@@ -1,10 +1,10 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shopping_assist/core/database/database.dart';
 import 'package:shopping_assist/core/widgets/delete_confirmation_dialog.dart';
 import 'package:shopping_assist/core/widgets/empty_state.dart';
 import 'package:shopping_assist/core/widgets/dextrous_fab.dart';
+import 'package:shopping_assist/core/widgets/item_image_view.dart';
 import 'package:shopping_assist/features/items/repositories/items_repository.dart';
 import 'package:shopping_assist/features/items/views/widgets/add_item_dialog.dart';
 import 'package:shopping_assist/features/items/views/widgets/edit_item_dialog.dart';
@@ -160,12 +160,13 @@ class ItemsScreen extends StatelessWidget {
   }
 
   Widget _buildItemImage(String? imagePath, ColorScheme colorScheme) {
-    if (imagePath != null && File(imagePath).existsSync()) {
-      return Image.file(File(imagePath), fit: BoxFit.cover);
-    }
-    return Container(
-      color: colorScheme.surfaceContainerHighest,
-      child: Icon(Icons.inventory_2_rounded, size: 48, color: colorScheme.onSurfaceVariant),
+    return ItemImageView(
+      imagePath: imagePath,
+      width: double.infinity,
+      height: double.infinity,
+      borderRadius: BorderRadius.zero,
+      placeholderIcon: Icons.inventory_2_rounded,
+      placeholderIconSize: 48,
     );
   }
 

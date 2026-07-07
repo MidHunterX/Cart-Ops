@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:shopping_assist/core/widgets/item_image_view.dart';
 
 class AddItemKeypad extends StatelessWidget {
   final bool isLoading;
   final String itemName;
-  final bool hasImage;
+  final String? imagePath;
   final String discountStr;
   final bool isTeleKeypad;
   final Function(String) onKeyPressed;
@@ -18,7 +19,7 @@ class AddItemKeypad extends StatelessWidget {
     super.key,
     required this.isLoading,
     required this.itemName,
-    required this.hasImage,
+    required this.imagePath,
     required this.discountStr,
     required this.isTeleKeypad,
     required this.onKeyPressed,
@@ -105,26 +106,17 @@ class AddItemKeypad extends StatelessWidget {
 
     bool hasDiscount = discountStr.isNotEmpty && discountStr != '0';
     bool hasText = itemName.isNotEmpty;
+    bool hasImage = imagePath != null;
 
     // SEMANTIC HIERARCHY DEFINITIONS
-    // ------------------------------
-    // High Emphasis (Primary Action)
     Color mainActionBg = colorScheme.primary;
     Color mainActionFg = colorScheme.onPrimary;
-
-    // Medium Emphasis (Active Inputs / Primary Utilities)
     Color inputActiveBg = colorScheme.primaryContainer;
     Color inputActiveFg = colorScheme.onPrimaryContainer;
-
-    // Accent Emphasis (Secondary Utilities / Modifiers)
     Color functionalBg = colorScheme.secondaryContainer;
     Color functionalFg = colorScheme.onSecondaryContainer;
-
-    // Low Emphasis (Inactive / Surface / Numbers)
     Color inputInactiveBg = colorScheme.surfaceContainerHighest;
     Color inputInactiveFg = colorScheme.onSurfaceVariant;
-
-    // Alert Emphasis (Destructive)
     Color destructiveBg = colorScheme.errorContainer;
     Color destructiveFg = colorScheme.onErrorContainer;
 
@@ -138,12 +130,47 @@ class AddItemKeypad extends StatelessWidget {
               foregroundColor: hasText ? inputActiveFg : inputInactiveFg,
               onTap: isLoading ? () {} : onNameTap,
             ),
-            _buildActionBtn(
-              text: !hasImage ? 'Image' : 'Img Added',
-              icon: !hasImage ? null : Icons.check_circle,
-              backgroundColor: hasImage ? inputActiveBg : inputInactiveBg,
-              foregroundColor: hasImage ? inputActiveFg : inputInactiveFg,
-              onTap: onImageTap,
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(4.0),
+                child: ElevatedButton(
+                  onPressed: onImageTap,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: hasImage ? inputActiveBg : inputInactiveBg,
+                    foregroundColor: hasImage ? inputActiveFg : inputInactiveFg,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    padding: EdgeInsets.zero,
+                    elevation: 0,
+                  ),
+                  child: SizedBox(
+                    height: 56,
+                    child: hasImage
+                        ? ItemImageView(
+                            imagePath: imagePath,
+                            width: double.infinity,
+                            height: double.infinity,
+                            borderRadius: BorderRadius.circular(8),
+                          )
+                        : const Center(
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(Icons.image, size: 24),
+                                SizedBox(width: 4),
+                                Flexible(
+                                  child: Text(
+                                    'Image',
+                                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                  ),
+                ),
+              ),
             ),
             _buildActionBtn(
               text: hasDiscount ? 'Disc: $discountStr' : 'Discount',

@@ -1,8 +1,8 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shopping_assist/core/database/database.dart';
 import 'package:shopping_assist/core/widgets/delete_confirmation_dialog.dart';
+import 'package:shopping_assist/core/widgets/item_image_view.dart';
 import 'package:shopping_assist/features/purchased_items/repositories/purchased_items_repository.dart';
 import 'package:shopping_assist/features/settings/providers/settings_provider.dart';
 import 'package:shopping_assist/core/utils/number_formatter.dart';
@@ -192,12 +192,22 @@ class PurchasedItemTile extends StatelessWidget {
               context.read<PurchasedItemsRepository>().updatePurchasedItem(
                 id: pItem.id,
                 price: pItem.price,
-                qty: 1,
+                qty: (pItem.quantity ?? 0) + 1,
                 discount: pItem.discount,
                 isWeight: pItem.isWeight,
               );
             },
-            onDecrement: () {},
+            onDecrement: () {
+              if ((pItem.quantity ?? 0) > 1) {
+                context.read<PurchasedItemsRepository>().updatePurchasedItem(
+                  id: pItem.id,
+                  price: pItem.price,
+                  qty: pItem.quantity! - 1,
+                  discount: pItem.discount,
+                  isWeight: pItem.isWeight,
+                );
+              }
+            },
           ),
         ),
       ],
@@ -205,27 +215,10 @@ class PurchasedItemTile extends StatelessWidget {
   }
 
   Widget _buildImageSection(Item item, ColorScheme colorScheme, double imgSize) {
-    return Container(
-      width: imgSize,
-      height: imgSize,
-      decoration: BoxDecoration(
-        color: colorScheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: item.imagePath != null
-          ? ClipRRect(
-              borderRadius: BorderRadius.circular(8),
-              child: Image.file(
-                File(item.imagePath!),
-                fit: BoxFit.cover,
-                errorBuilder: (_, _, _) => const Icon(Icons.image_not_supported),
-              ),
-            )
-          : Icon(
-              Icons.shopping_bag_outlined,
-              color: colorScheme.onSurfaceVariant,
-              size: imgSize * 0.6,
-            ),
+    return ItemImageView(
+      imagePath: item.imagePath,
+      size: imgSize,
+      placeholderIconSize: imgSize * 0.6,
     );
   }
 

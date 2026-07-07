@@ -1,17 +1,13 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:shopping_assist/core/utils/image_picker_util.dart';
+import 'package:shopping_assist/core/widgets/item_image_view.dart';
 
 class ItemImagePicker extends StatelessWidget {
   final String? imagePath;
   final ValueChanged<String?> onChanged;
 
-  const ItemImagePicker({
-    super.key,
-    required this.imagePath,
-    required this.onChanged,
-  });
+  const ItemImagePicker({super.key, required this.imagePath, required this.onChanged});
 
   Future<void> _handleImageTap(BuildContext context) async {
     final action = await ImagePickerUtil.showImagePickerOptions(context, imagePath != null);
@@ -31,20 +27,13 @@ class ItemImagePicker extends StatelessWidget {
       return Stack(
         alignment: Alignment.topRight,
         children: [
-          ClipRRect(
+          ItemImageView(
+            imagePath: imagePath,
+            height: 120,
+            width: double.maxFinite,
             borderRadius: BorderRadius.circular(8),
-            child: Image.file(
-              File(imagePath!),
-              height: 120,
-              width: double.maxFinite,
-              fit: BoxFit.cover,
-              errorBuilder: (_, _, _) => Container(
-                height: 120,
-                width: double.maxFinite,
-                color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                child: const Icon(Icons.image_not_supported, size: 40),
-              ),
-            ),
+            placeholderIcon: Icons.image_not_supported,
+            placeholderIconSize: 40,
           ),
           Positioned(
             top: 4,
