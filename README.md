@@ -13,18 +13,20 @@ resource management via technological assistance.
 ![Dart](https://img.shields.io/badge/Dart-0175C2?style=for-the-badge&logo=dart&logoColor=white)
 ![SQLite](https://img.shields.io/badge/Sqlite-003B57?style=for-the-badge&logo=sqlite&logoColor=white)
 
-## Requirements
+## Mission Objectives
 
 ![General Plan](./.assets/Cart-Ops-Mockup.svg)
 
-### Settings
+### PHASE ALPHA: GENERAL OPERATIONS
+
+#### Configuration Parameters
 
 - [x] Globally Set Currency Symbol
 - [x] Globally Set Theme Colors
 - [x] Globally Set Weight Unit (Metric, Imperial or Both)
 - [ ] Globally Set Tax Rate (0-100) for countries that display prices without tax
 
-### General
+#### Core Operations
 
 - [x] CRUD General purchases + Groups Screen
 - [x] CRUD purchase Screen
@@ -32,23 +34,7 @@ resource management via technological assistance.
 - [x] CRUD PurchasedItems Screen
 - [x] CRUD reusable items
 
-## Future Requirements
-
-### Analytics
-
-- [x] Purchase history
-- [x] Price history for individual items
-- [ ] Price history graph for individual items
-- [ ] Price history graph for all items timeline
-- [ ] Monthly spend
-
-### Imports and Exports
-
-- [ ] Export to CSV
-- [ ] Import from CSV
-- [ ] Export to PDF
-
-### QOL
+### PHASE BRAVO: OPERATOR QUALITY OF LIFE
 
 - [x] Item details autocompletion while typing
 - [x] ~Item Camera identification (tensorflow)~ Autocompletion works way too well for needing this
@@ -59,7 +45,23 @@ resource management via technological assistance.
 - [x] Numpad Variant - Calculator (bottom to top)
 - [x] Numpad Variant - Telephone (top to bottom)
 
-## Developer Snippets
+### PHASE CHARLIE: ADVANCED OPERATIONS
+
+#### Intelligence & Analytics
+
+- [x] Purchase history
+- [x] Price history for individual items
+- [ ] Price history graph for individual items
+- [ ] Price history graph for all items timeline
+- [ ] Monthly spend
+
+#### Data Import/Export
+
+- [ ] Export to CSV
+- [ ] Import from CSV
+- [ ] Export to PDF
+
+## Developer Operations
 
 To generate DAOs:
 
@@ -72,3 +74,12 @@ To generate app icons:
 ```bash
 dart run flutter_launcher_icons
 ```
+
+## Known Operational Defects
+
+There's a problem with Snackbar's Z-index. It shows always under BottomSheet by default.
+
+See Issue: [#63254](https://github.com/flutter/flutter/issues/63254)
+
+Item purchase keypad interface is implemented in showModalBottomSheet so, any
+errors will be hidden behind the keypad.
