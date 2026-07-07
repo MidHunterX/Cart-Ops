@@ -1,4 +1,6 @@
-# Cart-Ops
+![Cart Ops Banner](./.assets/cartops_banner.jpg)
+
+# Cart Ops
 
 Personal commerce operator tool focusing on cognitive delegation of financial
 resource management via technological assistance.
@@ -7,25 +9,24 @@ resource management via technological assistance.
 ![Dart](https://img.shields.io/badge/Dart-0175C2?style=for-the-badge&logo=dart&logoColor=white)
 ![SQLite](https://img.shields.io/badge/Sqlite-003B57?style=for-the-badge&logo=sqlite&logoColor=white)
 
-## Basic Requirements
+## Requirements
 
 ![General Plan](./.assets/Cart-Ops-Mockup.svg)
 
-### Settings Screen
+### Settings
 
 - [x] Globally Set Currency Symbol
 - [x] Globally Set Theme Colors
 - [x] Globally Set Weight Unit (Metric, Imperial or Both)
 - [ ] Globally Set Tax Rate (0-100) for countries that display prices without tax
 
-### Requirements
+### General
 
 - [x] CRUD General purchases + Groups Screen
 - [x] CRUD purchase Screen
 - [x] Set per purchase budget
 - [x] CRUD PurchasedItems Screen
 - [x] CRUD reusable items
-- [x] Settings Screen
 
 ## Future Requirements
 
