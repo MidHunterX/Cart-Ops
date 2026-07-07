@@ -25,7 +25,6 @@ class GroupsScreen extends StatefulWidget {
 }
 
 class _GroupsScreenState extends State<GroupsScreen> {
-  final _gridKey = GlobalKey<AnimatedGridState>();
   final _listKey = GlobalKey<AnimatedListState>();
 
   List<Group> _groups = [];
@@ -45,14 +44,10 @@ class _GroupsScreenState extends State<GroupsScreen> {
 
     _groupsSub = groupsRepo.watchGroups().listen((newGroups) {
       if (!mounted) return;
-      if (_isLoadingGroups) {
-        setState(() {
-          _groups = List.from(newGroups);
-          _isLoadingGroups = false;
-        });
-      } else {
-        _updateGroups(newGroups);
-      }
+      setState(() {
+        _groups = newGroups;
+        _isLoadingGroups = false;
+      });
     });
 
     _purchasesSub = purchasesRepo.watchGeneralPurchases().listen((newPurchases) {
@@ -75,30 +70,6 @@ class _GroupsScreenState extends State<GroupsScreen> {
     super.dispose();
   }
 
-  void _updateGroups(List<Group> newGroups) {
-    final currentState = _gridKey.currentState;
-    if (currentState == null) return;
-
-    // Handle removals
-    for (int i = _groups.length - 1; i >= 0; i--) {
-      if (!newGroups.any((g) => g.id == _groups[i].id)) {
-        final removed = _groups.removeAt(i);
-        currentState.removeItem(
-          i,
-          (context, animation) =>
-              _buildGroupTile(context, removed, Theme.of(context).colorScheme, animation),
-        );
-      }
-    }
-    // Handle additions
-    for (int i = 0; i < newGroups.length; i++) {
-      if (i >= _groups.length || _groups[i].id != newGroups[i].id) {
-        _groups.insert(i, newGroups[i]);
-        currentState.insertItem(i);
-      }
-    }
-  }
-
   void _updatePurchases(List<Purchase> newPurchases) {
     final currentState = _listKey.currentState;
     if (currentState == null) {
@@ -107,7 +78,6 @@ class _GroupsScreenState extends State<GroupsScreen> {
     }
 
     bool hasChanges = false;
-    // Handle removals
     for (int i = _purchases.length - 1; i >= 0; i--) {
       if (!newPurchases.any((p) => p.id == _purchases[i].id)) {
         final removed = _purchases.removeAt(i);
@@ -119,7 +89,6 @@ class _GroupsScreenState extends State<GroupsScreen> {
         );
       }
     }
-    // Handle additions
     for (int i = 0; i < newPurchases.length; i++) {
       if (i >= _purchases.length || _purchases[i].id != newPurchases[i].id) {
         _purchases.insert(i, newPurchases[i]);
@@ -128,7 +97,6 @@ class _GroupsScreenState extends State<GroupsScreen> {
       }
     }
 
-    // Give removal animation time to complete before updating to EmptyState
     if (hasChanges && _purchases.isEmpty) {
       Future.delayed(const Duration(milliseconds: 300), () {
         if (mounted && _purchases.isEmpty) setState(() {});
@@ -194,33 +162,28 @@ class _GroupsScreenState extends State<GroupsScreen> {
             padding: const EdgeInsets.fromLTRB(16, 24, 16, 16),
             child: Text('My Groups', style: Theme.of(context).textTheme.titleLarge),
           ),
-          AnimatedSwitcher(
-            duration: const Duration(milliseconds: 300),
-            child: _isLoadingGroups
-                ? const SizedBox(height: 150, child: Center(child: CircularProgressIndicator()))
-                : SizedBox(
-                    key: const ValueKey('groups_grid'),
-                    height: 150,
-                    child: AnimatedGrid(
-                      key: _gridKey,
-                      scrollDirection: Axis.horizontal,
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                        mainAxisSpacing: 16,
-                        crossAxisCount: 1,
-                        crossAxisSpacing: 16,
-                        childAspectRatio: 1.0,
-                      ),
-                      initialItemCount: _groups.length + 1,
-                      itemBuilder: (context, index, animation) {
-                        if (index == _groups.length) {
-                          return _buildAddGroupTile(context, colorScheme);
-                        }
-                        return _buildGroupTile(context, _groups[index], colorScheme, animation);
-                      },
+          _isLoadingGroups
+              ? const SizedBox(height: 150, child: Center(child: CircularProgressIndicator()))
+              : SizedBox(
+                  height: 150,
+                  child: GridView.builder(
+                    scrollDirection: Axis.horizontal,
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                      mainAxisSpacing: 16,
+                      crossAxisCount: 1,
+                      crossAxisSpacing: 16,
+                      childAspectRatio: 1.0,
                     ),
+                    itemCount: _groups.length + 1,
+                    itemBuilder: (context, index) {
+                      if (index == _groups.length) {
+                        return _buildAddGroupTile(context, colorScheme);
+                      }
+                      return _buildGroupTile(context, _groups[index], colorScheme);
+                    },
                   ),
-          ),
+                ),
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 32, 16, 8),
             child: Text('General Purchases', style: Theme.of(context).textTheme.titleLarge),
@@ -254,8 +217,7 @@ class _GroupsScreenState extends State<GroupsScreen> {
                         _purchases[index],
                         colorScheme,
                         animation,
-                        index <
-                            _purchases.length - 1, // Only show divider if it's not the last item
+                        index < _purchases.length - 1,
                       );
                     },
                   ),
@@ -265,57 +227,47 @@ class _GroupsScreenState extends State<GroupsScreen> {
     );
   }
 
-  Widget _buildGroupTile(
-    BuildContext context,
-    Group group,
-    ColorScheme colorScheme,
-    Animation<double> animation,
-  ) {
-    return ScaleTransition(
-      scale: animation,
-      child: InkWell(
-        onTap: () => Navigator.push(
-          context,
-          MaterialPageRoute(builder: (_) => PurchasesScreen(group: group)),
+  Widget _buildGroupTile(BuildContext context, Group group, ColorScheme colorScheme) {
+    return InkWell(
+      onTap: () =>
+          Navigator.push(context, MaterialPageRoute(builder: (_) => PurchasesScreen(group: group))),
+      borderRadius: BorderRadius.circular(24),
+      child: Ink(
+        decoration: BoxDecoration(
+          color: colorScheme.primaryContainer.withValues(alpha: 0.4),
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(color: colorScheme.primary.withValues(alpha: 0.2)),
         ),
-        borderRadius: BorderRadius.circular(24),
-        child: Ink(
-          decoration: BoxDecoration(
-            color: colorScheme.primaryContainer.withValues(alpha: 0.4),
-            borderRadius: BorderRadius.circular(24),
-            border: Border.all(color: colorScheme.primary.withValues(alpha: 0.2)),
-          ),
-          child: Stack(
-            children: [
-              Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.storefront, size: 36, color: colorScheme.primary),
-                    const SizedBox(height: 12),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                      child: Text(
-                        group.name,
-                        textAlign: TextAlign.center,
-                        style: TextStyle(color: colorScheme.onSurface),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
+        child: Stack(
+          children: [
+            Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.storefront, size: 36, color: colorScheme.primary),
+                  const SizedBox(height: 12),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                    child: Text(
+                      group.name,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(color: colorScheme.onSurface),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-              Positioned(
-                top: 0,
-                right: 0,
-                child: IconButton(
-                  icon: Icon(Icons.close, size: 18, color: colorScheme.onSurfaceVariant),
-                  onPressed: () => _confirmDeleteGroup(context, group),
-                ),
+            ),
+            Positioned(
+              top: 0,
+              right: 0,
+              child: IconButton(
+                icon: Icon(Icons.close, size: 18, color: colorScheme.onSurfaceVariant),
+                onPressed: () => _confirmDeleteGroup(context, group),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

@@ -218,9 +218,9 @@ class AddItemKeypad extends StatelessWidget {
         ),
         Row(
           children: [
-            _buildNumBtn(context, isTeleKeypad ? '.' : '0'),
-            _buildNumBtn(context, isTeleKeypad ? '0' : '.'),
             _buildNumBtn(context, '.99'),
+            _buildNumBtn(context, '0'),
+            _buildNumBtn(context, '.'),
             _buildActionBtn(
               text: 'OK',
               backgroundColor: mainActionBg,
