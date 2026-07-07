@@ -3,9 +3,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../data/settings_data.dart';
 
 class SettingsProvider extends ChangeNotifier {
-  // ▄▀█ █▀█ █▀█ █▀▀ ▄▀█ █▀█ ▄▀█ █▄░█ █▀▀ █▀▀
-  // █▀█ █▀▀ █▀▀ ██▄ █▀█ █▀▄ █▀█ █░▀█ █▄▄ ██▄
-
   // Lightmode | System | Darkmode
 
   void _loadThemeSettings() {
@@ -85,9 +82,6 @@ class SettingsProvider extends ChangeNotifier {
     notifyListeners();
     _prefs.setBool(_telephoneLayoutKey, useCalculator);
   }
-
-  // █░░ █▀█ █▀▀ ▄▀█ █░░ █ ▀█ ▄▀█ ▀█▀ █ █▀█ █▄░█
-  // █▄▄ █▄█ █▄▄ █▀█ █▄▄ █ █▄ █▀█ ░█░ █ █▄█ █░▀█
 
   // Weight Unit
 

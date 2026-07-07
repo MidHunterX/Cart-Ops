@@ -21,11 +21,19 @@ class ItemsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final repo = context.watch<ItemsRepository>();
-    final title = group == null ? 'General Items' : '${group!.name} Items';
     final settings = context.watch<SettingsProvider>();
 
     return Scaffold(
-      appBar: AppBar(title: Text(title), backgroundColor: colorScheme.primaryContainer),
+      appBar: AppBar(
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Tracked Items'),
+            if (group != null) Text(group!.name, style: Theme.of(context).textTheme.bodySmall),
+          ],
+        ),
+        backgroundColor: colorScheme.primaryContainer,
+      ),
       body: StreamBuilder<List<Item>>(
         stream: group == null ? repo.watchItemsWithoutGroup() : repo.watchItemsInGroup(group!.id),
         builder: (context, snapshot) {

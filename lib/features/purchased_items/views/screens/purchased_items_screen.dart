@@ -188,7 +188,16 @@ class _PurchasedItemsScreenState extends State<PurchasedItemsScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(_currentPurchase.name),
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(_currentPurchase.name),
+            Text(
+              _currentPurchase.purchaseDate.toString(),
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+          ],
+        ),
         backgroundColor: colorScheme.primaryContainer,
         actions: [
           PopupMenuButton<String>(

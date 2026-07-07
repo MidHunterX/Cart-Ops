@@ -22,7 +22,10 @@ class PurchasesScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('${group.name} Purchases'),
+        title: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [const Text('Purchases'), Text(group.name, style: Theme.of(context).textTheme.bodySmall)],
+        ),
         backgroundColor: colorScheme.primaryContainer,
         actions: [
           IconButton(

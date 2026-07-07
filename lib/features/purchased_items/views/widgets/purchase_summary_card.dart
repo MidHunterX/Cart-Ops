@@ -20,7 +20,7 @@ class PurchaseSummaryCard extends StatelessWidget {
     final hasBudget = budget != null && budget! > 0;
 
     return Container(
-      padding: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.symmetric(vertical: 16),
       decoration: BoxDecoration(
         color: colorScheme.primaryContainer,
         borderRadius: const BorderRadius.vertical(bottom: Radius.circular(16)),
@@ -64,7 +64,7 @@ class PurchaseSummaryCard extends StatelessWidget {
               Row(
                 children: [
                   Icon(
-                    Icons.payments_outlined,
+                    Icons.receipt_long_outlined,
                     color: colorScheme.onPrimaryContainer,
                     size: headerIconSize,
                   ),
