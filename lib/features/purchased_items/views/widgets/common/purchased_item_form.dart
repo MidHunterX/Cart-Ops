@@ -102,10 +102,12 @@ class PurchasedItemFormState extends State<PurchasedItemForm> {
   }
 
   void _focusActiveField() {
-    if (_activeField == ActiveField.price) {
-      _priceFocusNode.requestFocus();
-    } else {
-      _qtyFocusNode.requestFocus();
+    final controller = (_activeField == ActiveField.price) ? _priceController : _qtyController;
+    final node = (_activeField == ActiveField.price) ? _priceFocusNode : _qtyFocusNode;
+    node.requestFocus();
+    // Select all text so the next keypad press replaces it
+    if (controller.text.isNotEmpty) {
+      controller.selection = TextSelection(baseOffset: 0, extentOffset: controller.text.length);
     }
   }
 
