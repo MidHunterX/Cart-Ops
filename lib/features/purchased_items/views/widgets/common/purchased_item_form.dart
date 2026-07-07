@@ -105,12 +105,7 @@ class PurchasedItemFormState extends State<PurchasedItemForm> {
     if (_activeField == ActiveField.price) {
       _priceFocusNode.requestFocus();
     } else {
-      if (_isWeight) {
-        _qtyFocusNode.requestFocus();
-      } else {
-        _activeField = ActiveField.price;
-        _priceFocusNode.requestFocus();
-      }
+      _qtyFocusNode.requestFocus();
     }
   }
 
@@ -183,11 +178,7 @@ class PurchasedItemFormState extends State<PurchasedItemForm> {
   void _handleKeypadPress(String val) {
     if (val == '=>') {
       setState(() {
-        if (_isWeight) {
-          _activeField = _activeField == ActiveField.price
-              ? ActiveField.quantity
-              : ActiveField.price;
-        }
+        _activeField = _activeField == ActiveField.price ? ActiveField.quantity : ActiveField.price;
         _focusActiveField();
       });
       return;
@@ -321,7 +312,13 @@ class PurchasedItemFormState extends State<PurchasedItemForm> {
                     focusNode: _qtyFocusNode,
                   )
                 : UnitQuantitySelector(
-                    quantity: _qtyStr,
+                    controller: _qtyController,
+                    focusNode: _qtyFocusNode,
+                    isActive: _activeField == ActiveField.quantity,
+                    onTap: () {
+                      setState(() => _activeField = ActiveField.quantity);
+                      _qtyFocusNode.requestFocus();
+                    },
                     onIncrement: _incrementQuantity,
                     onDecrement: _decrementQuantity,
                   ),

@@ -8,7 +8,6 @@ import 'package:shopping_assist/features/settings/providers/settings_provider.da
 import 'package:shopping_assist/core/utils/number_formatter.dart';
 import 'edit_purchased_item_sheet.dart';
 import 'add_item_components/input_field_box.dart' show ActiveField;
-import 'common/unit_quantity_selector.dart';
 
 class PurchasedItemTile extends StatelessWidget {
   final PurchasedItemWithDetails details;
@@ -168,47 +167,15 @@ class PurchasedItemTile extends StatelessWidget {
       );
     }
 
-    if (pItem.isWeight) {
-      return Column(
-        children: [
-          OutlinedButton.icon(
-            style: OutlinedButton.styleFrom(
-              padding: EdgeInsets.symmetric(horizontal: isSmallScreen ? 4 : 8),
-            ),
-            onPressed: () => _showEditSheet(context, initialField: ActiveField.quantity),
-            label: Text(weightUnit, style: const TextStyle(fontSize: 12)),
-          ),
-        ],
-      );
-    }
-
+    // Input Button
     return Column(
       children: [
-        SizedBox(
-          height: 40,
-          child: UnitQuantitySelector(
-            quantity: '0',
-            onIncrement: () {
-              context.read<PurchasedItemsRepository>().updatePurchasedItem(
-                id: pItem.id,
-                price: pItem.price,
-                qty: (pItem.quantity ?? 0) + 1,
-                discount: pItem.discount,
-                isWeight: pItem.isWeight,
-              );
-            },
-            onDecrement: () {
-              if ((pItem.quantity ?? 0) > 1) {
-                context.read<PurchasedItemsRepository>().updatePurchasedItem(
-                  id: pItem.id,
-                  price: pItem.price,
-                  qty: pItem.quantity! - 1,
-                  discount: pItem.discount,
-                  isWeight: pItem.isWeight,
-                );
-              }
-            },
+        OutlinedButton.icon(
+          style: OutlinedButton.styleFrom(
+            padding: EdgeInsets.symmetric(horizontal: isSmallScreen ? 4 : 8),
           ),
+          onPressed: () => _showEditSheet(context, initialField: ActiveField.quantity),
+          label: Text(pItem.isWeight ? weightUnit : 'Qty', style: const TextStyle(fontSize: 12)),
         ),
       ],
     );
