@@ -152,20 +152,11 @@ class AddItemKeypad extends StatelessWidget {
                             borderRadius: BorderRadius.circular(8),
                           )
                         : const Center(
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(Icons.image, size: 24),
-                                SizedBox(width: 4),
-                                Flexible(
-                                  child: Text(
-                                    'Image',
-                                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ),
-                              ],
+                            child: Text(
+                              'Image',
+                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ),
                   ),
@@ -179,10 +170,10 @@ class AddItemKeypad extends StatelessWidget {
               onTap: onDiscountTap,
             ),
             _buildActionBtn(
-              text: 'OK',
-              backgroundColor: mainActionBg,
-              foregroundColor: mainActionFg,
-              onTap: onSubmit,
+              icon: Icons.keyboard_tab,
+              backgroundColor: functionalBg,
+              foregroundColor: functionalFg,
+              onTap: () => onKeyPressed('=>'),
             ),
           ],
         ),
@@ -231,10 +222,10 @@ class AddItemKeypad extends StatelessWidget {
             _buildNumBtn(context, isTeleKeypad ? '0' : '.'),
             _buildNumBtn(context, '.99'),
             _buildActionBtn(
-              icon: Icons.keyboard_tab,
-              backgroundColor: functionalBg,
-              foregroundColor: functionalFg,
-              onTap: () => onKeyPressed('=>'),
+              text: 'OK',
+              backgroundColor: mainActionBg,
+              foregroundColor: mainActionFg,
+              onTap: onSubmit,
             ),
           ],
         ),

@@ -1,4 +1,8 @@
-![Cart Ops Banner](./.assets/cartops_banner.jpg)
+![Dark military-style banner for 'CART OPS' featuring a green circular emblem
+with a white shopping cart icon and white wings on either side, set against a
+black-and-gray digital camouflage background. Below the emblem are five gold
+stars, followed by large white stencil text reading 'CART OPS' and the subtitle
+'ADVANCED COMMERCE OPERATOR TOOL'.](./.assets/cartops_banner.jpg)
 
 # Cart Ops
 
