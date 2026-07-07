@@ -46,7 +46,9 @@ class ItemsDao extends DatabaseAccessor<AppDatabase> with _$ItemsDaoMixin {
   }
 
   Future<bool> hasPurchasedItems(int itemId) async {
-    final query = select(purchasedItems)..where((t) => t.itemId.equals(itemId));
+    final query = select(purchasedItems)
+      ..where((t) => t.itemId.equals(itemId))
+      ..limit(1);
     final result = await query.getSingleOrNull();
     return result != null;
   }
