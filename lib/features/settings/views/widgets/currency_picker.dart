@@ -41,11 +41,28 @@ class _CurrencyPickerState extends State<CurrencyPicker> {
       children: [
         Padding(
           padding: const EdgeInsets.all(16),
-          child: SearchFilter(
-            controller: _searchController,
-            hintText: 'Search currency...',
-            onChanged: (value) => setState(() => _searchQuery = value),
-            onClear: () => setState(() => _searchQuery = ''),
+          child: Row(
+            children: [
+              Container(
+                width: 40,
+                height: 40,
+                alignment: Alignment.center,
+                child: IconButton(
+                  icon: const Icon(Icons.arrow_back),
+                  onPressed: () => Navigator.pop(context),
+                  padding: EdgeInsets.zero,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: SearchFilter(
+                  controller: _searchController,
+                  hintText: 'Search currency...',
+                  onChanged: (value) => setState(() => _searchQuery = value),
+                  onClear: () => setState(() => _searchQuery = ''),
+                ),
+              ),
+            ],
           ),
         ),
         Expanded(
@@ -56,17 +73,11 @@ class _CurrencyPickerState extends State<CurrencyPicker> {
               return ListTile(
                 selected: currency.code == widget.settings.currencyCode,
                 selectedTileColor: Theme.of(context).colorScheme.primaryContainer,
-                leading: Text(
-                  currency.flag,
-                  style: const TextStyle(fontSize: 24),
-                ),
+                leading: Text(currency.flag, style: const TextStyle(fontSize: 24)),
                 title: Text(currency.code),
                 trailing: Text(
                   currency.symbol,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 18,
-                  ),
+                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
                 ),
                 subtitle: Text(currency.name),
                 onTap: () {
