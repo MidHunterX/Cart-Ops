@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:drift/drift.dart' hide isNotNull;
+import 'package:drift/drift.dart' hide isNotNull, isNull;
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shopping_assist/core/database/database.dart';
@@ -188,5 +188,93 @@ void main() {
       expect(generalItems.length, 1);
       expect(generalItems.first.name, 'Toothbrush');
     });
+  });
+
+  // EDGE CASE SCENARIOS
+
+  test('addPurchasedItem handles empty/whitespace name gracefully', () async {
+    final purchase = await purchasesRepository.createPurchase(null);
+    await purchasedItemsRepository.addPurchasedItem(
+      name: '   ',
+      price: 3.5,
+      qty: 2.0,
+      discount: 0.0,
+      isWeight: false,
+      purchaseId: purchase.id,
+      group: null,
+    );
+    final purchasedItems = await purchasedItemsRepository.watchPurchasedItems(purchase.id).first;
+    expect(purchasedItems.length, 1);
+    expect(purchasedItems.first.purchasedItem.name, isNull);
+    expect(purchasedItems.first.purchasedItem.itemId, isNull);
+  });
+
+  test('addPurchasedItem does not create item when price is null', () async {
+    final purchase = await purchasesRepository.createPurchase(null);
+    await purchasedItemsRepository.addPurchasedItem(
+      name: 'Test Item',
+      price: null,
+      qty: 2.0,
+      discount: 0.0,
+      isWeight: false,
+      purchaseId: purchase.id,
+      group: null,
+    );
+    final purchasedItems = await purchasedItemsRepository.watchPurchasedItems(purchase.id).first;
+    expect(purchasedItems.length, 1);
+    expect(purchasedItems.first.purchasedItem.itemId, isNull);
+    // Verify no item was created globally
+    final allItems = await itemsRepository.getItemsWithoutGroup();
+    expect(allItems.isEmpty, isTrue);
+  });
+
+  test('addPurchasedItem does not create item when quantity is null', () async {
+    final purchase = await purchasesRepository.createPurchase(null);
+    await purchasedItemsRepository.addPurchasedItem(
+      name: 'Test Item',
+      price: 3.5,
+      qty: null,
+      discount: 0.0,
+      isWeight: false,
+      purchaseId: purchase.id,
+      group: null,
+    );
+    final purchasedItems = await purchasedItemsRepository.watchPurchasedItems(purchase.id).first;
+    expect(purchasedItems.length, 1);
+    expect(purchasedItems.first.purchasedItem.itemId, isNull);
+  });
+
+  /* TODO: Nullable discount
+  test('addPurchasedItem handles null discount', () async {
+    final purchase = await purchasesRepository.createPurchase(null);
+    await purchasedItemsRepository.addPurchasedItem(
+      name: 'Test Item',
+      price: 10.0,
+      qty: 1.0,
+      discount: null,
+      isWeight: false,
+      purchaseId: purchase.id,
+      group: null,
+    );
+    final purchasedItems = await purchasedItemsRepository.watchPurchasedItems(purchase.id).first;
+    expect(purchasedItems.length, 1);
+    expect(purchasedItems.first.purchasedItem.discount, null);
+  }); */
+
+  test('addPurchasedItem with null imagePath default behavior', () async {
+    final purchase = await purchasesRepository.createPurchase(null);
+    await purchasedItemsRepository.addPurchasedItem(
+      name: 'Test Item',
+      price: 3.5,
+      qty: 2.0,
+      discount: 0.0,
+      isWeight: false,
+      purchaseId: purchase.id,
+      group: null,
+      // imagePath intentionally not provided
+    );
+    final purchasedItems = await purchasedItemsRepository.watchPurchasedItems(purchase.id).first;
+    expect(purchasedItems.length, 1);
+    expect(purchasedItems.first.purchasedItem.imagePath, isNull);
   });
 }
