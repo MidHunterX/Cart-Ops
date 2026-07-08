@@ -62,6 +62,8 @@ class ItemPriceHistoryChart extends StatelessWidget {
                 showTitles: true,
                 reservedSize: 40,
                 getTitlesWidget: (value, meta) {
+                  // STRICTLY check if a data point exists at this exact day.
+                  if (!spots.any((spot) => spot.y == value)) return const SizedBox.shrink();
                   return Padding(
                     padding: const EdgeInsets.only(right: 8.0),
                     child: Text(
@@ -79,13 +81,12 @@ class ItemPriceHistoryChart extends StatelessWidget {
                 showTitles: true,
                 reservedSize: 30,
                 getTitlesWidget: (value, meta) {
+                  // STRICTLY check if a data point exists at this exact day.
+                  if (!spots.any((spot) => spot.x == value)) return const SizedBox.shrink();
                   final date = firstDate.add(Duration(days: value.toInt()));
                   return Padding(
                     padding: const EdgeInsets.only(top: 8.0),
-                    child: Text(
-                      '${date.month}/${date.day}',
-                      style: textTheme.bodySmall,
-                    ),
+                    child: Text('${date.month}/${date.day}', style: textTheme.bodySmall),
                   );
                 },
               ),
@@ -101,6 +102,7 @@ class ItemPriceHistoryChart extends StatelessWidget {
             LineChartBarData(
               spots: spots,
               isCurved: true,
+              isStepLineChart: !isMinimal,
               curveSmoothness: 0.3,
               preventCurveOverShooting: true,
               color: colorScheme.primary,
@@ -117,7 +119,7 @@ class ItemPriceHistoryChart extends StatelessWidget {
                 },
               ),
               belowBarData: BarAreaData(
-                show: !isMinimal,
+                show: true,
                 color: colorScheme.primary.withValues(alpha: 0.2),
               ),
             ),
