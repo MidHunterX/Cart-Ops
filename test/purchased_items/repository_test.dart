@@ -244,7 +244,6 @@ void main() {
     expect(purchasedItems.first.purchasedItem.itemId, isNull);
   });
 
-  /* TODO: Nullable discount
   test('addPurchasedItem handles null discount', () async {
     final purchase = await purchasesRepository.createPurchase(null);
     await purchasedItemsRepository.addPurchasedItem(
@@ -258,8 +257,8 @@ void main() {
     );
     final purchasedItems = await purchasedItemsRepository.watchPurchasedItems(purchase.id).first;
     expect(purchasedItems.length, 1);
-    expect(purchasedItems.first.purchasedItem.discount, null);
-  }); */
+    expect(purchasedItems.first.purchasedItem.discount, 0.0);
+  });
 
   test('addPurchasedItem with null imagePath default behavior', () async {
     final purchase = await purchasesRepository.createPurchase(null);
