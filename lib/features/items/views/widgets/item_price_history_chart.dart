@@ -38,13 +38,36 @@ class ItemPriceHistoryChart extends StatelessWidget {
       maxY = rawMaxY * 1.1;
       if (rawMinY == 0) maxY = 1.0;
     } else {
-      final padding = (rawMaxY - rawMinY) * 0.1;
+      // Top padding (0.15 instead of 0.1) so the labels don't clip at top
+      final padding = (rawMaxY - rawMinY) * 0.15;
       minY = rawMinY - padding;
       maxY = rawMaxY + padding;
     }
 
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+
+    final lineBarData = LineChartBarData(
+      spots: spots,
+      isCurved: true,
+      isStepLineChart: !isMinimal,
+      curveSmoothness: 0,
+      preventCurveOverShooting: true,
+      color: colorScheme.primary,
+      barWidth: isMinimal ? 2 : 3,
+      isStrokeCapRound: true,
+      dotData: FlDotData(
+        show: true,
+        getDotPainter: (spot, percent, barData, index) {
+          return FlDotCirclePainter(
+            radius: isMinimal ? 3 : 4,
+            color: colorScheme.primary,
+            strokeWidth: 0,
+          );
+        },
+      ),
+      belowBarData: BarAreaData(show: true, color: colorScheme.primary.withValues(alpha: 0.2)),
+    );
 
     return SizedBox(
       height: isMinimal ? 80 : 220,
@@ -56,28 +79,10 @@ class ItemPriceHistoryChart extends StatelessWidget {
             show: !isMinimal,
             topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
             rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-            leftTitles: AxisTitles(
-              sideTitles: SideTitles(
-                interval: 1, // y-axis interval
-                showTitles: true,
-                reservedSize: 40,
-                getTitlesWidget: (value, meta) {
-                  // STRICTLY check if a data point exists at this exact day.
-                  if (!spots.any((spot) => spot.y == value)) return const SizedBox.shrink();
-                  return Padding(
-                    padding: const EdgeInsets.only(right: 8.0),
-                    child: Text(
-                      value.toStringAsFixed(1),
-                      style: textTheme.bodySmall,
-                      textAlign: TextAlign.right,
-                    ),
-                  );
-                },
-              ),
-            ),
+            leftTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
             bottomTitles: AxisTitles(
               sideTitles: SideTitles(
-                interval: 1, // x-axis interval
+                interval: 2, // x-axis interval
                 showTitles: true,
                 reservedSize: 30,
                 getTitlesWidget: (value, meta) {
@@ -93,57 +98,38 @@ class ItemPriceHistoryChart extends StatelessWidget {
             ),
           ),
           borderData: FlBorderData(show: !isMinimal),
-          lineTouchData: LineTouchData(enabled: !isMinimal),
+
+          // Configure tooltips to act as plain persistent labels
+          lineTouchData: LineTouchData(
+            enabled: true,
+            handleBuiltInTouches: false,
+            touchTooltipData: LineTouchTooltipData(
+              getTooltipColor: (touchedSpot) => Colors.transparent,
+              tooltipPadding: EdgeInsets.zero,
+              tooltipMargin: 8,
+              fitInsideHorizontally: true,
+              fitInsideVertically: true,
+              getTooltipItems: (touchedSpots) {
+                return touchedSpots.map((touchedSpot) {
+                  return LineTooltipItem(
+                    touchedSpot.y.toStringAsFixed(1),
+                    textTheme.bodySmall?.copyWith(fontWeight: FontWeight.bold) ??
+                        const TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
+                  );
+                }).toList();
+              },
+            ),
+          ),
           minX: minX,
           maxX: maxX,
           minY: minY,
           maxY: maxY,
-          lineBarsData: [
-            LineChartBarData(
-              spots: spots,
-              isCurved: true,
-              isStepLineChart: !isMinimal,
-              curveSmoothness: 0.3,
-              preventCurveOverShooting: true,
-              color: colorScheme.primary,
-              barWidth: isMinimal ? 2 : 3,
-              isStrokeCapRound: true,
-              dotData: FlDotData(
-                show: true,
-                getDotPainter: (spot, percent, barData, index) {
-                  return FlDotCirclePainter(
-                    radius: isMinimal ? 3 : 4,
-                    color: colorScheme.primary,
-                    strokeWidth: 0,
-                  );
-                },
-              ),
-              belowBarData: BarAreaData(
-                show: true,
-                color: colorScheme.primary.withValues(alpha: 0.2),
-              ),
-            ),
-          ],
-          extraLinesData: ExtraLinesData(
-            extraLinesOnTop: isMinimal,
-            horizontalLines: isMinimal
-                ? spots.map((spot) {
-                    return HorizontalLine(
-                      color: colorScheme.primary.withValues(alpha: 0.2),
-                      y: spot.y,
-                      label: HorizontalLineLabel(
-                        show: true,
-                        style: TextStyle(
-                          color: colorScheme.primary,
-                          fontSize: 10,
-                          fontWeight: FontWeight.bold,
-                        ),
-                        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
-                      ),
-                    );
-                  }).toList()
-                : [],
-          ),
+          lineBarsData: [lineBarData],
+
+          // Map all data spots to persistently display tooltips right over them
+          showingTooltipIndicators: spots.map((spot) {
+            return ShowingTooltipIndicators([LineBarSpot(lineBarData, 0, spot)]);
+          }).toList(),
         ),
       ),
     );
