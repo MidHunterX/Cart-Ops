@@ -1,4 +1,4 @@
-package com.midhunterx.shopping_assist
+package com.midhunterx.cartops
 
 import io.flutter.embedding.android.FlutterActivity
 
