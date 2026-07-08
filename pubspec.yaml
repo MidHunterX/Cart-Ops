@@ -20,6 +20,8 @@ dependencies:
   image_picker: ^1.2.2
   uuid: ^4.5.3
   flutter_launcher_icons: ^0.14.4
+  # One of the best chart packages. Nice and flashy compared to Material Charts
+  fl_chart: ^1.2.0
 
 dev_dependencies:
   flutter_test:
