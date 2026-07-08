@@ -78,7 +78,9 @@ class PurchasedItemsRepository {
   }) async {
     int? finalItemId = itemId;
 
-    if (name != null) {
+    bool isNewItemRequired = name != null && price != null && qty != null;
+
+    if (isNewItemRequired) {
       Item? targetItem;
       if (itemId != null && itemId != -1) {
         targetItem = await _itemsDao.findItem(itemId, groupId);
@@ -91,7 +93,7 @@ class PurchasedItemsRepository {
         }
       } else {
         final trimmedName = name.trim();
-        if (trimmedName.isNotEmpty && price != null && qty != null) {
+        if (trimmedName.isNotEmpty) {
           finalItemId = await _itemsDao.insertItem(
             ItemsCompanion.insert(name: trimmedName, groupId: Value(groupId), imagePath: imagePath),
           );
@@ -103,7 +105,7 @@ class PurchasedItemsRepository {
       PurchasedItemsCompanion(
         id: Value(id),
         name: name != null ? Value(name.trim().isEmpty ? null : name.trim()) : const Value.absent(),
-        itemId: name != null ? Value(finalItemId) : const Value.absent(),
+        itemId: isNewItemRequired ? Value(finalItemId) : const Value.absent(),
         price: Value(price),
         quantity: Value(qty),
         discount: Value(discount),
