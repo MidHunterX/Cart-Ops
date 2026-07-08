@@ -277,4 +277,131 @@ void main() {
     expect(purchasedItems.length, 1);
     expect(purchasedItems.first.purchasedItem.imagePath, isNull);
   });
+
+  // UPDATE SCENARIOS
+
+  test('updatePurchasedItem updates only specified fields', () async {
+    final purchase = await purchasesRepository.createPurchase(null);
+    await purchasedItemsRepository.addPurchasedItem(
+      name: 'Original Name',
+      price: 10.0,
+      qty: 5.0,
+      discount: 0.0,
+      isWeight: false,
+      purchaseId: purchase.id,
+      group: null,
+    );
+    final items = await purchasedItemsRepository.watchPurchasedItems(purchase.id).first;
+    final itemToUpdate = items.first;
+    // Update only price and quantity
+    await purchasedItemsRepository.updatePurchasedItem(
+      id: itemToUpdate.purchasedItem.id,
+      itemId: itemToUpdate.purchasedItem.itemId,
+      name: null,
+      price: 15.0,
+      qty: 10.0,
+      discount: 0.0,
+      isWeight: false,
+      groupId: null,
+    );
+    final updatedItems = await purchasedItemsRepository.watchPurchasedItems(purchase.id).first;
+    final updated = updatedItems.first.purchasedItem;
+    expect(updated.name, 'Original Name'); // Name unchanged
+    expect(updated.price, 15.0);
+    expect(updated.quantity, 10.0);
+  });
+
+  test('updatePurchasedItem handles itemId=-1 without name change', () async {
+    final purchase = await purchasesRepository.createPurchase(null);
+    await purchasedItemsRepository.addPurchasedItem(
+      name: 'Test Item',
+      price: 10.0,
+      qty: 5.0,
+      discount: 0.0,
+      isWeight: false,
+      purchaseId: purchase.id,
+      group: null,
+    );
+    final items = await purchasedItemsRepository.watchPurchasedItems(purchase.id).first;
+    final itemToUpdate = items.first;
+    final originalItemId = itemToUpdate.purchasedItem.itemId;
+    await purchasedItemsRepository.updatePurchasedItem(
+      id: itemToUpdate.purchasedItem.id,
+      itemId: -1, // Invalid itemId
+      name: null, // Don't change name
+      price: 20.0,
+      qty: 3.0,
+      discount: 0.0,
+      isWeight: false,
+      groupId: null,
+    );
+    final updatedItems = await purchasedItemsRepository.watchPurchasedItems(purchase.id).first;
+    final updated = updatedItems.first.purchasedItem;
+    expect(updated.itemId, originalItemId); // Item ID unchanged
+    expect(updated.price, 20.0);
+    expect(updated.quantity, 3.0);
+  });
+
+  test('updatePurchasedItem creates new item when name changes with invalid itemId', () async {
+    final purchase = await purchasesRepository.createPurchase(null);
+    await purchasedItemsRepository.addPurchasedItem(
+      name: 'Old Name',
+      price: 10.0,
+      qty: 5.0,
+      discount: 0.0,
+      isWeight: false,
+      purchaseId: purchase.id,
+      group: null,
+    );
+    final items = await purchasedItemsRepository.watchPurchasedItems(purchase.id).first;
+    final itemToUpdate = items.first;
+    final originalItemId = itemToUpdate.purchasedItem.itemId;
+    await purchasedItemsRepository.updatePurchasedItem(
+      id: itemToUpdate.purchasedItem.id,
+      itemId: -1,
+      name: 'New Name',
+      price: 10.0,
+      qty: 5.0,
+      discount: 0.0,
+      isWeight: false,
+      groupId: null,
+    );
+    final updatedItems = await purchasedItemsRepository.watchPurchasedItems(purchase.id).first;
+    final updated = updatedItems.first.purchasedItem;
+    expect(updated.name, 'New Name');
+    expect(updated.itemId, isNot(originalItemId));
+    // Verify new item was created globally
+    final globalItem = await itemsRepository.findItem(updated.itemId!, null);
+    expect(globalItem?.name, 'New Name');
+  });
+
+  test('updatePurchasedItem does NOT create item when name changes but price is null', () async {
+    final purchase = await purchasesRepository.createPurchase(null);
+    await purchasedItemsRepository.addPurchasedItem(
+      name: 'Old Name',
+      price: 10.0,
+      qty: 5.0,
+      discount: 0.0,
+      isWeight: false,
+      purchaseId: purchase.id,
+      group: null,
+    );
+    final items = await purchasedItemsRepository.watchPurchasedItems(purchase.id).first;
+    final itemToUpdate = items.first;
+    final originalItemId = itemToUpdate.purchasedItem.itemId;
+    await purchasedItemsRepository.updatePurchasedItem(
+      id: itemToUpdate.purchasedItem.id,
+      itemId: -1,
+      name: 'New Name',
+      price: null, // No price provided
+      qty: 5.0,
+      discount: 0.0,
+      isWeight: false,
+      groupId: null,
+    );
+    final updatedItems = await purchasedItemsRepository.watchPurchasedItems(purchase.id).first;
+    final updated = updatedItems.first.purchasedItem;
+    expect(updated.name, 'New Name');
+    expect(updated.itemId, originalItemId); // No new item created
+  });
 }
