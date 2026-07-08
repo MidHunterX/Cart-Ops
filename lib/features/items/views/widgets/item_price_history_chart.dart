@@ -14,12 +14,12 @@ class ItemPriceHistoryChart extends StatelessWidget {
     if (validHistory.length < 2) return const SizedBox.shrink();
 
     final chronological = validHistory.reversed.toList();
-    final firstDate = chronological.first.purchase.purchaseDate;
 
-    final spots = chronological.map((h) {
-      final days = h.purchase.purchaseDate.difference(firstDate).inDays.toDouble();
+    final spots = chronological.asMap().entries.map((entry) {
+      final index = entry.key.toDouble(); // Use index for X to ensure even spacing
+      final h = entry.value;
       final price = h.purchasedItem.price! - h.purchasedItem.discount;
-      return FlSpot(days, price);
+      return FlSpot(index, price);
     }).toList();
 
     final rawMinX = spots.first.x;
@@ -27,9 +27,8 @@ class ItemPriceHistoryChart extends StatelessWidget {
     final rawMinY = spots.map((s) => s.y).reduce((a, b) => a < b ? a : b);
     final rawMaxY = spots.map((s) => s.y).reduce((a, b) => a > b ? a : b);
 
-    // Safeguards against crashes when drawing flat lines
     final minX = rawMinX;
-    final maxX = rawMinX == rawMaxX ? rawMinX + 1 : rawMaxX;
+    final maxX = rawMaxX;
 
     double minY = rawMinY;
     double maxY = rawMaxY;
@@ -38,8 +37,8 @@ class ItemPriceHistoryChart extends StatelessWidget {
       maxY = rawMaxY * 1.1;
       if (rawMinY == 0) maxY = 1.0;
     } else {
-      // Top padding (0.15 instead of 0.1) so the labels don't clip at top
-      final padding = (rawMaxY - rawMinY) * 0.15;
+      // Top padding so the labels don't clip at top
+      final padding = (rawMaxY - rawMinY) * 0.2;
       minY = rawMinY - padding;
       maxY = rawMaxY + padding;
     }
@@ -51,7 +50,7 @@ class ItemPriceHistoryChart extends StatelessWidget {
       spots: spots,
       isCurved: true,
       isStepLineChart: !isMinimal,
-      curveSmoothness: 0,
+      curveSmoothness: 0.3,
       preventCurveOverShooting: true,
       color: colorScheme.primary,
       barWidth: isMinimal ? 2 : 3,
@@ -70,36 +69,13 @@ class ItemPriceHistoryChart extends StatelessWidget {
     );
 
     return SizedBox(
-      height: isMinimal ? 80 : 220,
+      height: isMinimal ? 80 : 200,
       width: double.infinity,
       child: LineChart(
         LineChartData(
-          gridData: FlGridData(show: isMinimal ? false : true),
-          titlesData: FlTitlesData(
-            show: !isMinimal,
-            topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-            rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-            leftTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-            bottomTitles: AxisTitles(
-              sideTitles: SideTitles(
-                interval: 2, // x-axis interval
-                showTitles: true,
-                reservedSize: 30,
-                getTitlesWidget: (value, meta) {
-                  // STRICTLY check if a data point exists at this exact day.
-                  if (!spots.any((spot) => spot.x == value)) return const SizedBox.shrink();
-                  final date = firstDate.add(Duration(days: value.toInt()));
-                  return Padding(
-                    padding: const EdgeInsets.only(top: 8.0),
-                    child: Text('${date.month}/${date.day}', style: textTheme.bodySmall),
-                  );
-                },
-              ),
-            ),
-          ),
-          borderData: FlBorderData(show: !isMinimal),
-
-          // Configure tooltips to act as plain persistent labels
+          gridData: const FlGridData(show: true),
+          titlesData: const FlTitlesData(show: false),
+          borderData: FlBorderData(show: false),
           lineTouchData: LineTouchData(
             enabled: true,
             handleBuiltInTouches: false,
@@ -112,8 +88,11 @@ class ItemPriceHistoryChart extends StatelessWidget {
               getTooltipItems: (touchedSpots) {
                 return touchedSpots.map((touchedSpot) {
                   return LineTooltipItem(
-                    touchedSpot.y.toStringAsFixed(1),
-                    textTheme.bodySmall?.copyWith(fontWeight: FontWeight.bold) ??
+                    '\$${touchedSpot.y.toStringAsFixed(2)}',
+                    textTheme.bodySmall?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: colorScheme.onSurface,
+                        ) ??
                         const TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
                   );
                 }).toList();
@@ -125,8 +104,7 @@ class ItemPriceHistoryChart extends StatelessWidget {
           minY: minY,
           maxY: maxY,
           lineBarsData: [lineBarData],
-
-          // Map all data spots to persistently display tooltips right over them
+          // This keeps the price labels visible at all times
           showingTooltipIndicators: spots.map((spot) {
             return ShowingTooltipIndicators([LineBarSpot(lineBarData, 0, spot)]);
           }).toList(),
