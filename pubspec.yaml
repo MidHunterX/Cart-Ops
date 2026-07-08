@@ -22,6 +22,7 @@ dependencies:
   flutter_launcher_icons: ^0.14.4
   # One of the best chart packages. Nice and flashy compared to Material Charts
   fl_chart: ^1.2.0
+  faker: ^2.2.0
 
 dev_dependencies:
   flutter_test:
