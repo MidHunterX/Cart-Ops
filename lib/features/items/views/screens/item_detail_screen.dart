@@ -33,6 +33,10 @@ class ItemDetailScreen extends StatelessWidget {
           final history = snapshot.data ?? [];
           final count = history.length;
 
+          // TODO: Change dynamically based on viewport and datapoint string length
+          final int maxDataPoints = 14;
+          final displayHistory = history.take(maxDataPoints).toList();
+
           return SingleChildScrollView(
             padding: const EdgeInsets.all(16),
             child: Column(
@@ -60,7 +64,7 @@ class ItemDetailScreen extends StatelessWidget {
                 if (history.length >= 2) ...[
                   Text('Price Trend', style: Theme.of(context).textTheme.titleMedium),
                   const SizedBox(height: 16),
-                  ItemPriceHistoryChart(history: history),
+                  ItemPriceHistoryChart(history: displayHistory),
                   const SizedBox(height: 24),
                 ],
 

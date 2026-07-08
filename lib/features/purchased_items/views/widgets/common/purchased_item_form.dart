@@ -306,10 +306,14 @@ class PurchasedItemFormState extends State<PurchasedItemForm> {
               future: _historyFuture,
               builder: (context, snapshot) {
                 if (snapshot.hasData && snapshot.data!.length >= 2) {
+                  // TODO: Change dynamically based on viewport and datapoint string length
+                  final int maxDataPoints = 7;
+                  final displayHistory = snapshot.data?.take(maxDataPoints).toList();
+
                   return Padding(
                     padding: const EdgeInsets.only(bottom: 16.0, left: 12, right: 12),
                     child: ItemPriceHistoryChart(
-                      history: snapshot.data!,
+                      history: displayHistory ?? [],
                       isMinimal: true, // Only show a minimal trendline
                     ),
                   );
