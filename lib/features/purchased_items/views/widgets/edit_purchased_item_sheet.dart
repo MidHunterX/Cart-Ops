@@ -145,6 +145,7 @@ class _EditPurchasedItemSheetState extends State<EditPurchasedItemSheet> {
   Widget build(BuildContext context) {
     return PurchasedItemForm(
       key: _formKey,
+      itemId: _itemId,
       title: 'Edit Item',
       itemName: _name,
       initialPrice: widget.purchasedItem.price?.toPriceString() ?? '',

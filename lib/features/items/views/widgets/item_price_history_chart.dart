@@ -44,13 +44,14 @@ class ItemPriceHistoryChart extends StatelessWidget {
     }
 
     final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
 
     return SizedBox(
       height: isMinimal ? 80 : 220,
       width: double.infinity,
       child: LineChart(
         LineChartData(
-          gridData: FlGridData(show: !isMinimal),
+          gridData: FlGridData(show: isMinimal ? false : true),
           titlesData: FlTitlesData(
             show: !isMinimal,
             topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
@@ -65,7 +66,7 @@ class ItemPriceHistoryChart extends StatelessWidget {
                     padding: const EdgeInsets.only(right: 8.0),
                     child: Text(
                       value.toStringAsFixed(1),
-                      style: Theme.of(context).textTheme.bodySmall,
+                      style: textTheme.bodySmall,
                       textAlign: TextAlign.right,
                     ),
                   );
@@ -83,7 +84,7 @@ class ItemPriceHistoryChart extends StatelessWidget {
                     padding: const EdgeInsets.only(top: 8.0),
                     child: Text(
                       '${date.month}/${date.day}',
-                      style: Theme.of(context).textTheme.bodySmall,
+                      style: textTheme.bodySmall,
                     ),
                   );
                 },
@@ -105,13 +106,42 @@ class ItemPriceHistoryChart extends StatelessWidget {
               color: colorScheme.primary,
               barWidth: isMinimal ? 2 : 3,
               isStrokeCapRound: true,
-              dotData: FlDotData(show: !isMinimal),
-              belowBarData: BarAreaData(
+              dotData: FlDotData(
                 show: true,
+                getDotPainter: (spot, percent, barData, index) {
+                  return FlDotCirclePainter(
+                    radius: isMinimal ? 3 : 4,
+                    color: colorScheme.primary,
+                    strokeWidth: 0,
+                  );
+                },
+              ),
+              belowBarData: BarAreaData(
+                show: !isMinimal,
                 color: colorScheme.primary.withValues(alpha: 0.2),
               ),
             ),
           ],
+          extraLinesData: ExtraLinesData(
+            extraLinesOnTop: isMinimal,
+            horizontalLines: isMinimal
+                ? spots.map((spot) {
+                    return HorizontalLine(
+                      color: colorScheme.primary.withValues(alpha: 0.2),
+                      y: spot.y,
+                      label: HorizontalLineLabel(
+                        show: true,
+                        style: TextStyle(
+                          color: colorScheme.primary,
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+                      ),
+                    );
+                  }).toList()
+                : [],
+          ),
         ),
       ),
     );

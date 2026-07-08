@@ -132,6 +132,7 @@ class _AddPurchasedItemSheetState extends State<AddPurchasedItemSheet> {
   Widget build(BuildContext context) {
     return PurchasedItemForm(
       key: _formKey,
+      itemId: _itemId,
       title: 'Add an Item',
       itemName: _name,
       isLoading: _isLoading,

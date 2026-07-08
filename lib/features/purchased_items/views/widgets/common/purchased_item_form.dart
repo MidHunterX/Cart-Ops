@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:shopping_assist/core/database/database.dart';
 import 'package:shopping_assist/core/utils/image_picker_util.dart';
+import 'package:shopping_assist/features/items/repositories/items_repository.dart';
+import 'package:shopping_assist/features/items/views/widgets/item_price_history_chart.dart';
 import 'package:shopping_assist/features/purchased_items/utils/keypad_logic.dart';
 import 'package:shopping_assist/features/settings/providers/settings_provider.dart';
 import '../add_item_components/input_field_box.dart';
@@ -11,6 +14,7 @@ import 'purchased_item_form_header.dart';
 import 'unit_quantity_selector.dart';
 
 class PurchasedItemForm extends StatefulWidget {
+  final int? itemId; // for price history graph
   final String title;
   final String itemName;
   final String initialPrice;
@@ -36,6 +40,7 @@ class PurchasedItemForm extends StatefulWidget {
 
   const PurchasedItemForm({
     super.key,
+    this.itemId,
     required this.title,
     required this.itemName,
     this.initialPrice = '',
@@ -69,6 +74,8 @@ class PurchasedItemFormState extends State<PurchasedItemForm> {
   String? _imagePath;
   bool _imageChanged = false;
 
+  Future<List<PurchasedItemWithPurchase>>? _historyFuture;
+
   @override
   void initState() {
     super.initState();
@@ -84,12 +91,31 @@ class PurchasedItemFormState extends State<PurchasedItemForm> {
     _priceFocusNode = FocusNode();
     _qtyFocusNode = FocusNode();
 
+    _fetchHistory();
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _focusActiveField();
       if (widget.openDiscountDialog) {
         _handleDiscountTap();
       }
     });
+  }
+
+  // hook to update history chart when item changes
+  @override
+  void didUpdateWidget(PurchasedItemForm oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.itemId != widget.itemId) {
+      _fetchHistory();
+    }
+  }
+
+  void _fetchHistory() {
+    if (widget.itemId != null && widget.itemId != -1) {
+      _historyFuture = context.read<ItemsRepository>().getPurchaseHistoryForItem(widget.itemId!);
+    } else {
+      _historyFuture = null;
+    }
   }
 
   @override
@@ -273,6 +299,25 @@ class PurchasedItemFormState extends State<PurchasedItemForm> {
             ),
           ),
           const SizedBox(height: 16),
+
+          // CHART INTEGRATION
+          if (_historyFuture != null)
+            FutureBuilder<List<PurchasedItemWithPurchase>>(
+              future: _historyFuture,
+              builder: (context, snapshot) {
+                if (snapshot.hasData && snapshot.data!.length >= 2) {
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 16.0, left: 12, right: 12),
+                    child: ItemPriceHistoryChart(
+                      history: snapshot.data!,
+                      isMinimal: true, // Only show a minimal trendline
+                    ),
+                  );
+                }
+                return const SizedBox.shrink();
+              },
+            ),
+
           _buildFieldsRow(settings.weightUnit),
           const SizedBox(height: 16),
           AddItemKeypad(
