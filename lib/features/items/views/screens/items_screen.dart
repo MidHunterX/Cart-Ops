@@ -123,8 +123,26 @@ class ItemsScreen extends StatelessWidget {
                           }
                         },
                         itemBuilder: (ctx) => [
-                          const PopupMenuItem(value: 'edit', child: Text('Edit')),
-                          const PopupMenuItem(value: 'delete', child: Text('Delete')),
+                          const PopupMenuItem(
+                            value: 'edit',
+                            child: Row(
+                              children: [
+                                Icon(Icons.edit, size: 20),
+                                SizedBox(width: 8),
+                                Text('Edit'),
+                              ],
+                            ),
+                          ),
+                          const PopupMenuItem(
+                            value: 'delete',
+                            child: Row(
+                              children: [
+                                Icon(Icons.delete, size: 20, color: Colors.red),
+                                SizedBox(width: 8),
+                                Text('Delete', style: TextStyle(color: Colors.red)),
+                              ],
+                            ),
+                          ),
                         ],
                       ),
                     ),

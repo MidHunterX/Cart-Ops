@@ -35,7 +35,10 @@ class ItemImageView extends StatelessWidget {
     final w = width ?? size;
     final h = height ?? size;
     final br = borderRadius ?? BorderRadius.circular(8);
-    final pSize = placeholderIconSize ?? (w != null ? w * 0.6 : 24.0);
+
+    final pSize = (placeholderIconSize != null && placeholderIconSize!.isFinite)
+        ? placeholderIconSize!
+        : (w != null && w.isFinite ? w * 0.6 : 24.0);
 
     final hasImage = imagePath != null && File(imagePath!).existsSync();
 
