@@ -285,62 +285,59 @@ class PurchasedItemFormState extends State<PurchasedItemForm> {
   @override
   Widget build(BuildContext context) {
     final settings = context.watch<SettingsProvider>();
-    return Padding(
-      padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom, top: 16),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8),
-            child: PurchasedItemFormHeader(
-              title: widget.title,
-              isWeight: _isWeight,
-              onWeightChanged: _handleWeightToggle,
-            ),
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8),
+          child: PurchasedItemFormHeader(
+            title: widget.title,
+            isWeight: _isWeight,
+            onWeightChanged: _handleWeightToggle,
           ),
-          const SizedBox(height: 16),
+        ),
+        const SizedBox(height: 16),
 
-          // CHART INTEGRATION
-          if (_historyFuture != null)
-            FutureBuilder<List<PurchasedItemWithPurchase>>(
-              future: _historyFuture,
-              builder: (context, snapshot) {
-                if (snapshot.hasData && snapshot.data!.length >= 2) {
-                  // TODO: Change dynamically based on viewport and datapoint string length
-                  final int maxDataPoints = 7;
-                  final displayHistory = snapshot.data?.take(maxDataPoints).toList();
+        // CHART INTEGRATION
+        if (_historyFuture != null)
+          FutureBuilder<List<PurchasedItemWithPurchase>>(
+            future: _historyFuture,
+            builder: (context, snapshot) {
+              if (snapshot.hasData && snapshot.data!.length >= 2) {
+                // TODO: Change dynamically based on viewport and datapoint string length
+                final int maxDataPoints = 7;
+                final displayHistory = snapshot.data?.take(maxDataPoints).toList();
 
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 16.0, left: 12, right: 12),
-                    child: ItemPriceHistoryChart(
-                      history: displayHistory ?? [],
-                      isMinimal: true, // Only show a minimal trendline
-                    ),
-                  );
-                }
-                return const SizedBox.shrink();
-              },
-            ),
-
-          _buildFieldsRow(settings.weightUnit),
-          const SizedBox(height: 16),
-          AddItemKeypad(
-            isLoading: widget.isLoading,
-            itemName: widget.itemName,
-            imagePath: _imagePath,
-            discountStr: _discountStr,
-            isTeleKeypad: settings.isTelephoneLayout,
-            onKeyPressed: _handleKeypadPress,
-            onNameTap: widget.onNameTap,
-            onImageTap: _handleImagePicker,
-            onDiscountTap: _handleDiscountTap,
-            onSubmit: _submit,
-            onIncrement: _incrementQuantity,
-            onDecrement: _decrementQuantity,
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 16.0, left: 12, right: 12),
+                  child: ItemPriceHistoryChart(
+                    history: displayHistory ?? [],
+                    isMinimal: true, // Only show a minimal trendline
+                  ),
+                );
+              }
+              return const SizedBox.shrink();
+            },
           ),
-          const SizedBox(height: 16),
-        ],
-      ),
+
+        _buildFieldsRow(settings.weightUnit),
+        const SizedBox(height: 16),
+        AddItemKeypad(
+          isLoading: widget.isLoading,
+          itemName: widget.itemName,
+          imagePath: _imagePath,
+          discountStr: _discountStr,
+          isTeleKeypad: settings.isTelephoneLayout,
+          onKeyPressed: _handleKeypadPress,
+          onNameTap: widget.onNameTap,
+          onImageTap: _handleImagePicker,
+          onDiscountTap: _handleDiscountTap,
+          onSubmit: _submit,
+          onIncrement: _incrementQuantity,
+          onDecrement: _decrementQuantity,
+        ),
+        const SizedBox(height: 16),
+      ],
     );
   }
 

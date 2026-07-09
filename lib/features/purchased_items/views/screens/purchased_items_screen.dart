@@ -187,6 +187,7 @@ class _PurchasedItemsScreenState extends State<PurchasedItemsScreen> {
     );
 
     return Scaffold(
+      resizeToAvoidBottomInset: false, // perf: nothing to resize here on keyboard
       appBar: AppBar(
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -249,8 +250,8 @@ class _PurchasedItemsScreenState extends State<PurchasedItemsScreen> {
         label: 'Add Item',
         onPressed: () => showModalBottomSheet(
           context: context,
-          isScrollControlled: true,
-          useSafeArea: true,
+          isScrollControlled: true, // Must resize on graph UI
+          useSafeArea: false, // Must be behind keyboard
           builder: (context) =>
               AddPurchasedItemSheet(purchase: _currentPurchase, group: widget.group),
         ),
