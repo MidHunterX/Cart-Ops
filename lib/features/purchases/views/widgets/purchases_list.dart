@@ -143,6 +143,7 @@ class _PurchasesListState extends State<PurchasesList> {
       child: Column(
         children: [
           ListTile(
+            contentPadding: const EdgeInsets.only(left: 16, right: 4),
             leading: const Icon(Icons.receipt_long_outlined),
             title: Text(purchase.name),
             subtitle: Text(
