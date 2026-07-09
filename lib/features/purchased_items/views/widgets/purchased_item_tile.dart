@@ -186,6 +186,8 @@ class PurchasedItemTile extends StatelessWidget {
       imagePath: item.imagePath,
       size: imgSize,
       placeholderIconSize: imgSize * 0.6,
+      heroTag: 'purchasedItemTile-${item.id}',
+      enableTapToView: true,
     );
   }
 
