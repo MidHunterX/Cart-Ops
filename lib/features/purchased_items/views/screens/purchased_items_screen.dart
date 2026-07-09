@@ -25,6 +25,7 @@ class PurchasedItemsScreen extends StatefulWidget {
 
 class _PurchasedItemsScreenState extends State<PurchasedItemsScreen> {
   final _listKey = GlobalKey<SliverAnimatedListState>();
+  int? _selectedItemId;
 
   List<PurchasedItemWithDetails> _purchasedItems = [];
   StreamSubscription? _itemsSubscription;
@@ -168,7 +169,14 @@ class _PurchasedItemsScreenState extends State<PurchasedItemsScreen> {
   ) {
     return SizeTransition(
       sizeFactor: animation,
-      child: PurchasedItemTile(details: details, index: index, totalItems: totalItems),
+      child: PurchasedItemTile(
+        details: details,
+        index: index,
+        totalItems: totalItems,
+        isSelected: _selectedItemId == details.purchasedItem.id,
+        onMenuOpened: () => setState(() => _selectedItemId = details.purchasedItem.id),
+        onMenuClosed: () => setState(() => _selectedItemId = null),
+      ),
     );
   }
 

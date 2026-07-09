@@ -34,6 +34,8 @@ class _PurchasesListState extends State<PurchasesList> {
   StreamSubscription? _purchasesSub;
   bool _isLoading = true;
 
+  int? _selectedPurchaseId;
+
   @override
   void initState() {
     super.initState();
@@ -138,11 +140,14 @@ class _PurchasesListState extends State<PurchasesList> {
     Animation<double> animation,
     bool showDivider,
   ) {
+    final isMenuOpen = _selectedPurchaseId == purchase.id;
+    final tileBgColor = isMenuOpen ? colorScheme.primary.withValues(alpha: 0.2) : null;
     return SizeTransition(
       sizeFactor: animation,
       child: Column(
         children: [
           ListTile(
+            tileColor: tileBgColor,
             contentPadding: const EdgeInsets.only(left: 16, right: 4),
             leading: const Icon(Icons.receipt_long_outlined),
             title: Text(purchase.name),
@@ -150,7 +155,10 @@ class _PurchasesListState extends State<PurchasesList> {
               '${purchase.purchaseDate.day}/${purchase.purchaseDate.month}/${purchase.purchaseDate.year} at ${TimeOfDay.fromDateTime(purchase.purchaseDate).format(context)}',
             ),
             trailing: PopupMenuButton<String>(
+              onOpened: () => setState(() => _selectedPurchaseId = purchase.id),
+              onCanceled: () => setState(() => _selectedPurchaseId = null),
               onSelected: (value) {
+                setState(() => _selectedPurchaseId = null);
                 if (value == 'edit') {
                   showDialog(
                     context: context,

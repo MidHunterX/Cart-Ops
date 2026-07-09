@@ -14,11 +14,19 @@ class PurchasedItemTile extends StatelessWidget {
   final int index;
   final int totalItems;
 
+  final bool isSelected;
+  final VoidCallback onMenuOpened;
+  final VoidCallback onMenuClosed;
+
   const PurchasedItemTile({
     super.key,
     required this.details,
     required this.index,
     required this.totalItems,
+
+    this.isSelected = false,
+    required this.onMenuOpened,
+    required this.onMenuClosed,
   });
 
   @override
@@ -38,6 +46,8 @@ class PurchasedItemTile extends StatelessWidget {
     final hasQty = pItem.quantity != null;
     final hasPrice = pItem.price != null;
 
+    final tileBgColor = isSelected ? colorScheme.primary.withValues(alpha: 0.2) : null;
+
     return LayoutBuilder(
       builder: (context, constraints) {
         final maxWidth = constraints.maxWidth;
@@ -51,81 +61,87 @@ class PurchasedItemTile extends StatelessWidget {
 
         return Column(
           children: [
-            InkWell(
-              onLongPress: () => _showEditSheet(context),
-              child: Padding(
-                padding: EdgeInsets.symmetric(vertical: 12.0),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    // Quantity Section
-                    SizedBox(
-                      width: qtyWidth,
-                      child: _buildQuantitySection(
-                        context,
-                        pItem,
-                        hasQty,
-                        isSmallScreen,
-                        weightUnit,
-                        colorScheme,
+            Material(
+              color: tileBgColor,
+              child: InkWell(
+                onLongPress: () => _showEditSheet(context),
+                child: Padding(
+                  padding: EdgeInsets.symmetric(vertical: 12.0),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      // Quantity Section
+                      SizedBox(
+                        width: qtyWidth,
+                        child: _buildQuantitySection(
+                          context,
+                          pItem,
+                          hasQty,
+                          isSmallScreen,
+                          weightUnit,
+                          colorScheme,
+                        ),
                       ),
-                    ),
-                    SizedBox(width: spacing),
-
-                    // Image Section
-                    if (item.imagePath != null || settings.compactItemList == false) ...[
-                      _buildImageSection(item, colorScheme, imgSize),
                       SizedBox(width: spacing),
-                    ],
 
-                    // Main Details Section (Name, Unit Price, Total Price)
-                    Expanded(
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Expanded(
-                            child: _buildItemDetails(
-                              context,
-                              item,
-                              pItem,
-                              settings,
-                              colorScheme,
-                              currency,
-                              weightUnit,
-                              hasPrice,
-                              discountApplied,
-                              pricePerUnit,
-                            ),
-                          ),
-                          SizedBox(width: spacing),
+                      // Image Section
+                      if (item.imagePath != null || settings.compactItemList == false) ...[
+                        _buildImageSection(item, colorScheme, imgSize),
+                        SizedBox(width: spacing),
+                      ],
 
-                          // Total Price
-                          SizedBox(
-                            width: totalAreaWidth,
-                            child: _buildTotalPriceSection(
-                              context,
-                              pItem,
-                              colorScheme,
-                              currency,
-                              weightUnit,
-                              hasPrice,
-                              hasQty,
-                              discountApplied,
-                              totalPrice,
-                              qty,
-                              isSmallScreen,
+                      // Main Details Section (Name, Unit Price, Total Price)
+                      Expanded(
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Expanded(
+                              child: _buildItemDetails(
+                                context,
+                                item,
+                                pItem,
+                                settings,
+                                colorScheme,
+                                currency,
+                                weightUnit,
+                                hasPrice,
+                                discountApplied,
+                                pricePerUnit,
+                              ),
                             ),
-                          ),
-                        ],
+                            SizedBox(width: spacing),
+
+                            // Total Price
+                            SizedBox(
+                              width: totalAreaWidth,
+                              child: _buildTotalPriceSection(
+                                context,
+                                pItem,
+                                colorScheme,
+                                currency,
+                                weightUnit,
+                                hasPrice,
+                                hasQty,
+                                discountApplied,
+                                totalPrice,
+                                qty,
+                                isSmallScreen,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
 
-                    // Menu Button Section
-                    SizedBox(
-                      width: 40, // Limits wide trailing spacing
-                      child: Align(alignment: Alignment.topRight, child: _buildPopupMenu(context)),
-                    ),
-                  ],
+                      // Menu Button Section
+                      SizedBox(
+                        width: 40, // Limits wide trailing spacing
+                        child: Align(
+                          alignment: Alignment.topRight,
+                          child: _buildPopupMenu(context),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -369,7 +385,10 @@ class PurchasedItemTile extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
     return PopupMenuButton<String>(
       icon: Icon(Icons.more_vert, color: colorScheme.onSurfaceVariant),
+      onOpened: onMenuOpened,
+      onCanceled: onMenuClosed,
       onSelected: (value) {
+        onMenuClosed(); // Reset highlight on selection
         switch (value) {
           case 'edit':
             _showEditSheet(context);
