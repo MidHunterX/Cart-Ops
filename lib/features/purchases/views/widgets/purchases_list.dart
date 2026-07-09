@@ -65,26 +65,43 @@ class _PurchasesListState extends State<PurchasesList> {
       return;
     }
 
+    final currentMap = {for (var p in _purchases) p.id: p};
+    final newMap = {for (var p in newPurchases) p.id: p};
+    final removedIds = currentMap.keys.where((id) => !newMap.containsKey(id)).toList();
+    final addedItems = <int, Purchase>{};
+    for (int i = 0; i < newPurchases.length; i++) {
+      final p = newPurchases[i];
+      if (!currentMap.containsKey(p.id)) {
+        addedItems[i] = p;
+      }
+    }
+
     bool hasChanges = false;
+
+    // Process removals (from bottom to top to maintain indices)
     for (int i = _purchases.length - 1; i >= 0; i--) {
-      if (!newPurchases.any((p) => p.id == _purchases[i].id)) {
+      if (removedIds.contains(_purchases[i].id)) {
         final removed = _purchases.removeAt(i);
         hasChanges = true;
         currentState.removeItem(
           i,
           (context, animation) =>
               _buildPurchaseTile(context, removed, Theme.of(context).colorScheme, animation, false),
+          duration: const Duration(milliseconds: 200),
         );
       }
     }
-    for (int i = 0; i < newPurchases.length; i++) {
-      if (i >= _purchases.length || _purchases[i].id != newPurchases[i].id) {
-        _purchases.insert(i, newPurchases[i]);
-        hasChanges = true;
-        currentState.insertItem(i);
-      }
+
+    // Process additions (from top to bottom to maintain correct order)
+    final sortedAdditions = addedItems.keys.toList()..sort();
+    for (final index in sortedAdditions) {
+      final item = addedItems[index]!;
+      _purchases.insert(index, item);
+      hasChanges = true;
+      currentState.insertItem(index, duration: const Duration(milliseconds: 200));
     }
 
+    // Handle empty state transition
     if (hasChanges && _purchases.isEmpty) {
       Future.delayed(const Duration(milliseconds: 300), () {
         if (mounted && _purchases.isEmpty) setState(() {});
