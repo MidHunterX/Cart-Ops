@@ -24,6 +24,7 @@ void main() {
     purchasedItemsRepository = PurchasedItemsRepository(
       database.purchasedItemsDao,
       database.itemsDao,
+      database.purchasesDao,
     );
     purchasesRepository = PurchasesRepository(database.purchasesDao);
     groupsRepository = GroupsRepository(database.groupsDao);

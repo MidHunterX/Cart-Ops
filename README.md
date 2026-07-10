@@ -13,7 +13,7 @@ resource management via technological assistance.
 ![Dart](https://img.shields.io/badge/Dart-0175C2?style=for-the-badge&logo=dart&logoColor=white)
 ![SQLite](https://img.shields.io/badge/Sqlite-003B57?style=for-the-badge&logo=sqlite&logoColor=white)
 
-## Mission Objectives
+## 🎯 Mission Objectives
 
 ![General Plan](./.assets/Cart-Ops-Mockup.svg)
 
@@ -61,7 +61,7 @@ resource management via technological assistance.
 - [ ] Import from CSV
 - [ ] Export to PDF
 
-## Developer Operations
+## 🔫 Developer Operations
 
 To generate DAOs:
 
@@ -75,7 +75,7 @@ To generate app icons:
 dart run flutter_launcher_icons
 ```
 
-## Known Operational Defects
+## 🚨 Known Operational Defects
 
 ### Errors hidden behind Keypad
 

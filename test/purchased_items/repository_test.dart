@@ -24,6 +24,7 @@ void main() {
     purchasedItemsRepository = PurchasedItemsRepository(
       database.purchasedItemsDao,
       database.itemsDao,
+      database.purchasesDao,
     );
     purchasesRepository = PurchasesRepository(database.purchasesDao);
     groupsRepository = GroupsRepository(database.groupsDao);
@@ -402,5 +403,106 @@ void main() {
     final updated = updatedItems.first.purchasedItem;
     expect(updated.name, 'New Name');
     expect(updated.itemId, originalItemId); // No new item created
+  });
+
+  group('PurchasedItemsRepository - Total Price Calculations', () {
+    test('totalPrice updates correctly using (price - discount) * qty on addition', () async {
+      final purchase = await purchasesRepository.createPurchase(null);
+      // Item 1: (10.0 - 2.0) * 3.0 = 24.0
+      await purchasedItemsRepository.addPurchasedItem(
+        name: 'Item 1',
+        price: 10.0,
+        qty: 3.0,
+        discount: 2.0,
+        isWeight: false,
+        purchaseId: purchase.id,
+        group: null,
+      );
+      var updatedPurchase = await purchasesRepository.watchPurchaseById(purchase.id).first;
+      expect(updatedPurchase.totalPrice, 24.0);
+      // Item 2: (5.0 - 0.0) * 1.0 = 5.0
+      // Total should be 24.0 + 5.0 = 29.0
+      await purchasedItemsRepository.addPurchasedItem(
+        name: 'Item 2',
+        price: 5.0,
+        qty: 1.0,
+        discount: 0.0,
+        isWeight: false,
+        purchaseId: purchase.id,
+        group: null,
+      );
+      updatedPurchase = await purchasesRepository.watchPurchaseById(purchase.id).first;
+      expect(updatedPurchase.totalPrice, 29.0);
+    });
+
+    test('totalPrice updates correctly when an item is updated', () async {
+      final purchase = await purchasesRepository.createPurchase(null);
+      await purchasedItemsRepository.addPurchasedItem(
+        name: 'Item 1',
+        price: 10.0,
+        qty: 2.0,
+        discount: 0.0,
+        isWeight: false,
+        purchaseId: purchase.id,
+        group: null,
+      ); // Total: 20.0
+      final items = await purchasedItemsRepository.watchPurchasedItems(purchase.id).first;
+      final itemToUpdate = items.first.purchasedItem;
+      // Update to: (15.0 - 5.0) * 3.0 = 30.0
+      await purchasedItemsRepository.updatePurchasedItem(
+        id: itemToUpdate.id,
+        price: 15.0,
+        qty: 3.0,
+        discount: 5.0,
+        isWeight: false,
+      );
+      final updatedPurchase = await purchasesRepository.watchPurchaseById(purchase.id).first;
+      expect(updatedPurchase.totalPrice, 30.0);
+    });
+
+    test('totalPrice updates correctly when an item is deleted', () async {
+      final purchase = await purchasesRepository.createPurchase(null);
+      await purchasedItemsRepository.addPurchasedItem(
+        name: 'Keep',
+        price: 10.0,
+        qty: 1.0,
+        discount: 0.0,
+        isWeight: false,
+        purchaseId: purchase.id,
+        group: null,
+      ); // 10.0
+      await purchasedItemsRepository.addPurchasedItem(
+        name: 'Delete Me',
+        price: 20.0,
+        qty: 2.0,
+        discount: 5.0,
+        isWeight: false,
+        purchaseId: purchase.id,
+        group: null,
+      ); // (20-5)*2 = 30.0. Total = 40.0
+      final items = await purchasedItemsRepository.watchPurchasedItems(purchase.id).first;
+      final itemToDelete = items
+          .firstWhere((i) => i.purchasedItem.name == 'Delete Me')
+          .purchasedItem;
+      await purchasedItemsRepository.deletePurchasedItem(itemToDelete.id);
+      final updatedPurchase = await purchasesRepository.watchPurchaseById(purchase.id).first;
+      expect(updatedPurchase.totalPrice, 10.0);
+    });
+
+    test('recalculatePurchaseTotal handles null price/qty as 0.0', () async {
+      final purchase = await purchasesRepository.createPurchase(null);
+      await purchasedItemsRepository.addPurchasedItem(
+        name: 'Null Item',
+        price: null,
+        qty: null,
+        discount: 2.0,
+        isWeight: false,
+        purchaseId: purchase.id,
+        group: null,
+      );
+      final updatedPurchase = await purchasesRepository.watchPurchaseById(purchase.id).first;
+      // Calculation: ((0.0 - 2.0) * 0.0) = 0.0
+      expect(updatedPurchase.totalPrice, 0.0);
+    });
   });
 }
