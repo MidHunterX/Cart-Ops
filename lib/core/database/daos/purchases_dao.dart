@@ -4,7 +4,7 @@ import 'package:shopping_assist/core/database/models.dart';
 
 part 'purchases_dao.g.dart';
 
-@DriftAccessor(tables: [Purchases])
+@DriftAccessor(tables: [Purchases, PurchasedItems])
 class PurchasesDao extends DatabaseAccessor<AppDatabase> with _$PurchasesDaoMixin {
   PurchasesDao(super.db);
 
@@ -39,4 +39,20 @@ class PurchasesDao extends DatabaseAccessor<AppDatabase> with _$PurchasesDaoMixi
   }
 
   Future deletePurchase(int id) => (delete(purchases)..where((t) => t.id.equals(id))).go();
+
+  Future<void> recalculatePurchaseTotal(int purchaseId) async {
+    final items = await (select(
+      purchasedItems,
+    )..where((t) => t.purchaseId.equals(purchaseId))).get();
+    double total = 0.0;
+    for (final item in items) {
+      final price = item.price ?? 0.0;
+      final qty = item.quantity ?? 0.0;
+      final discount = item.discount;
+      total += ((price - discount) * qty); // TODO: Add overall discount toggle
+    }
+    await (update(
+      purchases,
+    )..where((t) => t.id.equals(purchaseId))).write(PurchasesCompanion(totalPrice: Value(total)));
+  }
 }

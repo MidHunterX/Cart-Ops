@@ -8,6 +8,7 @@ import 'package:shopping_assist/core/widgets/empty_state.dart';
 import 'package:shopping_assist/features/purchased_items/views/screens/purchased_items_screen.dart';
 import 'package:shopping_assist/features/purchases/repositories/purchases_repository.dart';
 import 'package:shopping_assist/features/purchases/views/widgets/edit_purchase_dialog.dart';
+import 'package:shopping_assist/features/settings/providers/settings_provider.dart';
 
 class PurchasesList extends StatefulWidget {
   final Stream<List<Purchase>> stream;
@@ -57,22 +58,14 @@ class _PurchasesListState extends State<PurchasesList> {
 
     final currentMap = {for (var p in _purchases) p.id: p};
     final newMap = {for (var p in newPurchases) p.id: p};
+
     final removedIds = currentMap.keys.where((id) => !newMap.containsKey(id)).toList();
-    final addedItems = <int, Purchase>{};
-    for (int i = 0; i < newPurchases.length; i++) {
-      final p = newPurchases[i];
-      if (!currentMap.containsKey(p.id)) {
-        addedItems[i] = p;
-      }
-    }
+    final addedIds = newMap.keys.where((id) => !currentMap.containsKey(id)).toSet();
 
-    bool hasChanges = false;
-
-    // Process removals (from bottom to top to maintain indices)
+    // Process removals (bottom to top)
     for (int i = _purchases.length - 1; i >= 0; i--) {
       if (removedIds.contains(_purchases[i].id)) {
         final removed = _purchases.removeAt(i);
-        hasChanges = true;
         currentState.removeItem(
           i,
           (context, animation) => _PurchaseTile(
@@ -86,21 +79,21 @@ class _PurchasesListState extends State<PurchasesList> {
       }
     }
 
-    // Process additions (from top to bottom to maintain correct order)
-    final sortedAdditions = addedItems.keys.toList()..sort();
-    for (final index in sortedAdditions) {
-      final item = addedItems[index]!;
-      _purchases.insert(index, item);
-      hasChanges = true;
-      currentState.insertItem(index, duration: const Duration(milliseconds: 200));
+    // Process additions
+    for (int i = 0; i < newPurchases.length; i++) {
+      final item = newPurchases[i];
+      if (addedIds.contains(item.id)) {
+        _purchases.insert(i, item);
+        currentState.insertItem(i, duration: const Duration(milliseconds: 200));
+      }
     }
 
-    // Handle empty state transition preserving removal animations
-    if (hasChanges && _purchases.isEmpty) {
-      Future.delayed(const Duration(milliseconds: 300), () {
-        if (mounted && _purchases.isEmpty) setState(() {});
-      });
-    }
+    // SYNC DATA AND REBUILD
+    // Even if no items were added/removed, the content (totalPrice) of
+    // existing items might have changed.
+    setState(() {
+      _purchases = List.from(newPurchases);
+    });
   }
 
   @override
@@ -177,6 +170,8 @@ class _PurchaseTileState extends State<_PurchaseTile> {
     final colorScheme = Theme.of(context).colorScheme;
     final purchase = widget.purchase;
     final tileBgColor = _isMenuOpen ? colorScheme.primary.withValues(alpha: 0.2) : null;
+    final settings = context.watch<SettingsProvider>();
+    final currency = settings.currencySymbol;
 
     return SizeTransition(
       sizeFactor: widget.animation,
@@ -190,36 +185,48 @@ class _PurchaseTileState extends State<_PurchaseTile> {
             subtitle: Text(
               '${purchase.purchaseDate.day}/${purchase.purchaseDate.month}/${purchase.purchaseDate.year} at ${TimeOfDay.fromDateTime(purchase.purchaseDate).format(context)}',
             ),
-            trailing: PopupMenuButton<String>(
-              onOpened: () => setState(() => _isMenuOpen = true),
-              onCanceled: () => setState(() => _isMenuOpen = false),
-              onSelected: (value) {
-                setState(() => _isMenuOpen = false);
-                if (value == 'edit') {
-                  showDialog(
-                    context: context,
-                    builder: (_) => EditPurchaseDialog(purchase: purchase),
-                  );
-                } else if (value == 'delete') {
-                  _confirmDelete(context, purchase);
-                }
-              },
-              itemBuilder: (context) => [
-                const PopupMenuItem(
-                  value: 'edit',
-                  child: Row(
-                    children: [Icon(Icons.edit, size: 20), SizedBox(width: 8), Text('Edit')],
+            trailing: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  '$currency${purchase.totalPrice?.toStringAsFixed(2) ?? '0.00'}',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: Theme.of(context).colorScheme.primary,
                   ),
                 ),
-                PopupMenuItem(
-                  value: 'delete',
-                  child: Row(
-                    children: [
-                      Icon(Icons.delete, size: 20, color: colorScheme.error),
-                      const SizedBox(width: 8),
-                      Text('Delete', style: TextStyle(color: colorScheme.error)),
-                    ],
-                  ),
+                PopupMenuButton<String>(
+                  onOpened: () => setState(() => _isMenuOpen = true),
+                  onCanceled: () => setState(() => _isMenuOpen = false),
+                  onSelected: (value) {
+                    setState(() => _isMenuOpen = false);
+                    if (value == 'edit') {
+                      showDialog(
+                        context: context,
+                        builder: (_) => EditPurchaseDialog(purchase: purchase),
+                      );
+                    } else if (value == 'delete') {
+                      _confirmDelete(context, purchase);
+                    }
+                  },
+                  itemBuilder: (context) => [
+                    const PopupMenuItem(
+                      value: 'edit',
+                      child: Row(
+                        children: [Icon(Icons.edit, size: 20), SizedBox(width: 8), Text('Edit')],
+                      ),
+                    ),
+                    PopupMenuItem(
+                      value: 'delete',
+                      child: Row(
+                        children: [
+                          Icon(Icons.delete, size: 20, color: colorScheme.error),
+                          const SizedBox(width: 8),
+                          Text('Delete', style: TextStyle(color: colorScheme.error)),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),

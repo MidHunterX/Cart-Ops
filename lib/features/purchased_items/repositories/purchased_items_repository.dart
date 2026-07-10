@@ -3,13 +3,15 @@ import 'dart:io';
 import 'package:drift/drift.dart';
 import 'package:shopping_assist/core/database/database.dart';
 import 'package:shopping_assist/core/database/daos/items_dao.dart';
+import 'package:shopping_assist/core/database/daos/purchases_dao.dart';
 import 'package:shopping_assist/core/database/daos/purchased_items_dao.dart';
 
 class PurchasedItemsRepository {
   final PurchasedItemsDao _purchasedItemsDao;
   final ItemsDao _itemsDao;
+  final PurchasesDao _purchasesDao;
 
-  PurchasedItemsRepository(this._purchasedItemsDao, this._itemsDao);
+  PurchasedItemsRepository(this._purchasedItemsDao, this._itemsDao, this._purchasesDao);
 
   Stream<List<PurchasedItemWithDetails>> watchPurchasedItems(int purchaseId) {
     return _purchasedItemsDao.watchPurchasedItems(purchaseId);
@@ -63,6 +65,8 @@ class PurchasedItemsRepository {
         itemId: Value(finalItemId),
       ),
     );
+
+    await _purchasesDao.recalculatePurchaseTotal(purchaseId);
   }
 
   Future<void> updatePurchasedItem({
@@ -113,6 +117,11 @@ class PurchasedItemsRepository {
         imagePath: imagePath,
       ),
     );
+
+    final updatedItem = await _purchasedItemsDao.getPurchasedItem(id);
+    if (updatedItem != null) {
+      await _purchasesDao.recalculatePurchaseTotal(updatedItem.purchaseId);
+    }
   }
 
   Future<void> deletePurchasedItem(int id) async {
@@ -128,5 +137,9 @@ class PurchasedItemsRepository {
       }
     }
     await _purchasedItemsDao.deletePurchasedItem(id);
+
+    if (purchasedItem != null) {
+      await _purchasesDao.recalculatePurchaseTotal(purchasedItem.purchaseId);
+    }
   }
 }

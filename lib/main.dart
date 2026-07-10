@@ -55,9 +55,9 @@ void main() async {
         ProxyProvider<PurchasesDao, PurchasesRepository>(
           update: (_, purchasesDao, _) => PurchasesRepository(purchasesDao),
         ),
-        ProxyProvider2<ItemsDao, PurchasedItemsDao, PurchasedItemsRepository>(
-          update: (_, itemsDao, purchasedItemsDao, _) =>
-              PurchasedItemsRepository(purchasedItemsDao, itemsDao),
+        ProxyProvider3<ItemsDao, PurchasedItemsDao, PurchasesDao, PurchasedItemsRepository>(
+          update: (_, itemsDao, purchasedItemsDao, purchasesDao, _) =>
+              PurchasedItemsRepository(purchasedItemsDao, itemsDao, purchasesDao),
         ),
       ],
       child: const ShoppingApp(),

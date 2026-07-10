@@ -6,6 +6,8 @@ part of 'purchases_dao.dart';
 mixin _$PurchasesDaoMixin on DatabaseAccessor<AppDatabase> {
   $GroupsTable get groups => attachedDatabase.groups;
   $PurchasesTable get purchases => attachedDatabase.purchases;
+  $ItemsTable get items => attachedDatabase.items;
+  $PurchasedItemsTable get purchasedItems => attachedDatabase.purchasedItems;
   PurchasesDaoManager get managers => PurchasesDaoManager(this);
 }
 
@@ -16,4 +18,11 @@ class PurchasesDaoManager {
       $$GroupsTableTableManager(_db.attachedDatabase, _db.groups);
   $$PurchasesTableTableManager get purchases =>
       $$PurchasesTableTableManager(_db.attachedDatabase, _db.purchases);
+  $$ItemsTableTableManager get items =>
+      $$ItemsTableTableManager(_db.attachedDatabase, _db.items);
+  $$PurchasedItemsTableTableManager get purchasedItems =>
+      $$PurchasedItemsTableTableManager(
+        _db.attachedDatabase,
+        _db.purchasedItems,
+      );
 }

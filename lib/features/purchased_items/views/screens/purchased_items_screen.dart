@@ -186,13 +186,7 @@ class _PurchasedItemsScreenState extends State<PurchasedItemsScreen> {
     final settings = context.watch<SettingsProvider>();
 
     final totalItems = _purchasedItems.length;
-    final totalPrice = _purchasedItems.fold<double>(
-      0.0,
-      (sum, details) =>
-          sum +
-          (((details.purchasedItem.price ?? 0.0) - details.purchasedItem.discount) *
-              (details.purchasedItem.quantity ?? 0.0)),
-    );
+    final totalPrice = _currentPurchase.totalPrice ?? 0.0;
 
     return Scaffold(
       resizeToAvoidBottomInset: false, // perf: nothing to resize here on keyboard
