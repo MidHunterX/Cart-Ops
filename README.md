@@ -77,9 +77,16 @@ dart run flutter_launcher_icons
 
 ## Known Operational Defects
 
-There's a problem with Snackbar's Z-index. It shows always under BottomSheet by default.
+### Errors hidden behind Keypad
 
-See Issue: [#63254](https://github.com/flutter/flutter/issues/63254)
-
+There's a problem with Snackbar's Z-index. It shows always under BottomSheet by
+default. See Issue: [#63254](https://github.com/flutter/flutter/issues/63254).
 Item purchase keypad interface is implemented in showModalBottomSheet so, any
 errors will be hidden behind the keypad.
+
+### Wrong Autocompletion Details?
+
+Autocompletion takes "last created" item details and not necessarily the "last
+purchased". So, if a purchase's purchase date is manually modified, the
+autocompletion will use it the next time. Just re-enter the price, after that
+it will be fine again until purchase date is manually overridden.

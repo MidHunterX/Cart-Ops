@@ -100,44 +100,48 @@ class _GroupsScreenState extends State<GroupsScreen> {
           : settings.dominantHand == DominantHand.left
           ? FloatingActionButtonLocation.startFloat
           : FloatingActionButtonLocation.centerFloat,
-      body: ListView(
-        padding: const EdgeInsets.only(bottom: 80),
-        children: [
-          Padding(
+      body: CustomScrollView(
+        slivers: [
+          SliverPadding(
             padding: const EdgeInsets.fromLTRB(16, 24, 16, 16),
-            child: Text('My Groups', style: Theme.of(context).textTheme.titleLarge),
+            sliver: SliverToBoxAdapter(
+              child: Text('My Groups', style: Theme.of(context).textTheme.titleLarge),
+            ),
           ),
-          _isLoadingGroups
-              ? const SizedBox(height: 150, child: Center(child: CircularProgressIndicator()))
-              : SizedBox(
-                  height: 150,
-                  child: GridView.builder(
-                    scrollDirection: Axis.horizontal,
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                      mainAxisSpacing: 16,
-                      crossAxisCount: 1,
-                      crossAxisSpacing: 16,
-                      childAspectRatio: 1.0,
+          SliverToBoxAdapter(
+            child: _isLoadingGroups
+                ? const SizedBox(height: 150, child: Center(child: CircularProgressIndicator()))
+                : SizedBox(
+                    height: 150,
+                    child: ListView.separated(
+                      scrollDirection: Axis.horizontal,
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      itemCount: _groups.length + 1,
+                      separatorBuilder: (context, index) => const SizedBox(width: 16),
+                      itemBuilder: (context, index) {
+                        if (index == _groups.length) {
+                          return SizedBox(
+                            width: 150,
+                            child: _buildAddGroupTile(context, colorScheme),
+                          );
+                        }
+                        return SizedBox(
+                          width: 150,
+                          child: _buildGroupTile(context, _groups[index], colorScheme),
+                        );
+                      },
                     ),
-                    itemCount: _groups.length + 1,
-                    itemBuilder: (context, index) {
-                      if (index == _groups.length) {
-                        return _buildAddGroupTile(context, colorScheme);
-                      }
-                      return _buildGroupTile(context, _groups[index], colorScheme);
-                    },
                   ),
-                ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 32, 16, 8),
-            child: Text('General Purchases', style: Theme.of(context).textTheme.titleLarge),
           ),
-          PurchasesList(
-            stream: purchasesRepo.watchGeneralPurchases(),
-            group: null,
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
+          SliverPadding(
+            padding: const EdgeInsets.fromLTRB(16, 32, 16, 8),
+            sliver: SliverToBoxAdapter(
+              child: Text('General Purchases', style: Theme.of(context).textTheme.titleLarge),
+            ),
+          ),
+          SliverPadding(
+            padding: const EdgeInsets.only(bottom: 80),
+            sliver: PurchasesList(stream: purchasesRepo.watchGeneralPurchases(), group: null),
           ),
         ],
       ),

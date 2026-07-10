@@ -12,29 +12,19 @@ import 'package:shopping_assist/features/purchases/views/widgets/edit_purchase_d
 class PurchasesList extends StatefulWidget {
   final Stream<List<Purchase>> stream;
   final Group? group;
-  final bool shrinkWrap;
-  final ScrollPhysics? physics;
 
-  const PurchasesList({
-    super.key,
-    required this.stream,
-    this.group,
-    this.shrinkWrap = false,
-    this.physics,
-  });
+  const PurchasesList({super.key, required this.stream, this.group});
 
   @override
   State<PurchasesList> createState() => _PurchasesListState();
 }
 
 class _PurchasesListState extends State<PurchasesList> {
-  final _listKey = GlobalKey<AnimatedListState>();
+  final _listKey = GlobalKey<SliverAnimatedListState>();
 
   List<Purchase> _purchases = [];
   StreamSubscription? _purchasesSub;
   bool _isLoading = true;
-
-  int? _selectedPurchaseId;
 
   @override
   void initState() {
@@ -85,8 +75,12 @@ class _PurchasesListState extends State<PurchasesList> {
         hasChanges = true;
         currentState.removeItem(
           i,
-          (context, animation) =>
-              _buildPurchaseTile(context, removed, Theme.of(context).colorScheme, animation, false),
+          (context, animation) => _PurchaseTile(
+            purchase: removed,
+            animation: animation,
+            showDivider: false,
+            group: widget.group,
+          ),
           duration: const Duration(milliseconds: 200),
         );
       }
@@ -101,7 +95,7 @@ class _PurchasesListState extends State<PurchasesList> {
       currentState.insertItem(index, duration: const Duration(milliseconds: 200));
     }
 
-    // Handle empty state transition
+    // Handle empty state transition preserving removal animations
     if (hasChanges && _purchases.isEmpty) {
       Future.delayed(const Duration(milliseconds: 300), () {
         if (mounted && _purchases.isEmpty) setState(() {});
@@ -111,56 +105,81 @@ class _PurchasesListState extends State<PurchasesList> {
 
   @override
   Widget build(BuildContext context) {
-    Widget content;
-
     if (_isLoading) {
-      content = const Padding(
-        padding: EdgeInsets.all(32.0),
-        child: Center(child: CircularProgressIndicator()),
+      return const SliverToBoxAdapter(
+        child: Padding(
+          padding: EdgeInsets.all(32.0),
+          child: Center(child: CircularProgressIndicator()),
+        ),
       );
     } else if (_purchases.isEmpty) {
-      content = const Padding(
-        key: ValueKey('empty_purchases'),
-        padding: EdgeInsets.only(top: 32.0),
-        child: EmptyState(
-          icon: Icons.shopping_bag_outlined,
-          title: 'No Purchases Yet',
-          message: 'Start a new shopping event by adding a purchase.',
+      return const SliverToBoxAdapter(
+        child: Padding(
+          key: ValueKey('empty_purchases'),
+          padding: EdgeInsets.only(top: 32.0),
+          child: EmptyState(
+            icon: Icons.shopping_bag_outlined,
+            title: 'No Purchases Yet',
+            message: 'Start a new shopping event by adding a purchase.',
+          ),
         ),
       );
     } else {
-      content = AnimatedList(
+      return SliverAnimatedList(
         key: _listKey,
-        shrinkWrap: widget.shrinkWrap,
-        physics: widget.physics,
-        padding: EdgeInsets.zero,
         initialItemCount: _purchases.length,
         itemBuilder: (context, index, animation) {
-          return _buildPurchaseTile(
-            context,
-            _purchases[index],
-            Theme.of(context).colorScheme,
-            animation,
-            index < _purchases.length - 1,
+          return _PurchaseTile(
+            purchase: _purchases[index],
+            animation: animation,
+            showDivider: index < _purchases.length - 1,
+            group: widget.group,
           );
         },
       );
     }
+  }
+}
 
-    return AnimatedSwitcher(duration: const Duration(milliseconds: 300), child: content);
+class _PurchaseTile extends StatefulWidget {
+  final Purchase purchase;
+  final Animation<double> animation;
+  final bool showDivider;
+  final Group? group;
+
+  const _PurchaseTile({
+    required this.purchase,
+    required this.animation,
+    required this.showDivider,
+    this.group,
+  });
+
+  @override
+  State<_PurchaseTile> createState() => _PurchaseTileState();
+}
+
+class _PurchaseTileState extends State<_PurchaseTile> {
+  bool _isMenuOpen = false;
+
+  void _confirmDelete(BuildContext context, Purchase purchase) {
+    DeleteConfirmationDialog.show(
+      context,
+      title: 'Delete Purchase Event?',
+      message: 'Are you sure you want to delete "${purchase.name}"?',
+      onDelete: () {
+        context.read<PurchasesRepository>().deletePurchase(purchase.id);
+      },
+    );
   }
 
-  Widget _buildPurchaseTile(
-    BuildContext context,
-    Purchase purchase,
-    ColorScheme colorScheme,
-    Animation<double> animation,
-    bool showDivider,
-  ) {
-    final isMenuOpen = _selectedPurchaseId == purchase.id;
-    final tileBgColor = isMenuOpen ? colorScheme.primary.withValues(alpha: 0.2) : null;
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final purchase = widget.purchase;
+    final tileBgColor = _isMenuOpen ? colorScheme.primary.withValues(alpha: 0.2) : null;
+
     return SizeTransition(
-      sizeFactor: animation,
+      sizeFactor: widget.animation,
       child: Column(
         children: [
           ListTile(
@@ -172,10 +191,10 @@ class _PurchasesListState extends State<PurchasesList> {
               '${purchase.purchaseDate.day}/${purchase.purchaseDate.month}/${purchase.purchaseDate.year} at ${TimeOfDay.fromDateTime(purchase.purchaseDate).format(context)}',
             ),
             trailing: PopupMenuButton<String>(
-              onOpened: () => setState(() => _selectedPurchaseId = purchase.id),
-              onCanceled: () => setState(() => _selectedPurchaseId = null),
+              onOpened: () => setState(() => _isMenuOpen = true),
+              onCanceled: () => setState(() => _isMenuOpen = false),
               onSelected: (value) {
-                setState(() => _selectedPurchaseId = null);
+                setState(() => _isMenuOpen = false);
                 if (value == 'edit') {
                   showDialog(
                     context: context,
@@ -211,20 +230,9 @@ class _PurchasesListState extends State<PurchasesList> {
               ),
             ),
           ),
-          if (showDivider) const Divider(height: 1),
+          if (widget.showDivider) const Divider(height: 1),
         ],
       ),
-    );
-  }
-
-  void _confirmDelete(BuildContext context, Purchase purchase) {
-    DeleteConfirmationDialog.show(
-      context,
-      title: 'Delete Purchase Event?',
-      message: 'Are you sure you want to delete "${purchase.name}"?',
-      onDelete: () {
-        context.read<PurchasesRepository>().deletePurchase(purchase.id);
-      },
     );
   }
 }

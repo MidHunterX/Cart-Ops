@@ -23,8 +23,11 @@ class PurchasesScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [const Text('Purchases'), Text(group.name, style: Theme.of(context).textTheme.bodySmall)],
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text('Purchases'),
+            Text(group.name, style: Theme.of(context).textTheme.bodySmall),
+          ],
         ),
         backgroundColor: colorScheme.primaryContainer,
         actions: [
@@ -64,7 +67,14 @@ class PurchasesScreen extends StatelessWidget {
           : settings.dominantHand == DominantHand.left
           ? FloatingActionButtonLocation.startFloat
           : FloatingActionButtonLocation.centerFloat,
-      body: PurchasesList(stream: repo.watchPurchasesInGroup(group.id), group: group),
+      body: CustomScrollView(
+        slivers: [
+          SliverPadding(
+            padding: const EdgeInsets.only(bottom: 80),
+            sliver: PurchasesList(stream: repo.watchPurchasesInGroup(group.id), group: group),
+          ),
+        ],
+      ),
     );
   }
 }
