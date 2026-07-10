@@ -180,7 +180,7 @@ class _PurchaseTileState extends State<_PurchaseTile> {
           ListTile(
             tileColor: tileBgColor,
             contentPadding: const EdgeInsets.only(left: 16, right: 4),
-            leading: const Icon(Icons.receipt_long_outlined),
+            leading: const Icon(Icons.shopping_cart_outlined),
             title: Text(purchase.name),
             subtitle: Text(
               '${purchase.purchaseDate.day}/${purchase.purchaseDate.month}/${purchase.purchaseDate.year} at ${TimeOfDay.fromDateTime(purchase.purchaseDate).format(context)}',

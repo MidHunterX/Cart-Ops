@@ -94,14 +94,8 @@ class ItemDetailScreen extends StatelessWidget {
                           child: Icon(Icons.history, color: colorScheme.onSecondaryContainer),
                         ),
                         title: Text(dateStr, style: const TextStyle(fontWeight: FontWeight.bold)),
-                        subtitle: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const SizedBox(height: 4),
-                            Text(
-                              'Quantity: ${p.quantity?.toWeightString(p.isWeight ? weightUnit : '')}',
-                            ),
-                          ],
+                        subtitle: Text(
+                          'Quantity: ${p.quantity?.toWeightString(p.isWeight ? weightUnit : '')}',
                         ),
                         trailing: Column(
                           crossAxisAlignment: CrossAxisAlignment.end,
