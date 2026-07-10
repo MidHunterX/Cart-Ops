@@ -35,6 +35,7 @@ class AddItemKeypad extends StatelessWidget {
     String? text,
     IconData? icon,
     required VoidCallback onTap,
+    VoidCallback? onLongPress,
     Color? backgroundColor,
     Color? foregroundColor,
   }) {
@@ -43,6 +44,7 @@ class AddItemKeypad extends StatelessWidget {
         padding: const EdgeInsets.all(4.0),
         child: ElevatedButton(
           onPressed: onTap,
+          onLongPress: onLongPress,
           style: ElevatedButton.styleFrom(
             backgroundColor: backgroundColor,
             foregroundColor: foregroundColor,
@@ -187,6 +189,7 @@ class AddItemKeypad extends StatelessWidget {
               backgroundColor: functionalBg,
               foregroundColor: functionalFg,
               onTap: () => onKeyPressed('<='),
+              onLongPress: () => onKeyPressed('C'),
             ),
           ],
         ),
