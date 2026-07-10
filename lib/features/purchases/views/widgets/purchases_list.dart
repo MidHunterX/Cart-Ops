@@ -201,10 +201,7 @@ class _PurchaseTileState extends State<_PurchaseTile> {
                   onSelected: (value) {
                     setState(() => _isMenuOpen = false);
                     if (value == 'edit') {
-                      showDialog(
-                        context: context,
-                        builder: (_) => EditPurchaseDialog(purchase: purchase),
-                      );
+                      _showEditDialog(context, purchase);
                     } else if (value == 'delete') {
                       _confirmDelete(context, purchase);
                     }
@@ -230,6 +227,7 @@ class _PurchaseTileState extends State<_PurchaseTile> {
                 ),
               ],
             ),
+            onLongPress: () => _showEditDialog(context, purchase),
             onTap: () => Navigator.push(
               context,
               MaterialPageRoute(
@@ -240,6 +238,13 @@ class _PurchaseTileState extends State<_PurchaseTile> {
           if (widget.showDivider) const Divider(height: 1),
         ],
       ),
+    );
+  }
+
+  void _showEditDialog(BuildContext context, Purchase purchase) {
+    showDialog(
+      context: context,
+      builder: (_) => EditPurchaseDialog(purchase: purchase),
     );
   }
 }
