@@ -12,6 +12,7 @@ import 'package:shopping_assist/features/items/repositories/items_repository.dar
 import 'package:shopping_assist/features/purchased_items/repositories/purchased_items_repository.dart';
 import 'package:shopping_assist/features/purchases/repositories/purchases_repository.dart';
 import 'package:shopping_assist/features/settings/providers/settings_provider.dart';
+// import 'package:drift/drift.dart';
 // import 'package:shopping_assist/dev/generate_seeds.dart';
 
 void main() async {
@@ -23,12 +24,22 @@ void main() async {
   // final seeder = DatabaseSeeder(
   //   db,
   //   config: const SeederConfig(
+  //     // Group Purchases
   //     numGroups: 2,
+  //     minItemsPerGroup: 5,
+  //     maxItemsPerGroup: 10,
+  //     minPurchasesPerGroup: 10,
   //     maxPurchasesPerGroup: 40,
+  //     // General Purchases
+  //     numOrphanItems: 5,
   //     numOrphanPurchases: 30,
-  //   )
+  //     minPurchasedItems: 5,
+  //     maxPurchasedItems: 10,
+  //   ),
   // );
   // await seeder.seed();
+  // await seeder.personalSeed();
+  // driftRuntimeOptions.dontWarnAboutMultipleDatabases = true;
   // ==========================================================================
 
   runApp(

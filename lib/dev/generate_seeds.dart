@@ -1,7 +1,12 @@
+import 'dart:convert';
+import 'dart:io';
 import 'dart:math';
 import 'package:drift/drift.dart';
 import 'package:faker/faker.dart';
 import 'package:shopping_assist/core/database/database.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:shopping_assist/dev/base_64_images.dart';
+import 'package:uuid/uuid.dart';
 
 /// Configuration for the database seeder to control data volume.
 class SeederConfig {
@@ -10,22 +15,22 @@ class SeederConfig {
   final int maxItemsPerGroup;
   final int minPurchasesPerGroup;
   final int maxPurchasesPerGroup;
-  final int minPurchasedItems;
-  final int maxPurchasedItems;
   final int numOrphanItems;
   final int numOrphanPurchases;
+  final int minPurchasedItems;
+  final int maxPurchasedItems;
 
   const SeederConfig({
     this.numGroups = 1,
 
-    this.numOrphanItems = 5,
-    this.numOrphanPurchases = 10,
+    this.minItemsPerGroup = 10,
+    this.maxItemsPerGroup = 25,
 
     this.minPurchasesPerGroup = 3,
     this.maxPurchasesPerGroup = 8,
 
-    this.minItemsPerGroup = 10,
-    this.maxItemsPerGroup = 25,
+    this.numOrphanItems = 5,
+    this.numOrphanPurchases = 10,
 
     this.minPurchasedItems = 2,
     this.maxPurchasedItems = 12,
@@ -39,8 +44,144 @@ class DatabaseSeeder {
   final Random _random;
 
   DatabaseSeeder(this._db, {this._config = const SeederConfig()})
-      : _faker = Faker(),
-        _random = Random();
+    : _faker = Faker(),
+      _random = Random();
+
+
+  Future<void> personalSeed() async {
+    print('Starting Personal Database Seeder...');
+
+    final imgpathFruits = await _createSeedImageFromBase64(baseFruits);
+    final imgpathLunch = await _createSeedImageFromBase64(baseLunch);
+    final imgpathMurukku = await _createSeedImageFromBase64(baseMurukku);
+    final imgpathPickle = await _createSeedImageFromBase64(basePickle);
+
+    final purchaseId = await _db.purchasesDao.insertPurchase(
+      PurchasesCompanion.insert(
+        name: "${_faker.company.name()} ${_faker.company.suffix()}",
+        purchaseDate: DateTime.now(),
+        budget: Value(1500),
+      ),
+    );
+
+    await _db.purchasedItemsDao.insertPurchasedItem(
+      PurchasedItemsCompanion.insert(
+        name: Value("Rice Lunch"),
+        price: Value(25),
+        quantity: Value(4),
+        isWeight: Value(false),
+        discount: Value(5),
+        imagePath: Value(imgpathLunch),
+        purchaseId: purchaseId,
+      ),
+    );
+
+    await _db.purchasedItemsDao.insertPurchasedItem(
+      PurchasedItemsCompanion.insert(
+        name: Value("Fresh Fruits"),
+        price: Value(25),
+        quantity: Value(3.57),
+        isWeight: Value(true),
+        discount: Value(4),
+        imagePath: Value(imgpathFruits),
+        purchaseId: purchaseId,
+      ),
+    );
+
+    await _db.purchasedItemsDao.insertPurchasedItem(
+      PurchasedItemsCompanion.insert(
+        name: Value("Onion Red"),
+        price: Value(35),
+        quantity: Value.absent(),
+        isWeight: Value(true),
+        discount: Value.absent(),
+        purchaseId: purchaseId,
+      ),
+    );
+
+    await _db.purchasedItemsDao.insertPurchasedItem(
+      PurchasedItemsCompanion.insert(
+        name: Value("Mentos Large"),
+        price: Value(20),
+        quantity: Value.absent(),
+        isWeight: Value(false),
+        discount: Value.absent(),
+        purchaseId: purchaseId,
+      ),
+    );
+
+    await _db.purchasedItemsDao.insertPurchasedItem(
+      PurchasedItemsCompanion.insert(
+        name: Value("Item Only"),
+        price: Value.absent(),
+        quantity: Value(4),
+        isWeight: Value(false),
+        discount: Value.absent(),
+        purchaseId: purchaseId,
+      ),
+    );
+
+    await _db.purchasedItemsDao.insertPurchasedItem(
+      PurchasedItemsCompanion.insert(
+        name: Value("Weight Only"),
+        price: Value.absent(),
+        quantity: Value(3.57),
+        isWeight: Value(true),
+        discount: Value.absent(),
+        purchaseId: purchaseId,
+      ),
+    );
+
+    await _db.purchasedItemsDao.insertPurchasedItem(
+      PurchasedItemsCompanion.insert(
+        name: Value.absent(),
+        price: Value(25),
+        quantity: Value(3.57),
+        isWeight: Value(true),
+        discount: Value.absent(),
+        purchaseId: purchaseId,
+      ),
+    );
+
+    await _db.purchasedItemsDao.insertPurchasedItem(
+      PurchasedItemsCompanion.insert(
+        name: Value.absent(),
+        price: Value(25),
+        quantity: Value(4),
+        isWeight: Value(false),
+        discount: Value.absent(),
+        purchaseId: purchaseId,
+      ),
+    );
+
+    await _db.purchasedItemsDao.insertPurchasedItem(
+      PurchasedItemsCompanion.insert(
+        name: Value.absent(),
+        price: Value(150),
+        quantity: Value(1.33),
+        isWeight: Value(true),
+        discount: Value.absent(),
+        imagePath: Value(imgpathMurukku),
+        purchaseId: purchaseId,
+      ),
+    );
+
+    await _db.purchasedItemsDao.insertPurchasedItem(
+      PurchasedItemsCompanion.insert(
+        name: Value.absent(),
+        price: Value(325),
+        quantity: Value(2),
+        isWeight: Value(false),
+        discount: Value.absent(),
+        imagePath: Value(imgpathPickle),
+        purchaseId: purchaseId,
+      ),
+    );
+
+    await _db.purchasesDao.recalculatePurchaseTotal(purchaseId);
+
+    print('Personal Seed Complete');
+  }
 
   /// Clears existing data and seeds the database with random data.
   Future<void> seed() async {
@@ -55,9 +196,7 @@ class DatabaseSeeder {
 
     for (int i = 0; i < _config.numGroups; i++) {
       final groupName = '${_faker.company.name()} ${_faker.company.suffix()}';
-      final groupId = await _db.groupsDao.insertGroup(
-        GroupsCompanion.insert(name: groupName),
-      );
+      final groupId = await _db.groupsDao.insertGroup(GroupsCompanion.insert(name: groupName));
       groupIds.add(groupId);
       groupItemsMap[groupId] = [];
     }
@@ -65,13 +204,12 @@ class DatabaseSeeder {
 
     // 2. Seed Items (Grouped)
     for (final groupId in groupIds) {
-      final numItems = _random.nextInt(_config.maxItemsPerGroup - _config.minItemsPerGroup) + _config.minItemsPerGroup;
+      final numItems =
+          _random.nextInt(_config.maxItemsPerGroup - _config.minItemsPerGroup) +
+          _config.minItemsPerGroup;
       for (int i = 0; i < numItems; i++) {
         final itemId = await _db.itemsDao.insertItem(
-          ItemsCompanion.insert(
-            name: _generateItemName(),
-            groupId: Value(groupId),
-          ),
+          ItemsCompanion.insert(name: _generateItemName(), groupId: Value(groupId)),
         );
         groupItemsMap[groupId]!.add(itemId);
       }
@@ -89,7 +227,9 @@ class DatabaseSeeder {
 
     // 4. Seed Purchases & Purchased Items (Grouped)
     for (final groupId in groupIds) {
-      final numPurchases = _random.nextInt(_config.maxPurchasesPerGroup - _config.minPurchasesPerGroup) + _config.minPurchasesPerGroup;
+      final numPurchases =
+          _random.nextInt(_config.maxPurchasesPerGroup - _config.minPurchasesPerGroup) +
+          _config.minPurchasesPerGroup;
 
       for (int i = 0; i < numPurchases; i++) {
         await _createPurchaseWithItems(groupId, groupItemsMap[groupId]!);
@@ -139,7 +279,9 @@ class DatabaseSeeder {
     );
 
     // Add random items to this purchase
-    final numItems = _random.nextInt(_config.maxPurchasedItems - _config.minPurchasedItems) + _config.minPurchasedItems;
+    final numItems =
+        _random.nextInt(_config.maxPurchasedItems - _config.minPurchasedItems) +
+        _config.minPurchasedItems;
 
     // Shuffle available items to pick random unique ones for this purchase
     final shuffledItems = List<int>.from(availableItemIds)..shuffle(_random);
@@ -151,7 +293,9 @@ class DatabaseSeeder {
       // Fetch the base item to copy its name to the purchased item record
       final item = await _db.itemsDao.findItem(itemId, groupId);
 
-      final price = double.parse((_random.nextDouble() * 40 + 1).toStringAsFixed(2)); // Price $1 to $41
+      final price = double.parse(
+        (_random.nextDouble() * 40 + 1).toStringAsFixed(2),
+      ); // Price $1 to $41
       final isWeight = _random.nextBool();
       final qty = isWeight
           ? double.parse((_random.nextDouble() * 4 + 0.5).toStringAsFixed(2)) // 0.5kg to 4.5kg
@@ -178,10 +322,7 @@ class DatabaseSeeder {
 
     // Update the purchase with the calculated total price
     await _db.purchasesDao.updatePurchase(
-      PurchasesCompanion(
-        id: Value(purchaseId),
-        totalPrice: Value(totalPrice),
-      )
+      PurchasesCompanion(id: Value(purchaseId), totalPrice: Value(totalPrice)),
     );
   }
 
@@ -191,5 +332,15 @@ class DatabaseSeeder {
     await _db.customStatement('DELETE FROM purchases');
     await _db.customStatement('DELETE FROM items');
     await _db.customStatement('DELETE FROM groups');
+  }
+
+  Future<String> _createSeedImageFromBase64(String base64) async {
+    final bytes = base64Decode(base64);
+    final directory = await getApplicationDocumentsDirectory();
+    final fileName = 'seed_${const Uuid().v4()}.png';
+    final file = File('${directory.path}/$fileName');
+
+    await file.writeAsBytes(bytes);
+    return file.path;
   }
 }

@@ -85,8 +85,10 @@ class PurchasedItemTile extends StatelessWidget {
                       SizedBox(width: spacing),
 
                       // Image Section
-                      if (item.imagePath != null || settings.compactItemList == false) ...[
-                        _buildImageSection(item, colorScheme, imgSize),
+                      if (details.item.imagePath != null ||
+                          details.purchasedItem.imagePath != null ||
+                          settings.compactItemList == false) ...[
+                        _buildImageSection(details, colorScheme, imgSize),
                         SizedBox(width: spacing),
                       ],
 
@@ -197,12 +199,12 @@ class PurchasedItemTile extends StatelessWidget {
     );
   }
 
-  Widget _buildImageSection(Item item, ColorScheme colorScheme, double imgSize) {
+  Widget _buildImageSection(PurchasedItemWithDetails pid, ColorScheme colorScheme, double imgSize) {
     return ItemImageView(
-      imagePath: item.imagePath,
+      imagePath: pid.item.imagePath ?? pid.purchasedItem.imagePath,
       size: imgSize,
       placeholderIconSize: imgSize * 0.6,
-      heroTag: 'purchasedItemTile-${item.id}',
+      heroTag: 'purchasedItemTile-${pid.purchasedItem.id}',
       enableTapToView: true,
     );
   }
