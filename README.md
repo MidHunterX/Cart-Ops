@@ -53,7 +53,7 @@ resource management via technological assistance.
 - [x] Price history for individual items
 - [x] Price history graph for individual items
 - [x] Price history analytics on item autocompletion
-- [ ] Monthly spend
+- [x] Track Monthly spend
 
 #### Data Import/Export
 

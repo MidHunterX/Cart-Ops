@@ -10,12 +10,34 @@ import 'package:shopping_assist/features/purchases/repositories/purchases_reposi
 import 'package:shopping_assist/features/purchases/views/widgets/edit_purchase_dialog.dart';
 import 'package:shopping_assist/features/settings/providers/settings_provider.dart';
 
+abstract class PurchaseListItem {
+  String get id;
+}
+
+class MonthHeaderItem extends PurchaseListItem {
+  final DateTime month;
+  double total;
+  MonthHeaderItem(this.month, this.total);
+  @override
+  String get id => 'header_${month.year}_${month.month}';
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) || other is MonthHeaderItem && other.id == id && other.total == total;
+  @override
+  int get hashCode => id.hashCode ^ total.hashCode;
+}
+
+class PurchaseItem extends PurchaseListItem {
+  final Purchase purchase;
+  PurchaseItem(this.purchase);
+  @override
+  String get id => 'purchase_${purchase.id}';
+}
+
 class PurchasesList extends StatefulWidget {
   final Stream<List<Purchase>> stream;
   final Group? group;
-
   const PurchasesList({super.key, required this.stream, this.group});
-
   @override
   State<PurchasesList> createState() => _PurchasesListState();
 }
@@ -23,7 +45,7 @@ class PurchasesList extends StatefulWidget {
 class _PurchasesListState extends State<PurchasesList> {
   final _listKey = GlobalKey<SliverAnimatedListState>();
 
-  List<Purchase> _purchases = [];
+  List<PurchaseListItem> _items = [];
   StreamSubscription? _purchasesSub;
   bool _isLoading = true;
 
@@ -32,13 +54,14 @@ class _PurchasesListState extends State<PurchasesList> {
     super.initState();
     _purchasesSub = widget.stream.listen((newPurchases) {
       if (!mounted) return;
+      final newItems = _generateItems(newPurchases);
       if (_isLoading) {
         setState(() {
-          _purchases = List.from(newPurchases);
+          _items = newItems;
           _isLoading = false;
         });
       } else {
-        _updatePurchases(newPurchases);
+        _updateItems(newItems);
       }
     });
   }
@@ -49,51 +72,88 @@ class _PurchasesListState extends State<PurchasesList> {
     super.dispose();
   }
 
-  void _updatePurchases(List<Purchase> newPurchases) {
+  List<PurchaseListItem> _generateItems(List<Purchase> purchases) {
+    final items = <PurchaseListItem>[];
+    if (purchases.isEmpty) return items;
+
+    // First, calculate totals per month
+    final totals = <DateTime, double>{};
+    for (final p in purchases) {
+      final month = DateTime(p.purchaseDate.year, p.purchaseDate.month);
+      totals[month] = (totals[month] ?? 0.0) + (p.totalPrice ?? 0.0);
+    }
+
+    // Second, build the list by grouping
+    DateTime? currentMonth;
+    for (final p in purchases) {
+      final month = DateTime(p.purchaseDate.year, p.purchaseDate.month);
+      if (currentMonth != month) {
+        currentMonth = month;
+        items.add(MonthHeaderItem(month, totals[month]!));
+      }
+      items.add(PurchaseItem(p));
+    }
+    return items;
+  }
+
+  void _updateItems(List<PurchaseListItem> newItems) {
     final currentState = _listKey.currentState;
     if (currentState == null) {
-      setState(() => _purchases = List.from(newPurchases));
+      setState(() => _items = newItems);
       return;
     }
 
-    final currentMap = {for (var p in _purchases) p.id: p};
-    final newMap = {for (var p in newPurchases) p.id: p};
+    final currentMap = {for (var item in _items) item.id: item};
+    final newMap = {for (var item in newItems) item.id: item};
 
     final removedIds = currentMap.keys.where((id) => !newMap.containsKey(id)).toList();
     final addedIds = newMap.keys.where((id) => !currentMap.containsKey(id)).toSet();
 
     // Process removals (bottom to top)
-    for (int i = _purchases.length - 1; i >= 0; i--) {
-      if (removedIds.contains(_purchases[i].id)) {
-        final removed = _purchases.removeAt(i);
+    for (int i = _items.length - 1; i >= 0; i--) {
+      final item = _items[i];
+      if (removedIds.contains(item.id)) {
+        final removed = _items.removeAt(i);
         currentState.removeItem(
           i,
-          (context, animation) => _PurchaseTile(
-            purchase: removed,
-            animation: animation,
-            showDivider: false,
-            group: widget.group,
-          ),
+          (context, animation) => _buildItem(removed, animation, showDivider: false),
           duration: const Duration(milliseconds: 200),
         );
       }
     }
 
     // Process additions
-    for (int i = 0; i < newPurchases.length; i++) {
-      final item = newPurchases[i];
+    for (int i = 0; i < newItems.length; i++) {
+      final item = newItems[i];
       if (addedIds.contains(item.id)) {
-        _purchases.insert(i, item);
+        _items.insert(i, item);
         currentState.insertItem(i, duration: const Duration(milliseconds: 200));
       }
     }
 
     // SYNC DATA AND REBUILD
-    // Even if no items were added/removed, the content (totalPrice) of
-    // existing items might have changed.
+    // Content of existing items (like total price) might have changed.
     setState(() {
-      _purchases = List.from(newPurchases);
+      _items = newItems;
     });
+  }
+
+  Widget _buildItem(
+    PurchaseListItem item,
+    Animation<double> animation, {
+    bool showDivider = false,
+  }) {
+    if (item is MonthHeaderItem) {
+      return _MonthHeaderTile(header: item, animation: animation);
+    } else if (item is PurchaseItem) {
+      return _PurchaseTile(
+        purchase: item.purchase,
+        animation: animation,
+        showDivider: showDivider,
+        group: widget.group,
+      );
+    }
+    return const SizedBox.shrink();
   }
 
   @override
@@ -105,7 +165,7 @@ class _PurchasesListState extends State<PurchasesList> {
           child: Center(child: CircularProgressIndicator()),
         ),
       );
-    } else if (_purchases.isEmpty) {
+    } else if (_items.isEmpty) {
       return const SliverToBoxAdapter(
         child: Padding(
           key: ValueKey('empty_purchases'),
@@ -120,17 +180,77 @@ class _PurchasesListState extends State<PurchasesList> {
     } else {
       return SliverAnimatedList(
         key: _listKey,
-        initialItemCount: _purchases.length,
+        initialItemCount: _items.length,
         itemBuilder: (context, index, animation) {
-          return _PurchaseTile(
-            purchase: _purchases[index],
-            animation: animation,
-            showDivider: index < _purchases.length - 1,
-            group: widget.group,
-          );
+          final item = _items[index];
+          final isLast = index == _items.length - 1;
+          final isNextHeader = !isLast && _items[index + 1] is MonthHeaderItem;
+          // Hide divider if this is the last element or if the next element is a Header
+          return _buildItem(item, animation, showDivider: !(isLast || isNextHeader));
         },
       );
     }
+  }
+}
+
+class _MonthHeaderTile extends StatelessWidget {
+  final MonthHeaderItem header;
+  final Animation<double> animation;
+
+  const _MonthHeaderTile({required this.header, required this.animation});
+
+  String _formatMonth(DateTime date) {
+    const monthNames = [
+      'January',
+      'February',
+      'March',
+      'April',
+      'May',
+      'June',
+      'July',
+      'August',
+      'September',
+      'October',
+      'November',
+      'December',
+    ];
+    return '${monthNames[date.month - 1]} ${date.year}';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final settings = context.watch<SettingsProvider>();
+    final currency = settings.currencySymbol;
+
+    final now = DateTime.now();
+    final isCurrentMonth = header.month.year == now.year && header.month.month == now.month;
+
+    final monthName = isCurrentMonth ? "This month" : _formatMonth(header.month);
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return SizeTransition(
+      sizeFactor: animation,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        color: colorScheme.surfaceContainer,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              monthName,
+              style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                color: colorScheme.primary,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            Text(
+              '$currency${header.total.toStringAsFixed(2)}',
+              style: Theme.of(context).textTheme.titleSmall?.copyWith(color: colorScheme.secondary),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
 
