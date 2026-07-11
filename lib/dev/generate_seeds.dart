@@ -47,7 +47,6 @@ class DatabaseSeeder {
     : _faker = Faker(),
       _random = Random();
 
-
   Future<void> personalSeed() async {
     print('Starting Personal Database Seeder...');
 
@@ -225,20 +224,41 @@ class DatabaseSeeder {
     }
     print('Seeded Items');
 
-    // 4. Seed Purchases & Purchased Items (Grouped)
+    // Collect all purchase intents to interleave and sort them chronologically
+    final pendingPurchases = <({int? groupId, List<int> availableItemIds})>[];
+
     for (final groupId in groupIds) {
       final numPurchases =
           _random.nextInt(_config.maxPurchasesPerGroup - _config.minPurchasesPerGroup) +
           _config.minPurchasesPerGroup;
 
       for (int i = 0; i < numPurchases; i++) {
-        await _createPurchaseWithItems(groupId, groupItemsMap[groupId]!);
+        pendingPurchases.add((groupId: groupId, availableItemIds: groupItemsMap[groupId]!));
       }
     }
 
-    // 5. Seed Purchases & Purchased Items (Orphans / General Shopping)
     for (int i = 0; i < _config.numOrphanPurchases; i++) {
-      await _createPurchaseWithItems(null, orphanItemIds);
+      pendingPurchases.add((groupId: null, availableItemIds: orphanItemIds));
+    }
+
+    // Shuffle so purchases from different groups are mixed randomly in time
+    pendingPurchases.shuffle(_random);
+
+    // Generate sequential random dates for all purchases
+    final purchaseDates = List.generate(pendingPurchases.length, (_) {
+      final daysAgo = _random.nextInt(180);
+      final hoursAgo = _random.nextInt(24);
+      final minutesAgo = _random.nextInt(60);
+      return DateTime.now().subtract(Duration(days: daysAgo, hours: hoursAgo, minutes: minutesAgo));
+    });
+
+    // Sort dates from oldest to newest to mimic real-life chronological purchasing
+    purchaseDates.sort((a, b) => a.compareTo(b));
+
+    // 5. Execute all purchases in chronological sequential order
+    for (int i = 0; i < pendingPurchases.length; i++) {
+      final intent = pendingPurchases[i];
+      await _createPurchaseWithItems(intent.groupId, intent.availableItemIds, purchaseDates[i]);
     }
 
     print('Seeded Purchases and Purchased Items');
@@ -259,14 +279,29 @@ class DatabaseSeeder {
   }
 
   /// Helper to create a purchase and populate it with items
-  Future<void> _createPurchaseWithItems(int? groupId, List<int> availableItemIds) async {
-    // Generate a random date within the last 6 months
-    final daysAgo = _random.nextInt(180);
-    final purchaseDate = DateTime.now().subtract(Duration(days: daysAgo));
+  Future<void> _createPurchaseWithItems(
+    int? groupId,
+    List<int> availableItemIds,
+    DateTime purchaseDate,
+  ) async {
+    // Extract real month from the sorted sequence date rather than a random faker string
+    final monthNames = [
+      'January',
+      'February',
+      'March',
+      'April',
+      'May',
+      'June',
+      'July',
+      'August',
+      'September',
+      'October',
+      'November',
+      'December',
+    ];
+    final monthName = monthNames[purchaseDate.month - 1];
 
-    final purchaseName = groupId == null
-        ? 'Quick Run - ${_faker.date.month()}'
-        : 'Shopping at ${_faker.date.month()}';
+    final purchaseName = groupId == null ? 'Quick Run - $monthName' : 'Shopping at $monthName';
 
     // Create the Purchase entry
     final purchaseId = await _db.purchasesDao.insertPurchase(
