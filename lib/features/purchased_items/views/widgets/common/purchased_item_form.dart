@@ -138,7 +138,13 @@ class PurchasedItemFormState extends State<PurchasedItemForm> {
   }
 
   /// Exposed method for parent widgets to dynamically update form values
-  void updateValues({String? price, String? qty, bool? isWeight, ActiveField? activeField}) {
+  void updateValues({
+    String? price,
+    String? qty,
+    bool? isWeight,
+    String? discount,
+    ActiveField? activeField,
+  }) {
     setState(() {
       if (price != null) {
         _priceStr = price;
@@ -149,6 +155,7 @@ class PurchasedItemFormState extends State<PurchasedItemForm> {
         _qtyController.text = qty;
       }
       if (isWeight != null) _isWeight = isWeight;
+      if (discount != null) _discountStr = discount;
       if (activeField != null) {
         _activeField = activeField;
         _focusActiveField();

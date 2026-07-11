@@ -75,6 +75,7 @@ class _EditPurchasedItemSheetState extends State<EditPurchasedItemSheet> {
           price: lastPurchase.price?.toPriceString() ?? '',
           qty: lastPurchase.isWeight ? '' : '1',
           isWeight: lastPurchase.isWeight,
+          discount: lastPurchase.discount > 0 ? lastPurchase.discount.toString() : null,
           activeField: lastPurchase.isWeight ? ActiveField.quantity : ActiveField.price,
         );
       }
