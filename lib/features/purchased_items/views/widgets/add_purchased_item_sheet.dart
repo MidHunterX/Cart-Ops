@@ -66,7 +66,7 @@ class _AddPurchasedItemSheetState extends State<AddPurchasedItemSheet> {
           price: lastPurchase.price.toString(),
           qty: lastPurchase.isWeight ? '' : '1',
           isWeight: lastPurchase.isWeight,
-          discount: lastPurchase.discount > 0 ? lastPurchase.discount.toString() : null,
+          discount: lastPurchase.discount > 0 ? lastPurchase.discount.toString() : '',
           activeField: lastPurchase.isWeight ? ActiveField.quantity : ActiveField.price,
         );
       }
