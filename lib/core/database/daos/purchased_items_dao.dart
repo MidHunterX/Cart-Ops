@@ -9,9 +9,12 @@ class PurchasedItemsDao extends DatabaseAccessor<AppDatabase> with _$PurchasedIt
   PurchasedItemsDao(super.db);
 
   Stream<List<PurchasedItemWithDetails>> watchPurchasedItems(int purchaseId) {
-    final query = select(purchasedItems).join([
-      leftOuterJoin(items, items.id.equalsExp(purchasedItems.itemId)),
-    ])..where(purchasedItems.purchaseId.equals(purchaseId));
+    final query =
+        select(
+            purchasedItems,
+          ).join([leftOuterJoin(items, items.id.equalsExp(purchasedItems.itemId))])
+          ..where(purchasedItems.purchaseId.equals(purchaseId))
+          ..orderBy([OrderingTerm.desc(purchasedItems.id)]);
 
     return query.watch().map((rows) {
       return rows.map((row) {

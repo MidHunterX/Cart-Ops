@@ -236,12 +236,15 @@ class _PurchasedItemsScreenState extends State<PurchasedItemsScreen> {
                         message: 'Add items to your purchase to see the running total.',
                       ),
                     ),
-                  SliverAnimatedList(
-                    key: _listKey,
-                    initialItemCount: _purchasedItems.length,
-                    itemBuilder: (context, index, animation) {
-                      return _buildItemTile(_purchasedItems[index], index, totalItems, animation);
-                    },
+                  SliverPadding(
+                    padding: const EdgeInsets.only(bottom: 80),
+                    sliver: SliverAnimatedList(
+                      key: _listKey,
+                      initialItemCount: _purchasedItems.length,
+                      itemBuilder: (context, index, animation) {
+                        return _buildItemTile(_purchasedItems[index], index, totalItems, animation);
+                      },
+                    ),
                   ),
                 ],
               ),

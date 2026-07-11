@@ -105,7 +105,7 @@ class _GroupsScreenState extends State<GroupsScreen> {
           SliverPadding(
             padding: const EdgeInsets.fromLTRB(16, 24, 16, 16),
             sliver: SliverToBoxAdapter(
-              child: Text('My Groups', style: Theme.of(context).textTheme.titleLarge),
+              child: Text('Groups', style: Theme.of(context).textTheme.titleLarge),
             ),
           ),
           SliverToBoxAdapter(

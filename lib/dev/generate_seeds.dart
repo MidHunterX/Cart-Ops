@@ -66,96 +66,6 @@ class DatabaseSeeder {
 
     await _db.purchasedItemsDao.insertPurchasedItem(
       PurchasedItemsCompanion.insert(
-        name: Value("Rice Lunch"),
-        price: Value(25),
-        quantity: Value(4),
-        isWeight: Value(false),
-        discount: Value(5),
-        imagePath: Value(imgpathLunch),
-        purchaseId: purchaseId,
-      ),
-    );
-
-    await _db.purchasedItemsDao.insertPurchasedItem(
-      PurchasedItemsCompanion.insert(
-        name: Value("Fresh Fruits"),
-        price: Value(25),
-        quantity: Value(3.57),
-        isWeight: Value(true),
-        discount: Value(4),
-        imagePath: Value(imgpathFruits),
-        purchaseId: purchaseId,
-      ),
-    );
-
-    await _db.purchasedItemsDao.insertPurchasedItem(
-      PurchasedItemsCompanion.insert(
-        name: Value("Onion Red"),
-        price: Value(35),
-        quantity: Value.absent(),
-        isWeight: Value(true),
-        discount: Value.absent(),
-        purchaseId: purchaseId,
-      ),
-    );
-
-    await _db.purchasedItemsDao.insertPurchasedItem(
-      PurchasedItemsCompanion.insert(
-        name: Value("Mentos Large"),
-        price: Value(20),
-        quantity: Value.absent(),
-        isWeight: Value(false),
-        discount: Value.absent(),
-        purchaseId: purchaseId,
-      ),
-    );
-
-    await _db.purchasedItemsDao.insertPurchasedItem(
-      PurchasedItemsCompanion.insert(
-        name: Value("Item Only"),
-        price: Value.absent(),
-        quantity: Value(4),
-        isWeight: Value(false),
-        discount: Value.absent(),
-        purchaseId: purchaseId,
-      ),
-    );
-
-    await _db.purchasedItemsDao.insertPurchasedItem(
-      PurchasedItemsCompanion.insert(
-        name: Value("Weight Only"),
-        price: Value.absent(),
-        quantity: Value(3.57),
-        isWeight: Value(true),
-        discount: Value.absent(),
-        purchaseId: purchaseId,
-      ),
-    );
-
-    await _db.purchasedItemsDao.insertPurchasedItem(
-      PurchasedItemsCompanion.insert(
-        name: Value.absent(),
-        price: Value(25),
-        quantity: Value(3.57),
-        isWeight: Value(true),
-        discount: Value.absent(),
-        purchaseId: purchaseId,
-      ),
-    );
-
-    await _db.purchasedItemsDao.insertPurchasedItem(
-      PurchasedItemsCompanion.insert(
-        name: Value.absent(),
-        price: Value(25),
-        quantity: Value(4),
-        isWeight: Value(false),
-        discount: Value.absent(),
-        purchaseId: purchaseId,
-      ),
-    );
-
-    await _db.purchasedItemsDao.insertPurchasedItem(
-      PurchasedItemsCompanion.insert(
         name: Value.absent(),
         price: Value(150),
         quantity: Value(1.33),
@@ -174,6 +84,96 @@ class DatabaseSeeder {
         isWeight: Value(false),
         discount: Value.absent(),
         imagePath: Value(imgpathPickle),
+        purchaseId: purchaseId,
+      ),
+    );
+
+    await _db.purchasedItemsDao.insertPurchasedItem(
+      PurchasedItemsCompanion.insert(
+        name: Value.absent(),
+        price: Value(25),
+        quantity: Value(4),
+        isWeight: Value(false),
+        discount: Value.absent(),
+        purchaseId: purchaseId,
+      ),
+    );
+
+    await _db.purchasedItemsDao.insertPurchasedItem(
+      PurchasedItemsCompanion.insert(
+        name: Value.absent(),
+        price: Value(25),
+        quantity: Value(3.57),
+        isWeight: Value(true),
+        discount: Value.absent(),
+        purchaseId: purchaseId,
+      ),
+    );
+
+    await _db.purchasedItemsDao.insertPurchasedItem(
+      PurchasedItemsCompanion.insert(
+        name: Value("Weight Only"),
+        price: Value.absent(),
+        quantity: Value(3.57),
+        isWeight: Value(true),
+        discount: Value.absent(),
+        purchaseId: purchaseId,
+      ),
+    );
+
+    await _db.purchasedItemsDao.insertPurchasedItem(
+      PurchasedItemsCompanion.insert(
+        name: Value("Item Only"),
+        price: Value.absent(),
+        quantity: Value(4),
+        isWeight: Value(false),
+        discount: Value.absent(),
+        purchaseId: purchaseId,
+      ),
+    );
+
+    await _db.purchasedItemsDao.insertPurchasedItem(
+      PurchasedItemsCompanion.insert(
+        name: Value("Mentos Large"),
+        price: Value(20),
+        quantity: Value.absent(),
+        isWeight: Value(false),
+        discount: Value.absent(),
+        purchaseId: purchaseId,
+      ),
+    );
+
+    await _db.purchasedItemsDao.insertPurchasedItem(
+      PurchasedItemsCompanion.insert(
+        name: Value("Onion Red"),
+        price: Value(35),
+        quantity: Value.absent(),
+        isWeight: Value(true),
+        discount: Value.absent(),
+        purchaseId: purchaseId,
+      ),
+    );
+
+    await _db.purchasedItemsDao.insertPurchasedItem(
+      PurchasedItemsCompanion.insert(
+        name: Value("Fresh Fruits"),
+        price: Value(25),
+        quantity: Value(3.57),
+        isWeight: Value(true),
+        discount: Value(4),
+        imagePath: Value(imgpathFruits),
+        purchaseId: purchaseId,
+      ),
+    );
+
+    await _db.purchasedItemsDao.insertPurchasedItem(
+      PurchasedItemsCompanion.insert(
+        name: Value("Rice Lunch"),
+        price: Value(25),
+        quantity: Value(4),
+        isWeight: Value(false),
+        discount: Value(5),
+        imagePath: Value(imgpathLunch),
         purchaseId: purchaseId,
       ),
     );
