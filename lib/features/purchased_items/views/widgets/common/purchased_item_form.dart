@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:shopping_assist/core/database/database.dart';
+import 'package:shopping_assist/core/utils/graph_utils.dart';
 import 'package:shopping_assist/core/utils/image_picker_util.dart';
 import 'package:shopping_assist/features/items/repositories/items_repository.dart';
 import 'package:shopping_assist/features/items/views/widgets/item_price_history_chart.dart';
@@ -311,8 +312,12 @@ class PurchasedItemFormState extends State<PurchasedItemForm> {
             future: _historyFuture,
             builder: (context, snapshot) {
               if (snapshot.hasData && snapshot.data!.length >= 2) {
-                // TODO: Change dynamically based on viewport and datapoint string length
-                final int maxDataPoints = 7;
+                const double bottomSheetWidth = 640;
+                final int maxDataPoints = calculateMaxDataPoints(
+                  context,
+                  snapshot.data!,
+                  maxWidth: bottomSheetWidth,
+                );
                 final displayHistory = snapshot.data?.take(maxDataPoints).toList();
 
                 return Padding(

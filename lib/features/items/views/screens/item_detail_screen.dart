@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shopping_assist/core/database/database.dart';
+import 'package:shopping_assist/core/utils/graph_utils.dart';
 import 'package:shopping_assist/core/utils/number_formatter.dart';
 import 'package:shopping_assist/core/widgets/item_image_view.dart';
 import 'package:shopping_assist/features/settings/providers/settings_provider.dart';
@@ -33,8 +34,7 @@ class ItemDetailScreen extends StatelessWidget {
           final history = snapshot.data ?? [];
           final count = history.length;
 
-          // TODO: Change dynamically based on viewport and datapoint string length
-          final int maxDataPoints = 14;
+          final int maxDataPoints = calculateMaxDataPoints(context, history);
           final displayHistory = history.take(maxDataPoints).toList();
 
           return SingleChildScrollView(
