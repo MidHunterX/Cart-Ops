@@ -23,6 +23,7 @@ dependencies:
   # One of the best chart packages. Nice and flashy compared to Material Charts
   fl_chart: ^1.2.0
   faker: ^2.2.0
+  decimal: ^3.2.4
 
 dev_dependencies:
   flutter_test:
