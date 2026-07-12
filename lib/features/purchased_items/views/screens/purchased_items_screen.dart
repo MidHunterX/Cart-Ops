@@ -257,6 +257,7 @@ class _PurchasedItemsScreenState extends State<PurchasedItemsScreen> {
           context: context,
           isScrollControlled: true, // Must resize on graph UI
           useSafeArea: false, // Must be behind keyboard
+          showDragHandle: true,
           builder: (context) =>
               AddPurchasedItemSheet(purchase: _currentPurchase, group: widget.group),
         ),

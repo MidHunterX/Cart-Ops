@@ -1,3 +1,4 @@
+import 'package:decimal/decimal.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shopping_assist/core/database/database.dart';
@@ -8,6 +9,25 @@ import 'package:shopping_assist/features/settings/providers/settings_provider.da
 import 'package:shopping_assist/core/utils/number_formatter.dart';
 import 'edit_purchased_item_sheet.dart';
 import 'add_item_components/input_field_box.dart' show ActiveField;
+
+double _calcTotalPrice(double price, double discount, double quantity) {
+  final priceDec = Decimal.parse(price.toString());
+  final discountDec = Decimal.parse(discount.toString());
+  final quantityDec = Decimal.parse(quantity.toString());
+
+  final total = (priceDec - discountDec) * quantityDec;
+  return total.toDouble();
+}
+
+double _calcTotalDiscount(double discount, double quantity) {
+  final total = Decimal.parse(discount.toString()) * Decimal.parse(quantity.toString());
+  return total.toDouble();
+}
+
+double _calcRateAfterDiscount(double price, double discount) {
+  final total = Decimal.parse(price.toString()) - Decimal.parse(discount.toString());
+  return total.toDouble();
+}
 
 class PurchasedItemTile extends StatelessWidget {
   final PurchasedItemWithDetails details;
@@ -40,7 +60,7 @@ class PurchasedItemTile extends StatelessWidget {
 
     final pricePerUnit = pItem.price ?? 0.0;
     final qty = pItem.quantity ?? 0.0;
-    final totalPrice = (pricePerUnit - pItem.discount) * qty;
+    final totalPrice = _calcTotalPrice(pricePerUnit, pItem.discount, qty);
     final discountApplied = pItem.discount > 0;
 
     final hasQty = pItem.quantity != null;
@@ -279,7 +299,7 @@ class PurchasedItemTile extends StatelessWidget {
                   ),
           ),
           Text(
-            '$currency${(pricePerUnit - pItem.discount).toPriceString()}'
+            '$currency${_calcRateAfterDiscount(pricePerUnit, pItem.discount).toPriceString()}'
             '${pItem.isWeight ? ' /$weightUnit' : ''}',
             style: settings.compactItemList == false || item.name != ''
                 ? Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -354,7 +374,7 @@ class PurchasedItemTile extends StatelessWidget {
           FittedBox(
             fit: BoxFit.scaleDown,
             child: Text(
-              '-$currency${(pItem.discount * qty).toStringAsFixed(2)}',
+              '-$currency${_calcTotalDiscount(pItem.discount, qty).toPriceString()}',
               style: Theme.of(context).textTheme.bodySmall?.copyWith(color: colorScheme.error),
             ),
           ),
@@ -443,6 +463,7 @@ class PurchasedItemTile extends StatelessWidget {
       context: context,
       isScrollControlled: true,
       useSafeArea: true,
+      showDragHandle: true,
       builder: (context) => EditPurchasedItemSheet(
         purchasedItem: details.purchasedItem,
         item: details.item,

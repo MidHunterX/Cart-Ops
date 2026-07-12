@@ -17,7 +17,7 @@ extension NumberFormatting on double {
   /// 1.0 -> "1.00"
   String toPriceString() {
     if (this == truncateToDouble()) return truncate().toString();
-    return toString();
+    return toStringAsFixed(2);
   }
 
   /// Converts a double to a weight string
