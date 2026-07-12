@@ -9,6 +9,7 @@ class InputFieldBox extends StatelessWidget {
   final VoidCallback onTap;
   final TextEditingController? controller;
   final FocusNode? focusNode;
+  final String? placeholder;
 
   const InputFieldBox({
     super.key,
@@ -18,6 +19,7 @@ class InputFieldBox extends StatelessWidget {
     required this.onTap,
     this.controller,
     this.focusNode,
+    this.placeholder,
   });
 
   @override
@@ -37,8 +39,13 @@ class InputFieldBox extends StatelessWidget {
           style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
           decoration: InputDecoration(
             labelText: label,
+            hintText: placeholder,
             labelStyle: textTheme.bodySmall?.copyWith(
               color: isActive ? colorScheme.primary : colorScheme.onSurfaceVariant,
+            ),
+            hintStyle: textTheme.bodySmall?.copyWith(
+              color: colorScheme.onSurfaceVariant,
+              fontStyle: FontStyle.italic,
             ),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),

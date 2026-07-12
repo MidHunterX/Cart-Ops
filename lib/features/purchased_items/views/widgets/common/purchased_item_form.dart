@@ -327,7 +327,7 @@ class PurchasedItemFormState extends State<PurchasedItemForm> {
             },
           ),
 
-        _buildFieldsRow(settings.weightUnit),
+        _buildFieldsRow(settings.weightUnit, settings.currencySymbol),
         const SizedBox(height: 16),
         AddItemKeypad(
           isLoading: widget.isLoading,
@@ -348,7 +348,7 @@ class PurchasedItemFormState extends State<PurchasedItemForm> {
     );
   }
 
-  Widget _buildFieldsRow(String weightUnit) {
+  Widget _buildFieldsRow(String weightUnit, String currencySymbol) {
     return IntrinsicHeight(
       child: Row(
         children: [
@@ -356,7 +356,8 @@ class PurchasedItemFormState extends State<PurchasedItemForm> {
             flex: 5,
             child: _isWeight
                 ? InputFieldBox(
-                    label: 'Quantity ($weightUnit)',
+                    label: _isWeight ? 'Weight ($weightUnit)' : 'Quantity',
+                    placeholder: _isWeight ? 'e.g. 2.3$weightUnit' : 'e.g. 2',
                     value: _qtyStr,
                     isActive: _activeField == ActiveField.quantity,
                     onTap: () {
@@ -381,7 +382,10 @@ class PurchasedItemFormState extends State<PurchasedItemForm> {
           Expanded(
             flex: 10,
             child: InputFieldBox(
-              label: 'Price (per unit)',
+              label: _isWeight
+                  ? '$currencySymbol Price (per kg)'
+                  : '$currencySymbol Price (per item)',
+              placeholder: 'e.g. ${currencySymbol}200',
               value: _priceStr,
               isActive: _activeField == ActiveField.price,
               onTap: () {
