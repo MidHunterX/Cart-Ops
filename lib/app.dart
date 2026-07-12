@@ -11,7 +11,7 @@ class ShoppingApp extends StatelessWidget {
     final settings = context.watch<SettingsProvider>();
 
     return MaterialApp(
-      title: 'Shopping Assist',
+      title: 'Cart Ops',
       theme: ThemeData(
         useMaterial3: true,
         colorScheme: ColorScheme.fromSeed(

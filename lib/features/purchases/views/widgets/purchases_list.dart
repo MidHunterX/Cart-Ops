@@ -289,7 +289,7 @@ class _PurchaseTileState extends State<_PurchaseTile> {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final purchase = widget.purchase;
-    final tileBgColor = _isMenuOpen ? colorScheme.primary.withValues(alpha: 0.2) : null;
+    final tileBgColor = _isMenuOpen ? colorScheme.surfaceContainerHighest : null;
     final settings = context.watch<SettingsProvider>();
     final currency = settings.currencySymbol;
 
@@ -299,7 +299,7 @@ class _PurchaseTileState extends State<_PurchaseTile> {
         children: [
           ListTile(
             tileColor: tileBgColor,
-            contentPadding: const EdgeInsets.only(left: 16, right: 4),
+            contentPadding: const EdgeInsets.only(left: 16),
             leading: const Icon(Icons.shopping_cart_outlined),
             title: Text(purchase.name),
             subtitle: Text(

@@ -19,7 +19,6 @@ class ItemsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
     final repo = context.watch<ItemsRepository>();
     final settings = context.watch<SettingsProvider>();
 
@@ -28,11 +27,10 @@ class ItemsScreen extends StatelessWidget {
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Tracked Items'),
+            const Text('Tracked Items'),
             if (group != null) Text(group!.name, style: Theme.of(context).textTheme.bodySmall),
           ],
         ),
-        backgroundColor: colorScheme.primaryContainer,
       ),
       body: StreamBuilder<List<Item>>(
         stream: group == null ? repo.watchItemsWithoutGroup() : repo.watchItemsInGroup(group!.id),
@@ -87,10 +85,8 @@ class ItemsScreen extends StatelessWidget {
   Widget _buildItemCard(BuildContext context, Item item, ItemsRepository repo) {
     final colorScheme = Theme.of(context).colorScheme;
 
-    return Card(
-      clipBehavior: Clip.antiAlias, // Internal image doesn't overflow the rounded corners
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+    return Card.filled(
+      clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: () => Navigator.push(
           context,
@@ -133,13 +129,13 @@ class ItemsScreen extends StatelessWidget {
                               ],
                             ),
                           ),
-                          const PopupMenuItem(
+                          PopupMenuItem(
                             value: 'delete',
                             child: Row(
                               children: [
-                                Icon(Icons.delete, size: 20, color: Colors.red),
-                                SizedBox(width: 8),
-                                Text('Delete', style: TextStyle(color: Colors.red)),
+                                Icon(Icons.delete, size: 20, color: colorScheme.error),
+                                const SizedBox(width: 8),
+                                Text('Delete', style: TextStyle(color: colorScheme.error)),
                               ],
                             ),
                           ),

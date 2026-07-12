@@ -40,20 +40,11 @@ class _CurrencyPickerState extends State<CurrencyPicker> {
     return Column(
       children: [
         Padding(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.only(left: 8, right: 16, bottom: 16),
           child: Row(
             children: [
-              Container(
-                width: 40,
-                height: 40,
-                alignment: Alignment.center,
-                child: IconButton(
-                  icon: const Icon(Icons.arrow_back),
-                  onPressed: () => Navigator.pop(context),
-                  padding: EdgeInsets.zero,
-                ),
-              ),
-              const SizedBox(width: 8),
+              // IconButton(icon: const Icon(Icons.close), onPressed: () => Navigator.pop(context)),
+              // const SizedBox(width: 8),
               Expanded(
                 child: SearchFilter(
                   controller: _searchController,
@@ -72,7 +63,6 @@ class _CurrencyPickerState extends State<CurrencyPicker> {
               final currency = _filteredCurrencies[index];
               return ListTile(
                 selected: currency.code == widget.settings.currencyCode,
-                selectedTileColor: Theme.of(context).colorScheme.primaryContainer,
                 leading: Text(currency.flag, style: const TextStyle(fontSize: 24)),
                 title: Text(currency.code),
                 trailing: Text(

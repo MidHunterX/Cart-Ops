@@ -23,7 +23,6 @@ class ItemDetailScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Item Details'),
-        backgroundColor: colorScheme.primaryContainer,
       ),
       body: FutureBuilder<List<PurchasedItemWithPurchase>>(
         future: repo.getPurchaseHistoryForItem(item.id),
@@ -50,7 +49,7 @@ class ItemDetailScreen extends StatelessWidget {
                           imagePath: item.imagePath,
                           height: 200,
                           width: double.maxFinite,
-                          borderRadius: BorderRadius.circular(12),
+                          borderRadius: BorderRadius.circular(16),
                           heroTag: 'itemDetail-${item.id}',
                           enableTapToView: true,
                         ),
@@ -88,7 +87,7 @@ class ItemDetailScreen extends StatelessWidget {
                           "-${purchase.purchaseDate.day.toString().padLeft(2, '0')}";
 
                       return ListTile(
-                        contentPadding: const EdgeInsets.all(0), // Remove default padding
+                        contentPadding: const EdgeInsets.all(0),
                         leading: CircleAvatar(
                           backgroundColor: colorScheme.secondaryContainer,
                           child: Icon(Icons.history, color: colorScheme.onSecondaryContainer),
@@ -111,7 +110,7 @@ class ItemDetailScreen extends StatelessWidget {
                               Text(
                                 'Discount: ${p.discount.toCurrencyString(currency)}',
                                 style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                                  color: Colors.green,
+                                  color: colorScheme.secondary,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),

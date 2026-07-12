@@ -5,51 +5,39 @@ class ThemeColorPicker extends StatelessWidget {
   final Color selectedColor;
   final ValueChanged<Color> onColorSelected;
 
-  const ThemeColorPicker({
-    super.key,
-    required this.selectedColor,
-    required this.onColorSelected,
-  });
+  const ThemeColorPicker({super.key, required this.selectedColor, required this.onColorSelected});
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final double colorSwatchSize = (screenWidth * 0.1).clamp(24, 48);
+    final double spacing = (screenWidth * 0.04).clamp(8, 12);
+
     return Padding(
-      padding: const EdgeInsets.only(top: 12.0),
+      padding: const EdgeInsets.only(top: 12.0, bottom: 8.0),
       child: Wrap(
-        spacing: 12,
-        runSpacing: 12,
+        spacing: spacing,
+        runSpacing: spacing,
         children: colorOptions.map((color) {
-          // Compare by ARGB value as dart sees it as different
           final isSelected = selectedColor.toARGB32() == color.toARGB32();
 
           return GestureDetector(
             onTap: () => onColorSelected(color),
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
-              width: 38,
-              height: 38,
-              decoration: ShapeDecoration(
+            child: Container(
+              width: colorSwatchSize,
+              height: colorSwatchSize,
+              decoration: BoxDecoration(
                 color: color,
-                shape: ContinuousRectangleBorder(
-                  borderRadius: BorderRadius.circular(24),
-                  side: isSelected
-                      ? BorderSide(
-                          color: Theme.of(context).colorScheme.primary,
-                          width: 3,
-                        )
-                      : BorderSide.none,
-                ),
-                shadows: [
-                  if (isSelected)
-                    BoxShadow(
-                      color: color.withValues(alpha: 0.5),
-                      blurRadius: 8,
-                      offset: const Offset(0, 4),
-                    ),
-                ],
+                shape: BoxShape.circle,
+                border: isSelected
+                    ? Border.all(color: Theme.of(context).colorScheme.onSurface, width: 2)
+                    : null,
               ),
               child: isSelected
-                  ? const Icon(Icons.check, color: Colors.white)
+                  ? Icon(
+                      Icons.check,
+                      color: color.computeLuminance() > 0.5 ? Colors.black : Colors.white,
+                    )
                   : null,
             ),
           );

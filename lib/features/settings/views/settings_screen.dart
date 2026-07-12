@@ -13,11 +13,10 @@ class SettingsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
     final settings = context.watch<SettingsProvider>();
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Settings'), backgroundColor: colorScheme.primaryContainer),
+      appBar: AppBar(title: const Text('Settings')),
       body: ListView(
         children: [
           const SettingsSectionHeader(title: 'Appearance', icon: Icons.color_lens),
@@ -51,6 +50,7 @@ class SettingsScreen extends StatelessWidget {
               context: context,
               isScrollControlled: true,
               useSafeArea: true,
+              showDragHandle: true,
               builder: (context) {
                 return CurrencyPicker(settings: settings);
               },
@@ -63,6 +63,7 @@ class SettingsScreen extends StatelessWidget {
             trailing: const Icon(Icons.arrow_drop_down),
             onTap: () => showModalBottomSheet(
               context: context,
+              showDragHandle: true,
               builder: (context) {
                 return WeightUnitPicker(settings: settings);
               },
@@ -73,15 +74,13 @@ class SettingsScreen extends StatelessWidget {
 
           const SettingsSectionHeader(title: 'Accessibility', icon: Icons.accessibility_new),
 
-          ListTile(
+          SwitchListTile(
             title: const Text('Dynamic Item List'),
             subtitle: Text(
               settings.compactItemList ? 'Enabled (Compact)' : 'Disabled (Structured)',
             ),
-            trailing: Switch(
-              value: settings.compactItemList,
-              onChanged: settings.setCompactItemList,
-            ),
+            value: settings.compactItemList,
+            onChanged: settings.setCompactItemList,
           ),
 
           ListTile(
@@ -90,6 +89,7 @@ class SettingsScreen extends StatelessWidget {
             trailing: const Icon(Icons.arrow_drop_down),
             onTap: () => showModalBottomSheet(
               context: context,
+              showDragHandle: true,
               builder: (context) {
                 return FabLocationPicker(
                   currentLocation: settings.dominantHand,

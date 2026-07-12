@@ -46,14 +46,13 @@ class PurchasedItemTile extends StatelessWidget {
     final hasQty = pItem.quantity != null;
     final hasPrice = pItem.price != null;
 
-    final tileBgColor = isSelected ? colorScheme.primary.withValues(alpha: 0.2) : null;
+    final tileBgColor = isSelected ? colorScheme.surfaceContainerHighest : null;
 
     return LayoutBuilder(
       builder: (context, constraints) {
         final maxWidth = constraints.maxWidth;
         final isSmallScreen = maxWidth < 360;
 
-        // Proportional sizing guarantees it looks optimal on Watches, Phones, and Tablets
         final double qtyWidth = (maxWidth * 0.18).clamp(65.0, 85.0);
         final double totalAreaWidth = (maxWidth * 0.25).clamp(80.0, 115.0);
         final double imgSize = isSmallScreen ? 40.0 : 50.0;
@@ -66,11 +65,10 @@ class PurchasedItemTile extends StatelessWidget {
               child: InkWell(
                 onLongPress: () => _showEditSheet(context),
                 child: Padding(
-                  padding: EdgeInsets.symmetric(vertical: 12.0),
+                  padding: const EdgeInsets.symmetric(vertical: 12.0),
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      // Quantity Section
                       SizedBox(
                         width: qtyWidth,
                         child: _buildQuantitySection(
@@ -84,7 +82,6 @@ class PurchasedItemTile extends StatelessWidget {
                       ),
                       SizedBox(width: spacing),
 
-                      // Image Section
                       if (details.item.imagePath != null ||
                           details.purchasedItem.imagePath != null ||
                           settings.compactItemList == false) ...[
@@ -92,7 +89,6 @@ class PurchasedItemTile extends StatelessWidget {
                         SizedBox(width: spacing),
                       ],
 
-                      // Main Details Section (Name, Unit Price, Total Price)
                       Expanded(
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.center,
@@ -113,7 +109,6 @@ class PurchasedItemTile extends StatelessWidget {
                             ),
                             SizedBox(width: spacing),
 
-                            // Total Price
                             SizedBox(
                               width: totalAreaWidth,
                               child: _buildTotalPriceSection(
@@ -134,12 +129,11 @@ class PurchasedItemTile extends StatelessWidget {
                         ),
                       ),
 
-                      // Menu Button Section
                       SizedBox(
-                        width: 40, // Limits wide trailing spacing
+                        width: 40,
                         child: Align(
                           alignment: Alignment.topRight,
-                          child: _buildPopupMenu(context),
+                          child: _buildPopupMenu(context, colorScheme),
                         ),
                       ),
                     ],
@@ -147,7 +141,7 @@ class PurchasedItemTile extends StatelessWidget {
                 ),
               ),
             ),
-            if (index < totalItems - 1) Divider(height: 1, color: colorScheme.outlineVariant),
+            if (index < totalItems - 1) const Divider(height: 1),
           ],
         );
       },
@@ -185,7 +179,6 @@ class PurchasedItemTile extends StatelessWidget {
       );
     }
 
-    // Input Button
     return Column(
       children: [
         OutlinedButton.icon(
@@ -383,8 +376,7 @@ class PurchasedItemTile extends StatelessWidget {
     );
   }
 
-  Widget _buildPopupMenu(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
+  Widget _buildPopupMenu(BuildContext context, ColorScheme colorScheme) {
     return PopupMenuButton<String>(
       icon: Icon(Icons.more_vert, color: colorScheme.onSurfaceVariant),
       onOpened: onMenuOpened,
@@ -428,13 +420,13 @@ class PurchasedItemTile extends StatelessWidget {
             children: [Icon(Icons.local_offer_outlined), SizedBox(width: 8), Text('Edit Discount')],
           ),
         ),
-        const PopupMenuItem(
+        PopupMenuItem(
           value: 'delete',
           child: Row(
             children: [
-              Icon(Icons.delete_outline, color: Colors.red),
-              SizedBox(width: 8),
-              Text('Delete', style: TextStyle(color: Colors.red)),
+              Icon(Icons.delete_outline, color: colorScheme.error),
+              const SizedBox(width: 8),
+              Text('Delete', style: TextStyle(color: colorScheme.error)),
             ],
           ),
         ),

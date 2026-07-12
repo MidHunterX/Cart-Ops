@@ -16,7 +16,6 @@ class PurchasesScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
     final repo = context.read<PurchasesRepository>();
     final settings = context.watch<SettingsProvider>();
 
@@ -29,13 +28,9 @@ class PurchasesScreen extends StatelessWidget {
             Text(group.name, style: Theme.of(context).textTheme.bodySmall),
           ],
         ),
-        backgroundColor: colorScheme.primaryContainer,
         actions: [
           IconButton(
-            icon: const Padding(
-              padding: EdgeInsets.all(8.0),
-              child: Icon(Icons.inventory_2_outlined),
-            ),
+            icon: const Icon(Icons.inventory_2_outlined),
             onPressed: () => Navigator.push(
               context,
               MaterialPageRoute(builder: (_) => ItemsScreen(group: group)),

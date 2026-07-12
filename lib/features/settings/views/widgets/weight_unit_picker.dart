@@ -12,13 +12,11 @@ class WeightUnitPicker extends StatelessWidget {
     return SafeArea(
       child: Column(
         mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Padding(
-            padding: EdgeInsets.all(16.0),
-            child: Text(
-              'Select Weight Unit',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+            child: Text('Select Weight Unit', style: Theme.of(context).textTheme.titleLarge),
           ),
           ...weightUnitOptions.map((option) {
             return ListTile(

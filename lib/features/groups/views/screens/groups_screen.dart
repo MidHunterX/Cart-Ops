@@ -54,23 +54,21 @@ class _GroupsScreenState extends State<GroupsScreen> {
     final settings = context.watch<SettingsProvider>();
     final purchasesRepo = context.read<PurchasesRepository>();
 
+    const double groupTileHeight = 150;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Cart Ops'),
-        backgroundColor: colorScheme.primaryContainer,
         actions: [
           IconButton(
-            icon: const Padding(
-              padding: EdgeInsets.all(8.0),
-              child: Icon(Icons.inventory_2_outlined),
-            ),
+            icon: const Icon(Icons.inventory_2_outlined),
             onPressed: () => Navigator.push(
               context,
               MaterialPageRoute(builder: (_) => const ItemsScreen(group: null)),
             ),
           ),
           IconButton(
-            icon: const Padding(padding: EdgeInsets.all(8.0), child: Icon(Icons.settings)),
+            icon: const Icon(Icons.settings),
             onPressed: () =>
                 Navigator.push(context, MaterialPageRoute(builder: (_) => const SettingsScreen())),
           ),
@@ -105,14 +103,17 @@ class _GroupsScreenState extends State<GroupsScreen> {
           SliverPadding(
             padding: const EdgeInsets.fromLTRB(16, 24, 16, 16),
             sliver: SliverToBoxAdapter(
-              child: Text('Groups', style: Theme.of(context).textTheme.titleLarge),
+              child: Text('Groups', style: Theme.of(context).textTheme.headlineSmall),
             ),
           ),
           SliverToBoxAdapter(
             child: _isLoadingGroups
-                ? const SizedBox(height: 150, child: Center(child: CircularProgressIndicator()))
+                ? const SizedBox(
+                    height: groupTileHeight,
+                    child: Center(child: CircularProgressIndicator()),
+                  )
                 : SizedBox(
-                    height: 150,
+                    height: groupTileHeight,
                     child: ListView.separated(
                       scrollDirection: Axis.horizontal,
                       padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -121,12 +122,12 @@ class _GroupsScreenState extends State<GroupsScreen> {
                       itemBuilder: (context, index) {
                         if (index == _groups.length) {
                           return SizedBox(
-                            width: 150,
+                            width: groupTileHeight,
                             child: _buildAddGroupTile(context, colorScheme),
                           );
                         }
                         return SizedBox(
-                          width: 150,
+                          width: groupTileHeight,
                           child: _buildGroupTile(context, _groups[index], colorScheme),
                         );
                       },
@@ -136,7 +137,7 @@ class _GroupsScreenState extends State<GroupsScreen> {
           SliverPadding(
             padding: const EdgeInsets.fromLTRB(16, 32, 16, 8),
             sliver: SliverToBoxAdapter(
-              child: Text('General Purchases', style: Theme.of(context).textTheme.titleLarge),
+              child: Text('Purchases', style: Theme.of(context).textTheme.headlineSmall),
             ),
           ),
           SliverPadding(
@@ -149,15 +150,12 @@ class _GroupsScreenState extends State<GroupsScreen> {
   }
 
   Widget _buildGroupTile(BuildContext context, Group group, ColorScheme colorScheme) {
-    return InkWell(
-      onTap: () =>
-          Navigator.push(context, MaterialPageRoute(builder: (_) => PurchasesScreen(group: group))),
-      borderRadius: BorderRadius.circular(24),
-      child: Ink(
-        decoration: BoxDecoration(
-          color: colorScheme.primaryContainer.withValues(alpha: 0.4),
-          borderRadius: BorderRadius.circular(24),
-          border: Border.all(color: colorScheme.primary.withValues(alpha: 0.2)),
+    return Card.filled(
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: () => Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => PurchasesScreen(group: group)),
         ),
         child: Stack(
           children: [
@@ -184,7 +182,7 @@ class _GroupsScreenState extends State<GroupsScreen> {
               top: 0,
               right: 0,
               child: IconButton(
-                icon: Icon(Icons.close, size: 18, color: colorScheme.onSurfaceVariant),
+                icon: const Icon(Icons.close, size: 18),
                 onPressed: () => _confirmDeleteGroup(context, group),
               ),
             ),
@@ -195,15 +193,10 @@ class _GroupsScreenState extends State<GroupsScreen> {
   }
 
   Widget _buildAddGroupTile(BuildContext context, ColorScheme colorScheme) {
-    return InkWell(
-      onTap: () => showDialog(context: context, builder: (_) => const AddGroupDialog()),
-      borderRadius: BorderRadius.circular(24),
-      child: Ink(
-        decoration: BoxDecoration(
-          color: colorScheme.surface,
-          borderRadius: BorderRadius.circular(24),
-          border: Border.all(color: colorScheme.surfaceContainerHighest, width: 2),
-        ),
+    return Card.outlined(
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: () => showDialog(context: context, builder: (_) => const AddGroupDialog()),
         child: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
