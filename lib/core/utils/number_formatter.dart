@@ -34,7 +34,10 @@ extension NumberFormatting on double {
   }
 
   String toCurrencyString(String currencySymbol) {
-    if (this % 1 == 0) return '$currencySymbol${toInt()}';
-    return '$currencySymbol${toStringAsFixed(2)}';
+    final isNegative = this < 0;
+    final absValue = abs();
+    final sign = isNegative ? '-' : '';
+    if (absValue % 1 == 0) return '$sign$currencySymbol${absValue.toInt()}';
+    return '$sign$currencySymbol${absValue.toStringAsFixed(2)}';
   }
 }

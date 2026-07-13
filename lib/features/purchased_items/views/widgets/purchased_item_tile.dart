@@ -287,7 +287,7 @@ class PurchasedItemTile extends StatelessWidget {
         crossAxisAlignment: WrapCrossAlignment.center,
         children: [
           Text(
-            '$currency${pricePerUnit.toPriceString()}',
+            pricePerUnit.toCurrencyString(currency),
             style: settings.compactItemList == false || item.name != ''
                 ? Theme.of(context).textTheme.bodySmall?.copyWith(
                     decoration: TextDecoration.lineThrough,
@@ -299,7 +299,7 @@ class PurchasedItemTile extends StatelessWidget {
                   ),
           ),
           Text(
-            '$currency${_calcRateAfterDiscount(pricePerUnit, pItem.discount).toPriceString()}'
+            '${_calcRateAfterDiscount(pricePerUnit, pItem.discount).toCurrencyString(currency)}'
             '${pItem.isWeight ? ' /$weightUnit' : ''}',
             style: settings.compactItemList == false || item.name != ''
                 ? Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -316,7 +316,7 @@ class PurchasedItemTile extends StatelessWidget {
     }
 
     return Text(
-      '$currency${pricePerUnit.toPriceString()}'
+      '${pricePerUnit.toCurrencyString(currency)}'
       '${pItem.isWeight ? ' /$weightUnit' : ''}',
       style: item.name == '' && settings.compactItemList == true
           ? Theme.of(context).textTheme.titleMedium
@@ -364,7 +364,7 @@ class PurchasedItemTile extends StatelessWidget {
           FittedBox(
             fit: BoxFit.scaleDown,
             child: Text(
-              '$currency${totalPrice.toStringAsFixed(2)}',
+              totalPrice.toCurrencyString(currency),
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
                 color: colorScheme.primary,
                 fontWeight: FontWeight.bold,
@@ -374,7 +374,7 @@ class PurchasedItemTile extends StatelessWidget {
           FittedBox(
             fit: BoxFit.scaleDown,
             child: Text(
-              '-$currency${_calcTotalDiscount(pItem.discount, qty).toPriceString()}',
+              _calcTotalDiscount(-pItem.discount, qty).toCurrencyString(currency),
               style: Theme.of(context).textTheme.bodySmall?.copyWith(color: colorScheme.error),
             ),
           ),
@@ -388,7 +388,7 @@ class PurchasedItemTile extends StatelessWidget {
         FittedBox(
           fit: BoxFit.scaleDown,
           child: Text(
-            '$currency${totalPrice.toStringAsFixed(2)}',
+            totalPrice.toCurrencyString(currency),
             style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
           ),
         ),

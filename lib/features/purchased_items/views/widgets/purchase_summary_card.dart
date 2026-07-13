@@ -88,7 +88,7 @@ class PurchaseSummaryCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              '$currency${total.toStringAsFixed(2)}',
+              total.toCurrencyString(currency),
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                 fontWeight: FontWeight.bold,
                 color: colorScheme.onPrimaryContainer,

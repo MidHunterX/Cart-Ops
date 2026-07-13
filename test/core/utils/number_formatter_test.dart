@@ -196,15 +196,14 @@ void main() {
         expect(1.999.toCurrencyString('\$'), '\$2.00');
       });
 
-      /* FIX:
-        test('handles negative numbers correctly', () {
+      test('handles negative numbers correctly', () {
         expect((-1.0).toCurrencyString('\$'), '-\$1');
         expect((-5.50).toCurrencyString('€'), '-€5.50');
         expect((-3.14159).toCurrencyString('₹'), '-₹3.14');
         expect((-0.99).toCurrencyString('£'), '-£0.99');
         expect((-0.01).toCurrencyString('\$'), '-\$0.01');
         expect((-0.0).toCurrencyString('\$'), '\$0');
-      });*/
+      });
 
       test('handles multi-character currency symbols', () {
         expect(1.0.toCurrencyString('USD'), 'USD1');

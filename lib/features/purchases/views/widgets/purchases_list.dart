@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shopping_assist/core/database/database.dart';
+import 'package:shopping_assist/core/utils/number_formatter.dart';
 import 'package:shopping_assist/core/widgets/delete_confirmation_dialog.dart';
 import 'package:shopping_assist/core/widgets/empty_state.dart';
 import 'package:shopping_assist/features/purchased_items/views/screens/purchased_items_screen.dart';
@@ -246,7 +247,7 @@ class _MonthHeaderTile extends StatelessWidget {
               ),
             ),
             Text(
-              '$currency${header.total.toStringAsFixed(2)}',
+              header.total.toCurrencyString(currency),
               style: Theme.of(context).textTheme.titleSmall?.copyWith(color: colorScheme.secondary),
             ),
           ],
@@ -311,7 +312,7 @@ class _PurchaseTileState extends State<_PurchaseTile> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  '$currency${purchase.totalPrice?.toStringAsFixed(2) ?? '0.00'}',
+                  purchase.totalPrice?.toCurrencyString(currency) ?? '0.00',
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                     color: Theme.of(context).colorScheme.primary,
