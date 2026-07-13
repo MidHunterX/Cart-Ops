@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shopping_assist/core/database/database.dart';
+import 'package:shopping_assist/core/utils/datetime_formatter.dart';
 import 'package:shopping_assist/core/utils/number_formatter.dart';
 import 'package:shopping_assist/core/widgets/delete_confirmation_dialog.dart';
 import 'package:shopping_assist/core/widgets/empty_state.dart';
@@ -306,7 +307,7 @@ class _PurchaseTileState extends State<_PurchaseTile> {
             leading: const Icon(Icons.shopping_cart_outlined),
             title: Text(purchase.name),
             subtitle: Text(
-              '${purchase.purchaseDate.day}/${purchase.purchaseDate.month}/${purchase.purchaseDate.year} at ${TimeOfDay.fromDateTime(purchase.purchaseDate).format(context)}',
+              '${purchase.purchaseDate.toShortDateNoYear} at ${purchase.purchaseDate.toShortTime}',
             ),
             trailing: Row(
               mainAxisSize: MainAxisSize.min,

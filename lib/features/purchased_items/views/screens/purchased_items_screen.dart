@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shopping_assist/core/database/database.dart';
+import 'package:shopping_assist/core/utils/datetime_formatter.dart';
 import 'package:shopping_assist/features/purchased_items/views/widgets/add_purchased_item_sheet.dart';
 import 'package:shopping_assist/core/widgets/empty_state.dart';
 import 'package:shopping_assist/core/widgets/dextrous_fab.dart';
@@ -196,7 +197,7 @@ class _PurchasedItemsScreenState extends State<PurchasedItemsScreen> {
           children: [
             Text(_currentPurchase.name),
             Text(
-              _currentPurchase.purchaseDate.toString(),
+              '${_currentPurchase.purchaseDate.toLongDate} at ${_currentPurchase.purchaseDate.toShortTime}',
               style: Theme.of(context).textTheme.bodySmall,
             ),
           ],
