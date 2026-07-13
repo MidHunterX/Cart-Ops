@@ -24,6 +24,7 @@ dependencies:
   fl_chart: ^1.2.0
   faker: ^2.2.0
   decimal: ^3.2.4
+  intl: ^0.20.3
 
 dev_dependencies:
   flutter_test:
