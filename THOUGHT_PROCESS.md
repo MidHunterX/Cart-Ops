@@ -121,31 +121,35 @@ a per item price and also for balancing composition.
 This style is for people who prefers a structured, organized and predictable
 environment. Every single item attribute have a dedicated place in the UI. This
 keeps everything predictable. If you want to look for something, you'll know
-where it is exactly; catering to OCD like tendencies.
-
-For ASD, I'd suggest the Dynamic List to reduce the visual noise and sticking
-to self selected attributes only for not breaking the pattern.
+where it is exactly; catering to ASD like neuro-types. But the Dynamic List
+reduces the visual noise to the maximum so, sticking to self selected
+attributes only helps not breaking the pattern.
 
 ### Settings
 
 - **Theme Mode**: Light Mode | Dark Mode | System (Default)
   - Respect user's choice first for not breaking the cohesion.
 - **Theme Color**: Material Colors: green, blue (Default), red, orange, purple, teal, pink
-  - In Color Semiotics, Blue is associated with Trust, Stability etc. For early humans, a clear blue sky meant safety and predictable weather. Which is the reason why banks use it often.
+  - In Color Semiotics, Blue is associated with Trust, Stability etc. For early
+    humans, a clear blue sky meant safety and predictable weather. Which is the
+    reason why banks use it often.
 - **Currency**: All Currencies around the World (USD Default)
 - **Weight Unit**: Kg (Default) | Lb
-- **Dynamic Item List**: On - Dynamic List | Off - Structured List (Default)
+- **Dynamic Item List**: On - Dynamic List (Default) | Off - Structured List
 - **Dominant Hand**: Right (Default) | Left | Ambidextrous
   - Right Hand is the most common dominant hand.
 - **Keypad Layout**: Calculator (Default) | Telephone
-  - There are people who are much more accustomed to a each keypad. Cognition, history and muscle memory play a major role in this.
+  - There are people who are much more accustomed to a each keypad. Cognition,
+    history and muscle memory play a major role in this.
 
 #### Keypad Layout
 
 When it comes to keypad layouts, there are mainly two paradigms:
 
-- Bottom-Up (`7 8 9 - 4 5 6 - 1 2 3 - 0`): Personal Computer Keyboards and Calculator uses this style of keypad layout.
-- Top-Down (`1 2 3 - 4 5 6 - 7 8 9 - 0`): Telephones, ATMs and modern Smartphones uses this style of keypad layout.
+- Bottom-Up (`7 8 9 - 4 5 6 - 1 2 3 - 0`): Personal Computer Keyboards and
+  Calculator uses this style of keypad layout.
+- Top-Down (`1 2 3 - 4 5 6 - 7 8 9 - 0`): Telephones, ATMs and modern
+  Smartphones uses this style of keypad layout.
 
 People like CPAs/Accountants who use keyboards and calculators on a daily basis
 might find the unexpected Top-Down number pad jarring due to muscle memory. The
@@ -158,5 +162,26 @@ screens can cause confusion. Which is why pages often have empty messages or
 placeholders. How you word and present the message can influence user's
 thoughts which in turn influences the behavior and feeling.
 
-- Purchase Screen: When purchase screen is empty, It must have a positive tone about no purchase being made _yet_ (anticipation and slightly defensive about spending financial resources).
-- List Screen: When list is empty, do not judge users for having an empty cart/list. It leaves a bad taste. Instead showing "Your Cart is Ready! - Add items to ..." respects and acknowledges users decision to make the purchase event.
+- Purchase Screen: When purchase screen is empty, It must have a positive tone
+  about no purchase being made _yet_ (anticipation and slightly defensive about
+  spending financial resources).
+- List Screen: When list is empty, do not judge users for having an empty
+  cart/list. It leaves a bad taste. Instead showing "Your Cart is Ready! - Add
+  items to ..." respects and acknowledges users decision to make the purchase
+  event.
+
+### Discounts
+
+Aside from dedicated budget tracking software, this is the area where almost
+all of the implementation falters. Many apps don't bother even adding one.
+Following the philosophy that everything is merely an item with a price.
+
+But what if you want to track discounts and the actual selling price? This is
+where things get tricky. Mainly there are three options:
+
+- Percentage: Reduces the price by a certain percentage.
+- Price: Reduces the price per unit by a certain amount.
+- Offer: Reduces the total price by a fixed amount. (Can be combined)
+
+Offer is an abstract reusable pattern which can be used for different discount
+mechanisms like Coupons, Buy N Get N Free, Free Samples, Concessions etc.

@@ -43,7 +43,7 @@ class SettingsProvider extends ChangeNotifier {
   }
 
   static const String _compactItemListKey = 'compact_item_list';
-  bool _compactItemList = false;
+  bool _compactItemList = true;
   bool get compactItemList => _compactItemList;
   void setCompactItemList(bool isCompact) async {
     _compactItemList = isCompact;
