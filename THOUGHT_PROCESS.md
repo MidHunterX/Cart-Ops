@@ -133,7 +133,8 @@ attributes only helps not breaking the pattern.
   - In Color Semiotics, Blue is associated with Trust, Stability etc. For early
     humans, a clear blue sky meant safety and predictable weather. Which is the
     reason why banks use it often.
-- **Currency**: All Currencies around the World (USD Default)
+- **Currency**: All Currencies around the World
+  - Currency is detected from device region. Fallback to USD if not found.
 - **Weight Unit**: Kg (Default) | Lb
 - **Dynamic Item List**: On - Dynamic List (Default) | Off - Structured List
 - **Dominant Hand**: Right (Default) | Left | Ambidextrous

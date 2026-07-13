@@ -98,7 +98,26 @@ class SettingsProvider extends ChangeNotifier {
 
   // Currency
 
-  void _loadCurrencySettings() => _currencyCode = _prefs.getString(_currencyKey) ?? 'USD';
+  void _loadCurrencySettings() {
+    final saved = _prefs.getString(_currencyKey);
+    if (saved != null) {
+      _currencyCode = saved;
+      return;
+    }
+
+    // Detect from device locale
+    Locale locale = WidgetsBinding.instance.platformDispatcher.locale;
+    final countryCode = locale.countryCode;
+    if (countryCode != null) {
+      final detectedCurrency = getCurrencyByCountryCode(countryCode);
+      if (detectedCurrency != null && currencies.any((c) => c.code == detectedCurrency.code)) {
+        _currencyCode = detectedCurrency.code;
+        return;
+      }
+    }
+
+    _currencyCode = 'USD';
+  }
 
   static const String _currencyKey = 'currency_code';
   String _currencyCode = 'USD';
