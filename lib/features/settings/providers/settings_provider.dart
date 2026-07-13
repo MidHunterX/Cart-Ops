@@ -110,6 +110,22 @@ class SettingsProvider extends ChangeNotifier {
     _prefs.setString(_currencyKey, code);
   }
 
+  // Groups Feture
+
+  void _loadGroupSettings() {
+    final isGroup = _prefs.getBool(_groupEnabledKey);
+    if (isGroup != null) _useGroupLayout = isGroup;
+  }
+
+  static const String _groupEnabledKey = 'is_group_enabled';
+  bool _useGroupLayout = false;
+  bool get isGroupEnabled => _useGroupLayout;
+  void setGroupFeatureStatus(bool useGroupFeature) async {
+    _useGroupLayout = useGroupFeature;
+    notifyListeners();
+    _prefs.setBool(_groupEnabledKey, useGroupFeature);
+  }
+
   // ======================================================================= //
 
   final SharedPreferences _prefs;
@@ -122,5 +138,6 @@ class SettingsProvider extends ChangeNotifier {
     _loadCompactItemList();
     _loadDominantHandSettings();
     _loadTelephoneSettings();
+    _loadGroupSettings();
   }
 }

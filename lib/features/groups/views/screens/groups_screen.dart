@@ -54,6 +54,8 @@ class _GroupsScreenState extends State<GroupsScreen> {
     final settings = context.watch<SettingsProvider>();
     final purchasesRepo = context.read<PurchasesRepository>();
 
+    final bool isGroupFeatureEnabled = settings.isGroupEnabled || _groups.isNotEmpty;
+
     const double groupTileHeight = 150;
 
     return Scaffold(
@@ -81,15 +83,12 @@ class _GroupsScreenState extends State<GroupsScreen> {
         onPressed: () async {
           final purchase = await purchasesRepo.createPurchase(null);
           if (context.mounted) {
-            await Future.delayed(const Duration(milliseconds: 300));
-            if (context.mounted) {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => PurchasedItemsScreen(purchase: purchase, group: null),
-                ),
-              );
-            }
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => PurchasedItemsScreen(purchase: purchase, group: null),
+              ),
+            );
           }
         },
       ),
@@ -100,46 +99,54 @@ class _GroupsScreenState extends State<GroupsScreen> {
           : FloatingActionButtonLocation.centerFloat,
       body: CustomScrollView(
         slivers: [
-          SliverPadding(
-            padding: const EdgeInsets.fromLTRB(16, 24, 16, 16),
-            sliver: SliverToBoxAdapter(
-              child: Text('Groups', style: Theme.of(context).textTheme.headlineSmall),
+          if (isGroupFeatureEnabled)
+            SliverPadding(
+              padding: const EdgeInsets.fromLTRB(16, 24, 16, 16),
+              sliver: SliverToBoxAdapter(
+                child: Text('Groups', style: Theme.of(context).textTheme.headlineSmall),
+              ),
             ),
-          ),
-          SliverToBoxAdapter(
-            child: _isLoadingGroups
-                ? const SizedBox(
-                    height: groupTileHeight,
-                    child: Center(child: CircularProgressIndicator()),
-                  )
-                : SizedBox(
-                    height: groupTileHeight,
-                    child: ListView.separated(
-                      scrollDirection: Axis.horizontal,
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      itemCount: _groups.length + 1,
-                      separatorBuilder: (context, index) => const SizedBox(width: 16),
-                      itemBuilder: (context, index) {
-                        if (index == _groups.length) {
+
+          if (isGroupFeatureEnabled)
+            SliverToBoxAdapter(
+              child: _isLoadingGroups
+                  ? const SizedBox(
+                      height: groupTileHeight,
+                      child: Center(child: CircularProgressIndicator()),
+                    )
+                  : SizedBox(
+                      height: groupTileHeight,
+                      child: ListView.separated(
+                        scrollDirection: Axis.horizontal,
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        itemCount: _groups.length + 1,
+                        separatorBuilder: (context, index) => const SizedBox(width: 16),
+                        itemBuilder: (context, index) {
+                          if (index == _groups.length) {
+                            return SizedBox(
+                              width: groupTileHeight,
+                              child: _buildAddGroupTile(context, colorScheme),
+                            );
+                          }
                           return SizedBox(
                             width: groupTileHeight,
-                            child: _buildAddGroupTile(context, colorScheme),
+                            child: _buildGroupTile(context, _groups[index], colorScheme),
                           );
-                        }
-                        return SizedBox(
-                          width: groupTileHeight,
-                          child: _buildGroupTile(context, _groups[index], colorScheme),
-                        );
-                      },
+                        },
+                      ),
                     ),
-                  ),
-          ),
-          SliverPadding(
-            padding: const EdgeInsets.fromLTRB(16, 32, 16, 8),
-            sliver: SliverToBoxAdapter(
-              child: Text('Purchases', style: Theme.of(context).textTheme.headlineSmall),
             ),
-          ),
+
+          SliverPadding(padding: const EdgeInsets.only(top: 18)),
+
+          if (isGroupFeatureEnabled)
+            SliverPadding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+              sliver: SliverToBoxAdapter(
+                child: Text('Purchases', style: Theme.of(context).textTheme.headlineSmall),
+              ),
+            ),
+
           PurchasesList(stream: purchasesRepo.watchGeneralPurchases(), group: null),
         ],
       ),

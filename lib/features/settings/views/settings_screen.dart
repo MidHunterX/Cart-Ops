@@ -72,6 +72,19 @@ class SettingsScreen extends StatelessWidget {
 
           const Divider(),
 
+          const SettingsSectionHeader(title: 'Features', icon: Icons.widgets),
+
+          SwitchListTile(
+            title: const Text('Purchase Groups'),
+            subtitle: Text(
+              settings.isGroupEnabled ? 'Enabled' : 'Disabled',
+            ),
+            value: settings.isGroupEnabled,
+            onChanged: settings.setGroupFeatureStatus,
+          ),
+
+          const Divider(),
+
           const SettingsSectionHeader(title: 'Accessibility', icon: Icons.accessibility_new),
 
           SwitchListTile(
