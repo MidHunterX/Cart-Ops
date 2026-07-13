@@ -281,13 +281,21 @@ class PurchasedItemTile extends StatelessWidget {
       );
     }
 
+    final ratePerItem = pricePerUnit.toCurrencyString(currency, preferWhole: true);
+    final unit = pItem.isWeight ? '/$weightUnit' : '';
+
     if (discountApplied) {
+      final ratePerDiscountedItem = _calcRateAfterDiscount(
+        pricePerUnit,
+        pItem.discount,
+      ).toCurrencyString(currency, preferWhole: true);
+
       return Wrap(
         spacing: 4,
         crossAxisAlignment: WrapCrossAlignment.center,
         children: [
           Text(
-            pricePerUnit.toCurrencyString(currency),
+            ratePerItem,
             style: settings.compactItemList == false || item.name != ''
                 ? Theme.of(context).textTheme.bodySmall?.copyWith(
                     decoration: TextDecoration.lineThrough,
@@ -299,8 +307,7 @@ class PurchasedItemTile extends StatelessWidget {
                   ),
           ),
           Text(
-            '${_calcRateAfterDiscount(pricePerUnit, pItem.discount).toCurrencyString(currency)}'
-            '${pItem.isWeight ? ' /$weightUnit' : ''}',
+            '$ratePerDiscountedItem$unit',
             style: settings.compactItemList == false || item.name != ''
                 ? Theme.of(context).textTheme.bodySmall?.copyWith(
                     fontWeight: FontWeight.bold,
@@ -316,8 +323,7 @@ class PurchasedItemTile extends StatelessWidget {
     }
 
     return Text(
-      '${pricePerUnit.toCurrencyString(currency)}'
-      '${pItem.isWeight ? ' /$weightUnit' : ''}',
+      '$ratePerItem$unit',
       style: item.name == '' && settings.compactItemList == true
           ? Theme.of(context).textTheme.titleMedium
           : Theme.of(context).textTheme.bodySmall,
