@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shopping_assist/core/database/database.dart';
+import 'package:shopping_assist/core/utils/datetime_formatter.dart';
 import 'package:shopping_assist/features/purchases/repositories/purchases_repository.dart';
 
 class EditPurchaseDialog extends StatefulWidget {
@@ -82,14 +83,21 @@ class _EditPurchaseDialogState extends State<EditPurchaseDialog> {
           Row(
             children: [
               Expanded(
+                flex: 10,
                 child: OutlinedButton.icon(
                   onPressed: _pickDate,
                   icon: const Icon(Icons.calendar_today, size: 16),
-                  label: Text('${_selectedDate.day}/${_selectedDate.month}/${_selectedDate.year}'),
+                  label: Text(
+                    _selectedDate.toIsoDate,
+                    overflow: TextOverflow.ellipsis,
+                    softWrap: false,
+                    maxLines: 1,
+                  ),
                 ),
               ),
               const SizedBox(width: 8),
               Expanded(
+                flex: 7,
                 child: OutlinedButton.icon(
                   onPressed: _pickTime,
                   icon: const Icon(Icons.access_time, size: 16),
