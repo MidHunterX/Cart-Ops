@@ -21,9 +21,7 @@ class ItemDetailScreen extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Item Details'),
-      ),
+      appBar: AppBar(title: const Text('Item Details')),
       body: FutureBuilder<List<PurchasedItemWithPurchase>>(
         future: repo.getPurchaseHistoryForItem(item.id),
         builder: (context, snapshot) {
@@ -33,7 +31,11 @@ class ItemDetailScreen extends StatelessWidget {
           final history = snapshot.data ?? [];
           final count = history.length;
 
-          final int maxDataPoints = calculateMaxDataPoints(context, history);
+          final int maxDataPoints = calculateMaxDataPoints(
+            context,
+            history,
+            extraLetters: currency.length + 1, // currency + space
+          );
           final displayHistory = history.take(maxDataPoints).toList();
 
           return SingleChildScrollView(

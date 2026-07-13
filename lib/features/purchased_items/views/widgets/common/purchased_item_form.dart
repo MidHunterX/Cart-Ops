@@ -317,6 +317,7 @@ class PurchasedItemFormState extends State<PurchasedItemForm> {
                   context,
                   snapshot.data!,
                   maxWidth: bottomSheetWidth,
+                  extraLetters: settings.currencySymbol.length + 1, // currency + space
                 );
                 final displayHistory = snapshot.data?.take(maxDataPoints).toList();
 
