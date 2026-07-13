@@ -173,11 +173,19 @@ void main() {
 
     group('toCurrencyString', () {
       test('formats whole numbers with currency symbol', () {
-        expect(0.0.toCurrencyString('\$'), '\$0');
-        expect(1.0.toCurrencyString('\$'), '\$1');
-        expect(5.0.toCurrencyString('€'), '€5');
-        expect(10.0.toCurrencyString('₹'), '₹10');
-        expect(100.0.toCurrencyString('£'), '£100');
+        expect(0.0.toCurrencyString('\$'), '\$0.00');
+        expect(1.0.toCurrencyString('\$'), '\$1.00');
+        expect(5.0.toCurrencyString('€'), '€5.00');
+        expect(10.0.toCurrencyString('₹'), '₹10.00');
+        expect(100.0.toCurrencyString('£'), '£100.00');
+      });
+
+      test('formats whole numbers with currency symbol and prefers whole', () {
+        expect(0.0.toCurrencyString('\$', preferWhole: true), '\$0');
+        expect(1.0.toCurrencyString('\$', preferWhole: true), '\$1');
+        expect(5.0.toCurrencyString('€', preferWhole: true), '€5');
+        expect(10.0.toCurrencyString('₹', preferWhole: true), '₹10');
+        expect(100.0.toCurrencyString('£', preferWhole: true), '£100');
       });
 
       test('formats decimal numbers with currency symbol', () {
@@ -197,16 +205,16 @@ void main() {
       });
 
       test('handles negative numbers correctly', () {
-        expect((-1.0).toCurrencyString('\$'), '-\$1');
+        expect((-1.0).toCurrencyString('\$'), '-\$1.00');
         expect((-5.50).toCurrencyString('€'), '-€5.50');
         expect((-3.14159).toCurrencyString('₹'), '-₹3.14');
         expect((-0.99).toCurrencyString('£'), '-£0.99');
         expect((-0.01).toCurrencyString('\$'), '-\$0.01');
-        expect((-0.0).toCurrencyString('\$'), '\$0');
+        expect((-0.0).toCurrencyString('\$'), '\$0.00');
       });
 
       test('handles multi-character currency symbols', () {
-        expect(1.0.toCurrencyString('USD'), 'USD1');
+        expect(1.0.toCurrencyString('USD'), 'USD1.00');
         expect(1.23.toCurrencyString('EUR'), 'EUR1.23');
         expect(5.50.toCurrencyString('GBP'), 'GBP5.50');
         expect(10.99.toCurrencyString('JPY'), 'JPY10.99');
@@ -219,28 +227,28 @@ void main() {
       });
 
       test('handles large numbers correctly', () {
-        expect(1000000.0.toCurrencyString('\$'), '\$1000000');
+        expect(1000000.0.toCurrencyString('\$'), '\$1000000.00');
         expect(1234567.89.toCurrencyString('€'), '€1234567.89');
         expect(999999.999.toCurrencyString('₹'), '₹1000000.00');
       });
 
       test('handles numbers with trailing zeros correctly', () {
         expect(1.50.toCurrencyString('\$'), '\$1.50');
-        expect(2.00.toCurrencyString('\$'), '\$2');
-        expect(0.00.toCurrencyString('\$'), '\$0');
+        expect(2.00.toCurrencyString('\$'), '\$2.00');
+        expect(0.00.toCurrencyString('\$'), '\$0.00');
         expect(10.10.toCurrencyString('\$'), '\$10.10');
       });
 
       test('handles currency symbols with spaces', () {
-        expect(1.0.toCurrencyString('\$ '), '\$ 1');
+        expect(1.0.toCurrencyString('\$ '), '\$ 1.00');
         expect(1.23.toCurrencyString(' \$'), ' \$1.23');
         expect(5.50.toCurrencyString(' € '), ' € 5.50');
       });
 
       test('handles empty currency symbol', () {
-        expect(1.0.toCurrencyString(''), '1');
+        expect(1.0.toCurrencyString(''), '1.00');
         expect(1.23.toCurrencyString(''), '1.23');
-        expect(0.0.toCurrencyString(''), '0');
+        expect(0.0.toCurrencyString(''), '0.00');
       });
     });
 

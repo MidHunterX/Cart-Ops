@@ -33,11 +33,11 @@ extension NumberFormatting on double {
     return '$value$unitStr';
   }
 
-  String toCurrencyString(String currencySymbol) {
+  String toCurrencyString(String currencySymbol, {bool preferWhole = false}) {
     final isNegative = this < 0;
     final absValue = abs();
     final sign = isNegative ? '-' : '';
-    if (absValue % 1 == 0) return '$sign$currencySymbol${absValue.toInt()}';
+    if (preferWhole && absValue % 1 == 0) return '$sign$currencySymbol${absValue.toInt()}';
     return '$sign$currencySymbol${absValue.toStringAsFixed(2)}';
   }
 }
