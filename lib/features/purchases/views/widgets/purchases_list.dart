@@ -166,10 +166,10 @@ class _PurchasesListState extends State<PurchasesList> {
         ),
       );
     } else if (_items.isEmpty) {
-      return const SliverToBoxAdapter(
-        child: Padding(
+      return const SliverFillRemaining(
+        hasScrollBody: false,
+        child: Center(
           key: ValueKey('empty_purchases'),
-          padding: EdgeInsets.only(top: 32.0),
           child: EmptyState(
             icon: Icons.shopping_bag_outlined,
             title: 'No Purchases Yet',
@@ -178,16 +178,18 @@ class _PurchasesListState extends State<PurchasesList> {
         ),
       );
     } else {
-      return SliverAnimatedList(
-        key: _listKey,
-        initialItemCount: _items.length,
-        itemBuilder: (context, index, animation) {
-          final item = _items[index];
-          final isLast = index == _items.length - 1;
-          final isNextHeader = !isLast && _items[index + 1] is MonthHeaderItem;
-          // Hide divider if this is the last element or if the next element is a Header
-          return _buildItem(item, animation, showDivider: !(isLast || isNextHeader));
-        },
+      return SliverPadding(
+        padding: const EdgeInsets.only(bottom: 80), // Space for FAB
+        sliver: SliverAnimatedList(
+          key: _listKey,
+          initialItemCount: _items.length,
+          itemBuilder: (context, index, animation) {
+            final item = _items[index];
+            final isLast = index == _items.length - 1;
+            final isNextHeader = !isLast && _items[index + 1] is MonthHeaderItem;
+            return _buildItem(item, animation, showDivider: !(isLast || isNextHeader));
+          },
+        ),
       );
     }
   }

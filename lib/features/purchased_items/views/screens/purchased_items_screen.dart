@@ -230,22 +230,29 @@ class _PurchasedItemsScreenState extends State<PurchasedItemsScreen> {
                   ),
                   if (_isListEmpty)
                     const SliverFillRemaining(
+                      hasScrollBody: false,
                       child: EmptyState(
                         icon: Icons.shopping_cart_outlined,
                         title: 'Your Cart is Ready',
                         message: 'Add items to your purchase to see the running total.',
                       ),
                     ),
-                  SliverPadding(
-                    padding: const EdgeInsets.only(bottom: 80),
-                    sliver: SliverAnimatedList(
-                      key: _listKey,
-                      initialItemCount: _purchasedItems.length,
-                      itemBuilder: (context, index, animation) {
-                        return _buildItemTile(_purchasedItems[index], index, totalItems, animation);
-                      },
+                  if (_isListEmpty == false)
+                    SliverPadding(
+                      padding: const EdgeInsets.only(bottom: 80),
+                      sliver: SliverAnimatedList(
+                        key: _listKey,
+                        initialItemCount: _purchasedItems.length,
+                        itemBuilder: (context, index, animation) {
+                          return _buildItemTile(
+                            _purchasedItems[index],
+                            index,
+                            totalItems,
+                            animation,
+                          );
+                        },
+                      ),
                     ),
-                  ),
                 ],
               ),
       ),

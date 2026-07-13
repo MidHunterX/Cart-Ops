@@ -140,10 +140,7 @@ class _GroupsScreenState extends State<GroupsScreen> {
               child: Text('Purchases', style: Theme.of(context).textTheme.headlineSmall),
             ),
           ),
-          SliverPadding(
-            padding: const EdgeInsets.only(bottom: 80),
-            sliver: PurchasesList(stream: purchasesRepo.watchGeneralPurchases(), group: null),
-          ),
+          PurchasesList(stream: purchasesRepo.watchGeneralPurchases(), group: null),
         ],
       ),
     );
