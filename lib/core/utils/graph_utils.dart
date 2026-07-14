@@ -18,6 +18,9 @@ int calculateMaxDataPoints(
   double labelFontSize = 10.0,
   int extraLetters = 0,
 }) {
+  if (history.isEmpty) return 0; // Empty list
+  if (history.length == 1) return 1; // At least 2 data points is required
+
   final double currentWidth = MediaQuery.of(context).size.width.clamp(0, maxWidth);
   final double labelWidth = _estimateLabelWidth(history, labelFontSize, extraLetters: extraLetters);
   final double minSpacing = labelWidth; // becase labels are evenly spaced
