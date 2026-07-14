@@ -186,3 +186,33 @@ where things get tricky. Mainly there are three options:
 
 Offer is an abstract reusable pattern which can be used for different discount
 mechanisms like Coupons, Buy N Get N Free, Free Samples, Concessions etc.
+
+## The Discovery Problem
+
+If there are many features shown all at once, there's high chance of
+experiencing cognitive friction since you have to find out the primary
+objective and how everything works.
+
+To solve this, the most commonly used strategy is user onboarding animations.
+Showing people what each and everything does and how it works. Or maybe even
+forcing you to go through the workflow for one time. Sometimes even wasting
+your time. But, if done correctly, it can be very effective.
+
+### User Onboarding
+
+Since this is meant to be a tool, we are going on a different direction by
+following the principle of **Progressive Disclosure**.
+
+1. At first it will be just a simple app. There's a button to add purchase
+   event which automatically sets up everything just ready to receive
+   purchases. Type item name > price > add. View running totals nothing more.
+2. On second purchase event, upon adding items, you type the item name as usual
+   but what's this? There's now a dropdown with the item names. Click on it and
+   every information including name, price, discount and image is auto-filled
+   for you. Only input quantity this time + other corrections if any. Nice
+3. On third purchase event, you auto-complete items as usual. Now what's this..
+   Since this is the third time an item is purchased, a price history graph
+   pops up on top of the keypad. Now you have a bird's eye view of the item's
+   pricing fluctuations and trends over time.
+4. You can go to settings and enable groups feature to enable purchase groups
+   only if you want.

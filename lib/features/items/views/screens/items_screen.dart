@@ -85,110 +85,120 @@ class ItemsScreen extends StatelessWidget {
   Widget _buildItemCard(BuildContext context, Item item, ItemsRepository repo) {
     final colorScheme = Theme.of(context).colorScheme;
 
-    return Card.filled(
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: () => Navigator.push(
-          context,
-          MaterialPageRoute(builder: (_) => ItemDetailScreen(item: item)),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Expanded(
-              child: Stack(
-                fit: StackFit.expand,
-                children: [
-                  _buildItemImage(item.imagePath, colorScheme),
-                  Positioned(
-                    top: 4,
-                    right: 4,
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: colorScheme.surface.withValues(alpha: 0.8),
-                        shape: BoxShape.circle,
-                      ),
-                      child: PopupMenuButton<String>(
-                        icon: const Icon(Icons.more_vert, size: 20),
-                        padding: EdgeInsets.zero,
-                        onSelected: (value) {
-                          if (value == 'edit') {
-                            _showEditDialog(context, item);
-                          } else if (value == 'delete') {
-                            _confirmDelete(context, repo, item);
-                          }
-                        },
-                        itemBuilder: (ctx) => [
-                          const PopupMenuItem(
-                            value: 'edit',
-                            child: Row(
-                              children: [
-                                Icon(Icons.edit, size: 20),
-                                SizedBox(width: 8),
-                                Text('Edit'),
-                              ],
-                            ),
-                          ),
-                          PopupMenuItem(
-                            value: 'delete',
-                            child: Row(
-                              children: [
-                                Icon(Icons.delete, size: 20, color: colorScheme.error),
-                                const SizedBox(width: 8),
-                                Text('Delete', style: TextStyle(color: colorScheme.error)),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
+    return FutureBuilder<int>(
+      future: repo.countPurchasesForItem(item.id),
+      builder: (context, snap) {
+        final purchaseCount = snap.data;
+        final hasNoPurchases = purchaseCount == 0;
+
+        return Card.filled(
+          clipBehavior: Clip.antiAlias,
+          child: InkWell(
+            onTap: hasNoPurchases
+                ? null // Disable tap when no purchases
+                : () => Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => ItemDetailScreen(item: item)),
                   ),
-                ],
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(12.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    item.name,
-                    style: Theme.of(
-                      context,
-                    ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Expanded(
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      _buildItemImage(item.imagePath, colorScheme, hasNoPurchases: hasNoPurchases),
+                      Positioned(
+                        top: 4,
+                        right: 4,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: colorScheme.surface,
+                            shape: BoxShape.circle,
+                          ),
+                          child: PopupMenuButton<String>(
+                            icon: const Icon(Icons.more_vert, size: 20),
+                            padding: EdgeInsets.zero,
+                            onSelected: (value) {
+                              if (value == 'edit') {
+                                _showEditDialog(context, item);
+                              } else if (value == 'delete') {
+                                _confirmDelete(context, repo, item);
+                              }
+                            },
+                            itemBuilder: (ctx) => [
+                              const PopupMenuItem(
+                                value: 'edit',
+                                child: Row(
+                                  children: [
+                                    Icon(Icons.edit, size: 20),
+                                    SizedBox(width: 8),
+                                    Text('Edit'),
+                                  ],
+                                ),
+                              ),
+                              PopupMenuItem(
+                                value: 'delete',
+                                child: Row(
+                                  children: [
+                                    Icon(Icons.delete, size: 20, color: colorScheme.error),
+                                    const SizedBox(width: 8),
+                                    Text('Delete', style: TextStyle(color: colorScheme.error)),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 4),
-                  FutureBuilder<int>(
-                    future: repo.countPurchasesForItem(item.id),
-                    builder: (ctx, snap) {
-                      final count = snap.data ?? 0;
-                      return Text(
-                        'Bought $count time${count == 1 ? '' : 's'}',
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(12.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        item.name,
                         style: Theme.of(
                           context,
-                        ).textTheme.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant),
-                      );
-                    },
+                        ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Bought $purchaseCount time${purchaseCount == 1 ? '' : 's'}',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: hasNoPurchases ? colorScheme.error : colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 
-  Widget _buildItemImage(String? imagePath, ColorScheme colorScheme) {
+  Widget _buildItemImage(
+    String? imagePath,
+    ColorScheme colorScheme, {
+    bool hasNoPurchases = false,
+  }) {
     return ItemImageView(
       imagePath: imagePath,
       width: double.infinity,
       height: double.infinity,
       borderRadius: BorderRadius.zero,
-      placeholderIcon: Icons.inventory_2_rounded,
+      placeholderIcon: hasNoPurchases ? Icons.broken_image : Icons.inventory_2_rounded,
       placeholderIconSize: 48,
+      placeholderIconColor: hasNoPurchases ? colorScheme.onError : null,
+      placeholderIconBackgroundColor: hasNoPurchases ? colorScheme.error : null,
     );
   }
 

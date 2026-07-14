@@ -15,6 +15,8 @@ class ItemImageView extends StatelessWidget {
   final BorderRadius? borderRadius;
   final String? heroTag;
   final bool enableTapToView;
+  final Color? placeholderIconColor;
+  final Color? placeholderIconBackgroundColor;
 
   const ItemImageView({
     super.key,
@@ -27,11 +29,17 @@ class ItemImageView extends StatelessWidget {
     this.borderRadius,
     this.heroTag,
     this.enableTapToView = false,
+    this.placeholderIconColor,
+    this.placeholderIconBackgroundColor,
   });
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+
+    final color = placeholderIconColor ?? colorScheme.onSurfaceVariant;
+    final backgroundColor = placeholderIconBackgroundColor ?? colorScheme.surfaceContainerHighest;
+
     final w = width ?? size;
     final h = height ?? size;
     final br = borderRadius ?? BorderRadius.circular(8);
@@ -45,7 +53,7 @@ class ItemImageView extends StatelessWidget {
     Widget imageWidget = Container(
       width: w,
       height: h,
-      decoration: BoxDecoration(color: colorScheme.surfaceContainerHighest, borderRadius: br),
+      decoration: BoxDecoration(color: backgroundColor, borderRadius: br),
       child: hasImage
           ? ClipRRect(
               borderRadius: br,
@@ -54,11 +62,10 @@ class ItemImageView extends StatelessWidget {
                 width: w,
                 height: h,
                 fit: BoxFit.cover,
-                errorBuilder: (_, _, _) =>
-                    Icon(Icons.image_not_supported, color: colorScheme.onSurfaceVariant),
+                errorBuilder: (_, _, _) => Icon(Icons.image_not_supported, color: color),
               ),
             )
-          : Icon(placeholderIcon, color: colorScheme.onSurfaceVariant, size: pSize),
+          : Icon(placeholderIcon, color: color, size: pSize),
     );
 
     if (hasImage && heroTag != null) {
