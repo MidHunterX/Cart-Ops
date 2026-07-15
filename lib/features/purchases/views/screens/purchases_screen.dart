@@ -63,7 +63,7 @@ class PurchasesScreen extends StatelessWidget {
           ? FloatingActionButtonLocation.startFloat
           : FloatingActionButtonLocation.centerFloat,
       body: CustomScrollView(
-        slivers: [PurchasesList(stream: repo.watchPurchasesInGroup(group.id), group: group)],
+        slivers: [PurchasesList(stream: repo.watchPurchases(group.id), group: group)],
       ),
     );
   }

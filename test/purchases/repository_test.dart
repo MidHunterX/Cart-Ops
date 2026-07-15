@@ -38,10 +38,10 @@ void main() {
       final purchase2 = await purchasesRepository.createPurchase(groupId1);
       await purchasesRepository.updatePurchase(purchase2.id, 'Updated Purchase', DateTime.now());
       await purchasesRepository.createPurchase(groupId2);
-      final group1Purchases = await purchasesRepository.watchPurchasesInGroup(groupId1).first;
+      final group1Purchases = await purchasesRepository.watchPurchases(groupId1).first;
       expect(group1Purchases.length, 2);
       expect(group1Purchases.any((p) => p.name == 'Updated Purchase'), isTrue);
-      final group2Purchases = await purchasesRepository.watchPurchasesInGroup(groupId2).first;
+      final group2Purchases = await purchasesRepository.watchPurchases(groupId2).first;
       expect(group2Purchases.length, 1);
     });
 
@@ -50,7 +50,7 @@ void main() {
       await purchasesRepository.createPurchase(groupId);
       await purchasesRepository.createPurchase(null);
       await purchasesRepository.createPurchase(null);
-      final generalPurchases = await purchasesRepository.watchGeneralPurchases().first;
+      final generalPurchases = await purchasesRepository.watchPurchases().first;
       expect(generalPurchases.length, 2);
       expect(generalPurchases.every((p) => p.groupId == null), isTrue);
     });
@@ -75,10 +75,10 @@ void main() {
 
     test('deletePurchase deletes the purchase record', () async {
       final purchase = await purchasesRepository.createPurchase(null);
-      final generalPurchasesBefore = await purchasesRepository.watchGeneralPurchases().first;
+      final generalPurchasesBefore = await purchasesRepository.watchPurchases().first;
       expect(generalPurchasesBefore.any((p) => p.id == purchase.id), isTrue);
       await purchasesRepository.deletePurchase(purchase.id);
-      final generalPurchasesAfter = await purchasesRepository.watchGeneralPurchases().first;
+      final generalPurchasesAfter = await purchasesRepository.watchPurchases().first;
       expect(generalPurchasesAfter.any((p) => p.id == purchase.id), isFalse);
     });
   });

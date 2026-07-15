@@ -7,10 +7,7 @@ class PurchasesRepository {
 
   PurchasesRepository(this._purchasesDao);
 
-  Stream<List<Purchase>> watchPurchasesInGroup(int groupId) =>
-      _purchasesDao.watchPurchasesInGroup(groupId);
-
-  Stream<List<Purchase>> watchGeneralPurchases() => _purchasesDao.watchPurchasesWithoutGroup();
+  Stream<List<Purchase>> watchPurchases([int? groupId]) => _purchasesDao.watchPurchases(groupId);
 
   Stream<Purchase> watchPurchaseById(int id) => _purchasesDao.watchPurchaseById(id);
 

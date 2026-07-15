@@ -8,16 +8,15 @@ part 'purchases_dao.g.dart';
 class PurchasesDao extends DatabaseAccessor<AppDatabase> with _$PurchasesDaoMixin {
   PurchasesDao(super.db);
 
-  Stream<List<Purchase>> watchPurchasesInGroup(int groupId) {
+  Stream<List<Purchase>> watchPurchases([int? groupId]) {
+    if (groupId == null) {
+      return (select(purchases)
+            ..where((t) => t.groupId.isNull())
+            ..orderBy([(t) => OrderingTerm.desc(t.purchaseDate)]))
+          .watch();
+    }
     return (select(purchases)
           ..where((t) => t.groupId.equals(groupId))
-          ..orderBy([(t) => OrderingTerm.desc(t.purchaseDate)]))
-        .watch();
-  }
-
-  Stream<List<Purchase>> watchPurchasesWithoutGroup() {
-    return (select(purchases)
-          ..where((t) => t.groupId.isNull())
           ..orderBy([(t) => OrderingTerm.desc(t.purchaseDate)]))
         .watch();
   }

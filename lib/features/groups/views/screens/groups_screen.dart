@@ -147,7 +147,7 @@ class _GroupsScreenState extends State<GroupsScreen> {
               ),
             ),
 
-          PurchasesList(stream: purchasesRepo.watchGeneralPurchases(), group: null),
+          PurchasesList(stream: purchasesRepo.watchPurchases(), group: null),
         ],
       ),
     );
