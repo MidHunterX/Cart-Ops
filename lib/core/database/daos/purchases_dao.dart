@@ -25,6 +25,18 @@ class PurchasesDao extends DatabaseAccessor<AppDatabase> with _$PurchasesDaoMixi
     return (select(purchases)..where((t) => t.id.equals(id))).watchSingle();
   }
 
+  Stream<int> watchPurchasesCount([int? groupId, bool? all]) {
+    var query = select(purchases);
+    if (all != true) {
+      if (groupId != null) {
+        query = query..where((t) => t.groupId.equals(groupId));
+      } else {
+        query = query..where((t) => t.groupId.isNull());
+      }
+    }
+    return query.watch().map((rows) => rows.length);
+  }
+
   Future<int> insertPurchase(PurchasesCompanion purchase) {
     return into(purchases).insert(purchase);
   }
@@ -32,6 +44,18 @@ class PurchasesDao extends DatabaseAccessor<AppDatabase> with _$PurchasesDaoMixi
   Future<Purchase> getPurchaseById(int id) {
     return (select(purchases)..where((t) => t.id.equals(id))).getSingle();
   }
+
+  /*Future<int> getPurchasesCount([int? groupId, bool? all]) {
+    var query = select(purchases);
+    if (all != true) {
+      if (groupId != null) {
+        query.where((t) => t.groupId.equals(groupId));
+      } else {
+        query.where((t) => t.groupId.isNull());
+      }
+    }
+    return query.get().then((rows) => rows.length);
+  }*/
 
   Future<void> updatePurchase(PurchasesCompanion entry) {
     return (update(purchases)..where((t) => t.id.equals(entry.id.value))).write(entry);

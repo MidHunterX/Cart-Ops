@@ -11,6 +11,12 @@ class PurchasesRepository {
 
   Stream<Purchase> watchPurchaseById(int id) => _purchasesDao.watchPurchaseById(id);
 
+  Stream<int> watchPurchasesCount([int? groupId, bool? all]) => all == true
+      ? _purchasesDao.watchPurchasesCount(groupId, true)
+      : groupId == null
+      ? _purchasesDao.watchPurchasesCount(null)
+      : _purchasesDao.watchPurchasesCount(groupId);
+
   Future<Purchase> createPurchase(int? groupId) async {
     final now = DateTime.now();
     final defaultName = 'Purchase';
@@ -19,6 +25,12 @@ class PurchasesRepository {
     );
     return _purchasesDao.getPurchaseById(id);
   }
+
+  /*Future<int> getPurchasesCount([int? groupId, bool? all]) => all == true
+      ? _purchasesDao.getPurchasesCount(groupId, true)
+      : groupId == null
+      ? _purchasesDao.getPurchasesCount(null)
+      : _purchasesDao.getPurchasesCount(groupId);*/
 
   Future<void> updatePurchase(int id, String name, DateTime date) {
     return _purchasesDao.updatePurchase(

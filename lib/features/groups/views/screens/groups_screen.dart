@@ -26,12 +26,15 @@ class GroupsScreen extends StatefulWidget {
 class _GroupsScreenState extends State<GroupsScreen> {
   List<Group> _groups = [];
   StreamSubscription? _groupsSub;
+  StreamSubscription? _ungroupedPurchasesCountSub;
   bool _isLoadingGroups = true;
+  int _ungroupedPurchasesCount = 0;
 
   @override
   void initState() {
     super.initState();
     final groupsRepo = context.read<GroupsRepository>();
+    final purchasesRepo = context.read<PurchasesRepository>();
 
     _groupsSub = groupsRepo.watchGroups().listen((newGroups) {
       if (!mounted) return;
@@ -40,11 +43,19 @@ class _GroupsScreenState extends State<GroupsScreen> {
         _isLoadingGroups = false;
       });
     });
+
+    _ungroupedPurchasesCountSub = purchasesRepo.watchPurchasesCount().listen((count) {
+      if (!mounted) return;
+      setState(() {
+        _ungroupedPurchasesCount = count;
+      });
+    });
   }
 
   @override
   void dispose() {
     _groupsSub?.cancel();
+    _ungroupedPurchasesCountSub?.cancel();
     super.dispose();
   }
 
@@ -54,7 +65,15 @@ class _GroupsScreenState extends State<GroupsScreen> {
     final settings = context.watch<SettingsProvider>();
     final purchasesRepo = context.read<PurchasesRepository>();
 
-    final bool isGroupFeatureEnabled = settings.isGroupEnabled || _groups.isNotEmpty;
+    final bool hasPurchases = _ungroupedPurchasesCount > 0;
+    final bool hasGroups = _groups.isNotEmpty;
+    // If groups enabled or has groups, show groups
+    // If no purchases and groups enabled, show groups
+    final bool showGroups = (hasGroups || settings.isGroupEnabled) || (!hasPurchases && hasGroups);
+    // If purchases and groups disabled, show purchases
+    final bool showPurchases = hasPurchases || (!settings.isGroupEnabled && !hasGroups);
+    // If groups enabled and purchases enabled, show titles
+    final bool showTitles = showGroups && showPurchases;
 
     const double groupTileHeight = 150;
 
@@ -99,7 +118,7 @@ class _GroupsScreenState extends State<GroupsScreen> {
           : FloatingActionButtonLocation.centerFloat,
       body: CustomScrollView(
         slivers: [
-          if (isGroupFeatureEnabled)
+          if (showTitles)
             SliverPadding(
               padding: const EdgeInsets.fromLTRB(16, 24, 16, 16),
               sliver: SliverToBoxAdapter(
@@ -107,7 +126,7 @@ class _GroupsScreenState extends State<GroupsScreen> {
               ),
             ),
 
-          if (isGroupFeatureEnabled)
+          if (showGroups)
             SliverToBoxAdapter(
               child: _isLoadingGroups
                   ? const SizedBox(
@@ -139,7 +158,7 @@ class _GroupsScreenState extends State<GroupsScreen> {
 
           SliverPadding(padding: const EdgeInsets.only(top: 18)),
 
-          if (isGroupFeatureEnabled)
+          if (showTitles)
             SliverPadding(
               padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
               sliver: SliverToBoxAdapter(
@@ -147,7 +166,7 @@ class _GroupsScreenState extends State<GroupsScreen> {
               ),
             ),
 
-          PurchasesList(stream: purchasesRepo.watchPurchases(), group: null),
+          if (showPurchases) PurchasesList(stream: purchasesRepo.watchPurchases(), group: null),
         ],
       ),
     );
