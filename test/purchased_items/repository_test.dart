@@ -504,5 +504,114 @@ void main() {
       // Calculation: ((0.0 - 2.0) * 0.0) = 0.0
       expect(updatedPurchase.totalPrice, 0.0);
     });
+
+    test('updatePurchasedItem creates Item under the correct Group from Purchase', () async {
+      // Setup: Create a Group and a Purchase associated with it
+      final groupId = await groupsRepository.addGroup('Pharmacy');
+      final purchase = await purchasesRepository.createPurchase(groupId);
+
+      final initialId = await purchasedItemsRepository.addPurchasedItem(
+          name: 'Aspirin',
+          price: null,
+          qty: null,
+          discount: null,
+          purchaseId: purchase.id,
+          group: null,
+          isWeight: false,
+      );
+
+      // Action: Update the item with full details (name, price, qty)
+      // This should trigger the creation of the master Item record.
+      await purchasedItemsRepository.updatePurchasedItem(
+        id: initialId,
+        name: 'Aspirin Gold',
+        price: 5.99,
+        qty: 1.0,
+        discount: 0.0,
+        isWeight: false,
+      );
+
+      // Verification: Check the PurchasedItem
+      final purchasedItems = await purchasedItemsRepository.watchPurchasedItems(purchase.id).first;
+      final updatedPI = purchasedItems.firstWhere((it) => it.purchasedItem.id == initialId);
+
+      expect(
+        updatedPI.purchasedItem.itemId,
+        isNotNull,
+        reason: 'A master Item should have been created',
+      );
+
+      // Verification: Check the newly created Item in group
+      final masterItem = await itemsRepository.findItem(updatedPI.purchasedItem.itemId!, groupId);
+
+      expect(masterItem, isNotNull);
+      expect(masterItem!.name, 'Aspirin Gold');
+      expect(
+        masterItem.groupId,
+        equals(groupId),
+        reason: 'The new Item must be associated with the Pharmacy group',
+      );
+    });
+
+    test('updatePurchasedItem creates orphan Item when Purchase has no group', () async {
+      // Setup: Create a Purchase NOT associated with any group
+      final purchase = await purchasesRepository.createPurchase(null);
+
+      final initialId = await database.purchasedItemsDao.insertPurchasedItem(
+        PurchasedItemsCompanion.insert(
+          name: const Value('Generic Soda'),
+          purchaseId: purchase.id,
+          isWeight: const Value(false),
+        ),
+      );
+
+      // Action: Update to trigger Item creation
+      await purchasedItemsRepository.updatePurchasedItem(
+        id: initialId,
+        name: 'Generic Soda',
+        price: 1.50,
+        qty: 1.0,
+        discount: 0.0,
+        isWeight: false,
+      );
+
+      // Verification
+      final purchasedItems = await purchasedItemsRepository.watchPurchasedItems(purchase.id).first;
+      final itemId = purchasedItems.first.purchasedItem.itemId;
+
+      final masterItem = await itemsRepository.findItem(itemId!, null);
+      expect(
+        masterItem!.groupId,
+        isNull,
+        reason: 'The Item should be an orphan because the Purchase was not grouped',
+      );
+    });
+
+    test('updatePurchasedItem recalculates purchase total after update', () async {
+      final purchase = await purchasesRepository.createPurchase(null);
+
+      final initialId = await database.purchasedItemsDao.insertPurchasedItem(
+        PurchasedItemsCompanion.insert(
+          name: const Value('Cheap Item'),
+          price: const Value(10.0),
+          quantity: const Value(1.0),
+          purchaseId: purchase.id,
+          isWeight: const Value(false),
+        ),
+      );
+
+      await database.purchasesDao.recalculatePurchaseTotal(purchase.id);
+
+      await purchasedItemsRepository.updatePurchasedItem(
+        id: initialId,
+        price: 20.0,
+        qty: 2.0,
+        discount: 5.0, // (20 - 5) * 2 = 30
+        isWeight: false,
+      );
+
+      final updatedPurchase = await purchasesRepository.watchPurchaseById(purchase.id).first;
+      expect(updatedPurchase.totalPrice, 30.0);
+    });
   });
 }
