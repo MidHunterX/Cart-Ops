@@ -178,12 +178,20 @@ class PurchasedItemFormState extends State<PurchasedItemForm> {
         _qtyStr = '';
         _qtyController.text = '';
         _activeField = ActiveField.quantity;
-        _qtyFocusNode.requestFocus();
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) {
+            _qtyFocusNode.requestFocus();
+          }
+        });
       } else {
         _qtyStr = '1';
         _qtyController.text = '1';
         _activeField = ActiveField.price;
-        _priceFocusNode.requestFocus();
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) {
+            _priceFocusNode.requestFocus();
+          }
+        });
       }
     });
   }
