@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:shopping_assist/core/utils/image_picker_util.dart';
 import 'package:shopping_assist/features/items/repositories/items_repository.dart';
-import 'package:shopping_assist/core/widgets/item_image_picker.dart';
+import 'package:shopping_assist/core/widgets/app_image_selector.dart';
 
 class AddItemDialog extends StatefulWidget {
   final int? groupId;
@@ -14,7 +16,7 @@ class AddItemDialog extends StatefulWidget {
 
 class _AddItemDialogState extends State<AddItemDialog> {
   final _controller = TextEditingController();
-  String? _imagePath;
+  XFile? _pendingImage;
 
   @override
   void dispose() {
@@ -22,15 +24,22 @@ class _AddItemDialogState extends State<AddItemDialog> {
     super.dispose();
   }
 
-  void _submit() {
+  void _submit() async {
     final name = _controller.text.trim();
     if (name.isNotEmpty) {
-      context.read<ItemsRepository>().insertItem(
-        name: name,
-        groupId: widget.groupId,
-        imagePath: _imagePath,
-      );
-      Navigator.pop(context);
+      String? finalPath;
+      if (_pendingImage != null) {
+        finalPath = await ImagePickerUtil.saveImage(_pendingImage!.path);
+      }
+
+      if (mounted) {
+        context.read<ItemsRepository>().insertItem(
+          name: name,
+          groupId: widget.groupId,
+          imagePath: finalPath,
+        );
+        Navigator.pop(context);
+      }
     }
   }
 
@@ -50,9 +59,10 @@ class _AddItemDialogState extends State<AddItemDialog> {
               onSubmitted: (_) => _submit(),
             ),
             const SizedBox(height: 16),
-            ItemImagePicker(
-              imagePath: _imagePath,
-              onChanged: (path) => setState(() => _imagePath = path),
+            AppImageSelector(
+              pendingImage: _pendingImage,
+              onImagePicked: (file) => setState(() => _pendingImage = file),
+              onImageRemoved: () => setState(() => _pendingImage = null),
             ),
           ],
         ),

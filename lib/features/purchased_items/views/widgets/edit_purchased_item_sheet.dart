@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:drift/drift.dart' as drift;
 import 'package:shopping_assist/core/database/database.dart';
+import 'package:shopping_assist/core/utils/image_picker_util.dart';
 import 'package:shopping_assist/core/utils/number_formatter.dart';
 import 'package:shopping_assist/features/items/repositories/items_repository.dart';
 import 'package:shopping_assist/features/purchased_items/repositories/purchased_items_repository.dart';
@@ -60,7 +62,9 @@ class _EditPurchasedItemSheetState extends State<EditPurchasedItemSheet> {
     } catch (e) {
       if (mounted) {
         setState(() => _isLoading = false);
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error loading items: $e')));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error loading items: $e')));
       }
     }
   }
@@ -117,21 +121,34 @@ class _EditPurchasedItemSheetState extends State<EditPurchasedItemSheet> {
     double? qty,
     double discount,
     bool isWeight,
-    String? imagePath,
-    bool imageChanged,
+    XFile? pendingImage,
+    bool imageRemoved,
   ) async {
     try {
-      await context.read<PurchasedItemsRepository>().updatePurchasedItem(
-        id: widget.purchasedItem.id,
-        itemId: _itemId,
-        name: _name,
-        price: price,
-        qty: qty,
-        discount: discount,
-        isWeight: isWeight,
-        groupId: widget.item.groupId,
-        imagePath: imageChanged ? drift.Value(imagePath) : const drift.Value.absent(),
-      );
+      String? finalImagePath = widget.item.imagePath;
+      bool imageChanged = false;
+
+      if (pendingImage != null) {
+        finalImagePath = await ImagePickerUtil.saveImage(pendingImage.path);
+        imageChanged = true;
+      } else if (imageRemoved) {
+        finalImagePath = null;
+        imageChanged = true;
+      }
+
+      if (mounted) {
+        await context.read<PurchasedItemsRepository>().updatePurchasedItem(
+          id: widget.purchasedItem.id,
+          itemId: _itemId,
+          name: _name,
+          price: price,
+          qty: qty,
+          discount: discount,
+          isWeight: isWeight,
+          groupId: widget.item.groupId,
+          imagePath: imageChanged ? drift.Value(finalImagePath) : const drift.Value.absent(),
+        );
+      }
       if (mounted) Navigator.pop(context);
     } catch (e) {
       if (mounted) {
@@ -158,7 +175,6 @@ class _EditPurchasedItemSheetState extends State<EditPurchasedItemSheet> {
       openDiscountDialog: widget.openDiscountDialog,
       isLoading: _isLoading,
       onNameTap: _showNameDialog,
-      onImageChanged: _onImageChanged,
       onSubmit: _submit,
     );
   }

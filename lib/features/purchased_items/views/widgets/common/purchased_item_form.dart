@@ -3,11 +3,11 @@ import 'package:provider/provider.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:shopping_assist/core/database/database.dart';
 import 'package:shopping_assist/core/utils/graph_utils.dart';
-import 'package:shopping_assist/core/utils/image_picker_util.dart';
 import 'package:shopping_assist/features/items/repositories/items_repository.dart';
 import 'package:shopping_assist/features/items/views/widgets/item_price_history_chart.dart';
 import 'package:shopping_assist/features/purchased_items/utils/keypad_logic.dart';
 import 'package:shopping_assist/features/settings/providers/settings_provider.dart';
+import 'package:shopping_assist/core/widgets/app_image_selector.dart'; // IMPORTANT
 import '../add_item_components/input_field_box.dart';
 import '../add_item_components/add_item_keypad.dart';
 import '../add_item_components/item_dialogs.dart';
@@ -28,14 +28,13 @@ class PurchasedItemForm extends StatefulWidget {
   final bool openDiscountDialog;
 
   final VoidCallback onNameTap;
-  final void Function(String? newImagePath)? onImageChanged;
   final void Function(
     double? price,
     double? qty,
     double discount,
     bool isWeight,
-    String? imagePath,
-    bool imageChanged,
+    XFile? pendingImage,
+    bool imageRemoved,
   )
   onSubmit;
 
@@ -53,7 +52,6 @@ class PurchasedItemForm extends StatefulWidget {
     this.isLoading = false,
     this.openDiscountDialog = false,
     required this.onNameTap,
-    this.onImageChanged,
     required this.onSubmit,
   });
 
@@ -72,8 +70,10 @@ class PurchasedItemFormState extends State<PurchasedItemForm> {
   late TextEditingController _qtyController;
   late FocusNode _priceFocusNode;
   late FocusNode _qtyFocusNode;
+
   String? _imagePath;
-  bool _imageChanged = false;
+  XFile? _pendingImage;
+  bool _imageRemoved = false;
 
   Future<List<PurchasedItemWithPurchase>>? _historyFuture;
 
@@ -164,11 +164,11 @@ class PurchasedItemFormState extends State<PurchasedItemForm> {
     });
   }
 
-  /// Exposed method for parent widgets to update the image without marking it as "changed" internally
   void updateImage(String? path, {bool changed = false}) {
     setState(() {
       _imagePath = path;
-      _imageChanged = changed;
+      _pendingImage = null;
+      _imageRemoved = false;
     });
   }
 
@@ -187,28 +187,6 @@ class PurchasedItemFormState extends State<PurchasedItemForm> {
         _priceFocusNode.requestFocus();
       }
     });
-  }
-
-  void _handleImagePicker() async {
-    final action = await ImagePickerUtil.showImagePickerOptions(context, _imagePath != null);
-
-    if (action == ImagePickerAction.remove) {
-      setState(() {
-        _imagePath = null;
-        _imageChanged = true;
-      });
-      widget.onImageChanged?.call(null);
-    } else if (action == ImagePickerAction.gallery || action == ImagePickerAction.camera) {
-      final source = action == ImagePickerAction.gallery ? ImageSource.gallery : ImageSource.camera;
-      final path = await ImagePickerUtil.pickAndSaveImage(source);
-      if (path != null) {
-        setState(() {
-          _imagePath = path;
-          _imageChanged = true;
-        });
-        widget.onImageChanged?.call(path);
-      }
-    }
   }
 
   void _handleKeypadPress(String val) {
@@ -287,7 +265,7 @@ class PurchasedItemFormState extends State<PurchasedItemForm> {
       return;
     }
 
-    widget.onSubmit(pricePerUnit, qty, discount, _isWeight, _imagePath, _imageChanged);
+    widget.onSubmit(pricePerUnit, qty, discount, _isWeight, _pendingImage, _imageRemoved);
   }
 
   @override
@@ -323,27 +301,41 @@ class PurchasedItemFormState extends State<PurchasedItemForm> {
 
                 return Padding(
                   padding: const EdgeInsets.only(bottom: 16.0, left: 12, right: 12),
-                  child: ItemPriceHistoryChart(
-                    history: displayHistory ?? [],
-                    isMinimal: true, // Only show a minimal trendline
-                  ),
+                  child: ItemPriceHistoryChart(history: displayHistory ?? [], isMinimal: true),
                 );
               }
               return const SizedBox.shrink();
             },
           ),
 
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+          child: AppImageSelector(
+            imagePath: _imageRemoved ? null : _imagePath,
+            pendingImage: _pendingImage,
+            onImagePicked: (file) => setState(() {
+              _pendingImage = file;
+              _imageRemoved = false;
+            }),
+            onImageRemoved: () => setState(() {
+              _pendingImage = null;
+              _imageRemoved = true;
+            }),
+          ),
+        ),
+        const SizedBox(height: 16),
+
         _buildFieldsRow(settings.weightUnit, settings.currencySymbol),
         const SizedBox(height: 16),
         AddItemKeypad(
           isLoading: widget.isLoading,
           itemName: widget.itemName,
-          imagePath: _imagePath,
+          imagePath: null, // Bypassed logic inside AddItemKeypad since it's handled above
           discountStr: _discountStr,
           isTeleKeypad: settings.isTelephoneLayout,
           onKeyPressed: _handleKeypadPress,
           onNameTap: widget.onNameTap,
-          onImageTap: _handleImagePicker,
+          onImageTap: () {}, // No-op to avoid breaking interface
           onDiscountTap: _handleDiscountTap,
           onSubmit: _submit,
           onIncrement: _incrementQuantity,

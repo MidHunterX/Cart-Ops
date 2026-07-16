@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:drift/drift.dart' as drift;
 import 'package:shopping_assist/core/database/database.dart';
+import 'package:shopping_assist/core/utils/image_picker_util.dart';
 import 'package:shopping_assist/features/items/repositories/items_repository.dart';
 import 'package:shopping_assist/features/purchased_items/repositories/purchased_items_repository.dart';
 import 'package:shopping_assist/features/purchased_items/views/widgets/add_item_components/input_field_box.dart';
@@ -102,23 +104,36 @@ class _AddPurchasedItemSheetState extends State<AddPurchasedItemSheet> {
     double? qty,
     double discount,
     bool isWeight,
-    String? imagePath,
-    bool imageChanged,
+    XFile? pendingImage,
+    bool imageRemoved,
   ) async {
     final name = _name.trim();
 
     try {
-      await context.read<PurchasedItemsRepository>().addPurchasedItem(
-        itemId: _itemId,
-        name: name,
-        price: price,
-        qty: qty,
-        discount: discount,
-        isWeight: isWeight,
-        purchaseId: widget.purchase.id,
-        group: widget.group,
-        imagePath: imageChanged ? drift.Value(imagePath) : const drift.Value.absent(),
-      );
+      String? finalImagePath;
+      bool imageChanged = false;
+
+      if (pendingImage != null) {
+        finalImagePath = await ImagePickerUtil.saveImage(pendingImage.path);
+        imageChanged = true;
+      } else if (imageRemoved) {
+        finalImagePath = null;
+        imageChanged = true;
+      }
+
+      if (mounted) {
+        await context.read<PurchasedItemsRepository>().addPurchasedItem(
+          itemId: _itemId,
+          name: name,
+          price: price,
+          qty: qty,
+          discount: discount,
+          isWeight: isWeight,
+          purchaseId: widget.purchase.id,
+          group: widget.group,
+          imagePath: imageChanged ? drift.Value(finalImagePath) : const drift.Value.absent(),
+        );
+      }
       if (mounted) Navigator.pop(context);
     } catch (e) {
       if (mounted) {
