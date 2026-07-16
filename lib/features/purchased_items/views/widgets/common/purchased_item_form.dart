@@ -7,7 +7,6 @@ import 'package:shopping_assist/features/items/repositories/items_repository.dar
 import 'package:shopping_assist/features/items/views/widgets/item_price_history_chart.dart';
 import 'package:shopping_assist/features/purchased_items/utils/keypad_logic.dart';
 import 'package:shopping_assist/features/settings/providers/settings_provider.dart';
-import 'package:shopping_assist/core/widgets/app_image_selector.dart'; // IMPORTANT
 import '../add_item_components/input_field_box.dart';
 import '../add_item_components/add_item_keypad.dart';
 import '../add_item_components/item_dialogs.dart';
@@ -308,34 +307,25 @@ class PurchasedItemFormState extends State<PurchasedItemForm> {
             },
           ),
 
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8.0),
-          child: AppImageSelector(
-            imagePath: _imageRemoved ? null : _imagePath,
-            pendingImage: _pendingImage,
-            onImagePicked: (file) => setState(() {
-              _pendingImage = file;
-              _imageRemoved = false;
-            }),
-            onImageRemoved: () => setState(() {
-              _pendingImage = null;
-              _imageRemoved = true;
-            }),
-          ),
-        ),
-        const SizedBox(height: 16),
-
         _buildFieldsRow(settings.weightUnit, settings.currencySymbol),
         const SizedBox(height: 16),
         AddItemKeypad(
           isLoading: widget.isLoading,
           itemName: widget.itemName,
-          imagePath: null, // Bypassed logic inside AddItemKeypad since it's handled above
+          imagePath: _imageRemoved ? null : _imagePath,
+          pendingImage: _pendingImage,
+          onImagePicked: (file) => setState(() {
+            _pendingImage = file;
+            _imageRemoved = false;
+          }),
+          onImageRemoved: () => setState(() {
+            _pendingImage = null;
+            _imageRemoved = true;
+          }),
           discountStr: _discountStr,
           isTeleKeypad: settings.isTelephoneLayout,
           onKeyPressed: _handleKeypadPress,
           onNameTap: widget.onNameTap,
-          onImageTap: () {}, // No-op to avoid breaking interface
           onDiscountTap: _handleDiscountTap,
           onSubmit: _submit,
           onIncrement: _incrementQuantity,

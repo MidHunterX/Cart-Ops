@@ -1,15 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:shopping_assist/core/utils/image_picker_util.dart';
 import 'package:shopping_assist/core/widgets/item_image_view.dart';
 
-class AddItemKeypad extends StatelessWidget {
+class AddItemKeypad extends StatefulWidget {
   final bool isLoading;
   final String itemName;
   final String? imagePath;
+  final XFile? pendingImage;
+  final ValueChanged<XFile?> onImagePicked;
+  final VoidCallback onImageRemoved;
   final String discountStr;
   final bool isTeleKeypad;
   final Function(String) onKeyPressed;
   final VoidCallback onNameTap;
-  final VoidCallback onImageTap;
   final VoidCallback onDiscountTap;
   final VoidCallback onSubmit;
   final VoidCallback onIncrement;
@@ -20,16 +24,47 @@ class AddItemKeypad extends StatelessWidget {
     required this.isLoading,
     required this.itemName,
     required this.imagePath,
+    required this.pendingImage,
+    required this.onImagePicked,
+    required this.onImageRemoved,
     required this.discountStr,
     required this.isTeleKeypad,
     required this.onKeyPressed,
     required this.onNameTap,
-    required this.onImageTap,
     required this.onDiscountTap,
     required this.onSubmit,
     required this.onIncrement,
     required this.onDecrement,
   });
+
+  @override
+  State<AddItemKeypad> createState() => _AddItemKeypadState();
+}
+
+class _AddItemKeypadState extends State<AddItemKeypad> {
+  bool _showDeleteOverlay = false;
+
+  void _handlePick(ImageSource source) async {
+    final file = await ImagePickerUtil.pickImage(source);
+    if (file != null) {
+      if (mounted) setState(() => _showDeleteOverlay = false);
+      widget.onImagePicked(file);
+    }
+  }
+
+  void _handleImageTap() {
+    if (_showDeleteOverlay) {
+      setState(() => _showDeleteOverlay = false);
+      widget.onImageRemoved();
+    } else {
+      setState(() => _showDeleteOverlay = true);
+      Future.delayed(const Duration(seconds: 3), () {
+        if (mounted && _showDeleteOverlay) {
+          setState(() => _showDeleteOverlay = false);
+        }
+      });
+    }
+  }
 
   Widget _buildActionBtn({
     String? text,
@@ -88,7 +123,7 @@ class AddItemKeypad extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.all(4.0),
         child: OutlinedButton(
-          onPressed: () => onKeyPressed(text),
+          onPressed: () => widget.onKeyPressed(text),
           style: OutlinedButton.styleFrom(
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
             padding: EdgeInsets.zero,
@@ -106,11 +141,10 @@ class AddItemKeypad extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
 
-    bool hasDiscount = discountStr.isNotEmpty && discountStr != '0';
-    bool hasText = itemName.isNotEmpty;
-    bool hasImage = imagePath != null;
+    bool hasDiscount = widget.discountStr.isNotEmpty && widget.discountStr != '0';
+    bool hasText = widget.itemName.isNotEmpty;
+    bool hasImage = widget.imagePath != null || widget.pendingImage != null;
 
-    // SEMANTIC HIERARCHY DEFINITIONS
     Color mainActionBg = colorScheme.primary;
     Color mainActionFg = colorScheme.onPrimary;
     Color inputActiveBg = colorScheme.primaryContainer;
@@ -127,69 +161,127 @@ class AddItemKeypad extends StatelessWidget {
         Row(
           children: [
             _buildActionBtn(
-              text: isLoading ? 'Loading...' : (hasText ? itemName : 'Name'),
+              text: widget.isLoading ? 'Loading...' : (hasText ? widget.itemName : 'Name'),
               backgroundColor: hasText ? inputActiveBg : inputInactiveBg,
               foregroundColor: hasText ? inputActiveFg : inputInactiveFg,
-              onTap: isLoading ? () {} : onNameTap,
+              onTap: widget.isLoading ? () {} : widget.onNameTap,
             ),
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.all(4.0),
-                child: ElevatedButton(
-                  onPressed: onImageTap,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: hasImage ? inputActiveBg : inputInactiveBg,
-                    foregroundColor: hasImage ? inputActiveFg : inputInactiveFg,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                    padding: EdgeInsets.zero,
-                    elevation: 0,
-                  ),
-                  child: SizedBox(
-                    height: 56,
-                    child: hasImage
-                        ? ItemImageView(
-                            imagePath: imagePath,
-                            width: double.infinity,
-                            height: double.infinity,
-                            borderRadius: BorderRadius.circular(8),
-                          )
-                        : const Center(
-                            child: Text(
-                              'Image',
-                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
+                child: hasImage
+                    ? GestureDetector(
+                        onTap: _handleImageTap,
+                        child: Stack(
+                          alignment: Alignment.center,
+                          children: [
+                            ElevatedButton(
+                              onPressed: _handleImageTap,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: inputActiveBg,
+                                foregroundColor: inputActiveFg,
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                                padding: EdgeInsets.zero,
+                                elevation: 0,
+                              ),
+                              child: SizedBox(
+                                height: 56,
+                                width: double.infinity,
+                                child: ItemImageView(
+                                  imagePath: widget.pendingImage?.path ?? widget.imagePath,
+                                  width: double.infinity,
+                                  height: double.infinity,
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                              ),
+                            ),
+                            if (_showDeleteOverlay)
+                              Positioned.fill(
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    color: Colors.black54,
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: const Center(
+                                    child: Icon(Icons.delete_outline, color: Colors.white, size: 32),
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
+                      )
+                    : Row(
+                        children: [
+                          Expanded(
+                            flex: 1, // 1 ratio for Gallery
+                            child: ElevatedButton(
+                              onPressed: () => _handlePick(ImageSource.gallery),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: inputInactiveBg,
+                                foregroundColor: inputInactiveFg,
+                                shape: const RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.horizontal(left: Radius.circular(8)),
+                                ),
+                                padding: EdgeInsets.zero,
+                                elevation: 0,
+                                minimumSize: Size.zero,
+                              ),
+                              child: const SizedBox(
+                                height: 56,
+                                child: Center(child: Icon(Icons.photo_library, size: 20)),
+                              ),
                             ),
                           ),
-                  ),
-                ),
+                          const SizedBox(width: 1), // Tiny separator
+                          Expanded(
+                            flex: 2, // 2 ratio for Camera
+                            child: ElevatedButton(
+                              onPressed: () => _handlePick(ImageSource.camera),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: inputInactiveBg,
+                                foregroundColor: inputInactiveFg,
+                                shape: const RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.horizontal(right: Radius.circular(8)),
+                                ),
+                                padding: EdgeInsets.zero,
+                                elevation: 0,
+                                minimumSize: Size.zero,
+                              ),
+                              child: const SizedBox(
+                                height: 56,
+                                child: Center(child: Icon(Icons.photo_camera, size: 24)),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
               ),
             ),
             _buildActionBtn(
-              text: hasDiscount ? 'Disc: $discountStr' : 'Discount',
+              text: hasDiscount ? 'Disc: ${widget.discountStr}' : 'Discount',
               backgroundColor: hasDiscount ? inputActiveBg : inputInactiveBg,
               foregroundColor: hasDiscount ? inputActiveFg : inputInactiveFg,
-              onTap: onDiscountTap,
+              onTap: widget.onDiscountTap,
             ),
             _buildActionBtn(
               icon: Icons.keyboard_tab,
               backgroundColor: functionalBg,
               foregroundColor: functionalFg,
-              onTap: () => onKeyPressed('=>'),
+              onTap: () => widget.onKeyPressed('=>'),
             ),
           ],
         ),
         Row(
           children: [
-            _buildNumBtn(context, isTeleKeypad ? '1' : '7'),
-            _buildNumBtn(context, isTeleKeypad ? '2' : '8'),
-            _buildNumBtn(context, isTeleKeypad ? '3' : '9'),
+            _buildNumBtn(context, widget.isTeleKeypad ? '1' : '7'),
+            _buildNumBtn(context, widget.isTeleKeypad ? '2' : '8'),
+            _buildNumBtn(context, widget.isTeleKeypad ? '3' : '9'),
             _buildActionBtn(
               icon: Icons.backspace_outlined,
               backgroundColor: functionalBg,
               foregroundColor: functionalFg,
-              onTap: () => onKeyPressed('<='),
-              onLongPress: () => onKeyPressed('C'),
+              onTap: () => widget.onKeyPressed('<='),
+              onLongPress: () => widget.onKeyPressed('C'),
             ),
           ],
         ),
@@ -202,20 +294,20 @@ class AddItemKeypad extends StatelessWidget {
               text: 'C',
               backgroundColor: destructiveBg,
               foregroundColor: destructiveFg,
-              onTap: () => onKeyPressed('C'),
+              onTap: () => widget.onKeyPressed('C'),
             ),
           ],
         ),
         Row(
           children: [
-            _buildNumBtn(context, isTeleKeypad ? '7' : '1'),
-            _buildNumBtn(context, isTeleKeypad ? '8' : '2'),
-            _buildNumBtn(context, isTeleKeypad ? '9' : '3'),
+            _buildNumBtn(context, widget.isTeleKeypad ? '7' : '1'),
+            _buildNumBtn(context, widget.isTeleKeypad ? '8' : '2'),
+            _buildNumBtn(context, widget.isTeleKeypad ? '9' : '3'),
             _buildActionBtn(
               text: '—',
               backgroundColor: functionalBg,
               foregroundColor: functionalFg,
-              onTap: () => onKeyPressed('-'),
+              onTap: () => widget.onKeyPressed('-'),
             ),
           ],
         ),
@@ -228,7 +320,7 @@ class AddItemKeypad extends StatelessWidget {
               text: 'OK',
               backgroundColor: mainActionBg,
               foregroundColor: mainActionFg,
-              onTap: onSubmit,
+              onTap: widget.onSubmit,
             ),
           ],
         ),

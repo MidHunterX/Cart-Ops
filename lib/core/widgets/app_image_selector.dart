@@ -68,7 +68,7 @@ class _AppImageSelectorState extends State<AppImageSelector> {
                 width: double.infinity,
                 height: 120,
                 fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) => const SizedBox(
+                errorBuilder: (_, _, _) => const SizedBox(
                   height: 120,
                   child: Center(child: Icon(Icons.image_not_supported, size: 40)),
                 ),

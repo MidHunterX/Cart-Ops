@@ -110,12 +110,6 @@ class _EditPurchasedItemSheetState extends State<EditPurchasedItemSheet> {
     );
   }
 
-  void _onImageChanged(String? path) {
-    if (_itemId != null && _itemId != -1) {
-      context.read<ItemsRepository>().updateItemImage(_itemId!, path);
-    }
-  }
-
   Future<void> _submit(
     double? price,
     double? qty,
