@@ -66,8 +66,8 @@ class InputFieldBox extends StatelessWidget {
             focusedBorder: UnderlineInputBorder(
               borderSide: BorderSide(color: colorScheme.primary, width: 2),
             ),
-            filled: isActive,
-            fillColor: isActive ? colorScheme.primaryContainer : null,
+            filled: true,
+            fillColor: isActive ? colorScheme.primaryContainer : Colors.transparent,
             contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             prefixText: prefixText,
             suffixText: suffixText,
