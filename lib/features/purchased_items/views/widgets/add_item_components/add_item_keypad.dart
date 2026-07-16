@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:shopping_assist/core/utils/image_picker_util.dart';
+import 'package:shopping_assist/core/widgets/delete_loading_overlay.dart';
 import 'package:shopping_assist/core/widgets/item_image_view.dart';
 
 class AddItemKeypad extends StatefulWidget {
@@ -43,6 +44,7 @@ class AddItemKeypad extends StatefulWidget {
 
 class _AddItemKeypadState extends State<AddItemKeypad> {
   bool _showDeleteOverlay = false;
+  Key _overlayKey = UniqueKey();
 
   void _handlePick(ImageSource source) async {
     final file = await ImagePickerUtil.pickImage(source);
@@ -57,11 +59,9 @@ class _AddItemKeypadState extends State<AddItemKeypad> {
       setState(() => _showDeleteOverlay = false);
       widget.onImageRemoved();
     } else {
-      setState(() => _showDeleteOverlay = true);
-      Future.delayed(const Duration(seconds: 3), () {
-        if (mounted && _showDeleteOverlay) {
-          setState(() => _showDeleteOverlay = false);
-        }
+      setState(() {
+        _showDeleteOverlay = true;
+        _overlayKey = UniqueKey(); // Reset the animation
       });
     }
   }
@@ -180,7 +180,9 @@ class _AddItemKeypadState extends State<AddItemKeypad> {
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: inputActiveBg,
                                 foregroundColor: inputActiveFg,
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
                                 padding: EdgeInsets.zero,
                                 elevation: 0,
                               ),
@@ -197,14 +199,15 @@ class _AddItemKeypadState extends State<AddItemKeypad> {
                             ),
                             if (_showDeleteOverlay)
                               Positioned.fill(
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    color: Colors.black54,
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                  child: const Center(
-                                    child: Icon(Icons.delete_outline, color: Colors.white, size: 32),
-                                  ),
+                                child: DeleteLoadingOverlay(
+                                  key: _overlayKey,
+                                  duration: const Duration(seconds: 3),
+                                  onComplete: () {
+                                    if (mounted) {
+                                      setState(() => _showDeleteOverlay = false);
+                                    }
+                                  },
+                                  child: const SizedBox.shrink(),
                                 ),
                               ),
                           ],

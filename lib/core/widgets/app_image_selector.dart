@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:shopping_assist/core/utils/image_picker_util.dart';
+import 'package:shopping_assist/core/widgets/delete_loading_overlay.dart';
 
 class AppImageSelector extends StatefulWidget {
   final String? imagePath;
@@ -23,6 +24,7 @@ class AppImageSelector extends StatefulWidget {
 
 class _AppImageSelectorState extends State<AppImageSelector> {
   bool _showDeleteOverlay = false;
+  Key _overlayKey = UniqueKey();
 
   void _handlePick(ImageSource source) async {
     final file = await ImagePickerUtil.pickImage(source);
@@ -37,14 +39,31 @@ class _AppImageSelectorState extends State<AppImageSelector> {
       setState(() => _showDeleteOverlay = false);
       widget.onImageRemoved();
     } else {
-      setState(() => _showDeleteOverlay = true);
-      // Auto-hide the delete prompt after 3 seconds for cleaner UX
-      Future.delayed(const Duration(seconds: 3), () {
-        if (mounted && _showDeleteOverlay) {
-          setState(() => _showDeleteOverlay = false);
-        }
+      setState(() {
+        _showDeleteOverlay = true;
+        _overlayKey = UniqueKey(); // Reset the animation
       });
     }
+  }
+
+  Widget _buildImageWidget() {
+    final imageFile = widget.pendingImage != null
+        ? File(widget.pendingImage!.path)
+        : File(widget.imagePath!);
+
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(8),
+      child: Image.file(
+        imageFile,
+        width: double.infinity,
+        height: 120,
+        fit: BoxFit.cover,
+        errorBuilder: (_, _, _) => const SizedBox(
+          height: 120,
+          child: Center(child: Icon(Icons.image_not_supported, size: 40)),
+        ),
+      ),
+    );
   }
 
   @override
@@ -52,42 +71,20 @@ class _AppImageSelectorState extends State<AppImageSelector> {
     final hasImage = widget.imagePath != null || widget.pendingImage != null;
 
     if (hasImage) {
-      final imageFile = widget.pendingImage != null
-          ? File(widget.pendingImage!.path)
-          : File(widget.imagePath!);
-
       return GestureDetector(
         onTap: _handleImageTap,
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(8),
-              child: Image.file(
-                imageFile,
-                width: double.infinity,
-                height: 120,
-                fit: BoxFit.cover,
-                errorBuilder: (_, _, _) => const SizedBox(
-                  height: 120,
-                  child: Center(child: Icon(Icons.image_not_supported, size: 40)),
-                ),
-              ),
-            ),
-            if (_showDeleteOverlay)
-              Positioned.fill(
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Colors.black54,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: const Center(
-                    child: Icon(Icons.delete_outline, color: Colors.white, size: 40),
-                  ),
-                ),
-              ),
-          ],
-        ),
+        child: _showDeleteOverlay
+            ? DeleteLoadingOverlay(
+                key: _overlayKey,
+                duration: const Duration(seconds: 3),
+                onComplete: () {
+                  if (mounted) {
+                    setState(() => _showDeleteOverlay = false);
+                  }
+                },
+                child: _buildImageWidget(),
+              )
+            : _buildImageWidget(),
       );
     }
 
