@@ -18,6 +18,7 @@ class ItemDialogs {
         content: Autocomplete<Item>(
           initialValue: TextEditingValue(text: currentName),
           displayStringForOption: (Item option) => option.name,
+          optionsViewOpenDirection: OptionsViewOpenDirection.up,
           optionsBuilder: (TextEditingValue textEditingValue) {
             if (textEditingValue.text.isEmpty) {
               return const Iterable<Item>.empty();
