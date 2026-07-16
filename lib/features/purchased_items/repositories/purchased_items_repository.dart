@@ -21,7 +21,7 @@ class PurchasedItemsRepository {
     return groupId == null ? _itemsDao.getItemsWithoutGroup() : _itemsDao.getItemsInGroup(groupId);
   }
 
-  Future<void> addPurchasedItem({
+  Future<int> addPurchasedItem({
     int? itemId,
     required String name,
     required double? price,
@@ -53,7 +53,7 @@ class PurchasedItemsRepository {
       }
     }
 
-    await _purchasedItemsDao.insertPurchasedItem(
+    int newItemId = await _purchasedItemsDao.insertPurchasedItem(
       PurchasedItemsCompanion.insert(
         name: Value(name.trim().isEmpty ? null : name.trim()),
         imagePath: imagePath,
@@ -67,6 +67,8 @@ class PurchasedItemsRepository {
     );
 
     await _purchasesDao.recalculatePurchaseTotal(purchaseId);
+
+    return newItemId;
   }
 
   Future<void> updatePurchasedItem({
@@ -81,12 +83,20 @@ class PurchasedItemsRepository {
     Value<String?> imagePath = const Value.absent(),
   }) async {
     int? finalItemId = itemId;
+    int? finalGroupId = groupId;
 
-    bool isNewItemRequired = name != null && price != null && qty != null;
+    final existingPurchasedItem = await _purchasedItemsDao.getPurchasedItem(id);
+    if (existingPurchasedItem != null) {
+      final purchase = await _purchasesDao.getPurchaseById(existingPurchasedItem.purchaseId);
+      finalGroupId = purchase.groupId;
+    }
 
-    if (isNewItemRequired) {
+    bool isItemRequirementsMet =
+        name != null && name.trim().isNotEmpty && price != null && qty != null;
+
+    if (isItemRequirementsMet) {
       Item? targetItem;
-      if (itemId != null && itemId != -1) {
+      if (itemId != null) {
         targetItem = await _itemsDao.findItem(itemId, groupId);
       }
 
@@ -99,7 +109,11 @@ class PurchasedItemsRepository {
         final trimmedName = name.trim();
         if (trimmedName.isNotEmpty) {
           finalItemId = await _itemsDao.insertItem(
-            ItemsCompanion.insert(name: trimmedName, groupId: Value(groupId), imagePath: imagePath),
+            ItemsCompanion.insert(
+              name: trimmedName,
+              groupId: Value(finalGroupId),
+              imagePath: imagePath,
+            ),
           );
         }
       }
@@ -109,7 +123,7 @@ class PurchasedItemsRepository {
       PurchasedItemsCompanion(
         id: Value(id),
         name: name != null ? Value(name.trim().isEmpty ? null : name.trim()) : const Value.absent(),
-        itemId: isNewItemRequired ? Value(finalItemId) : const Value.absent(),
+        itemId: isItemRequirementsMet ? Value(finalItemId) : const Value.absent(),
         price: Value(price),
         quantity: Value(qty),
         discount: Value(discount),
@@ -118,9 +132,8 @@ class PurchasedItemsRepository {
       ),
     );
 
-    final updatedItem = await _purchasedItemsDao.getPurchasedItem(id);
-    if (updatedItem != null) {
-      await _purchasesDao.recalculatePurchaseTotal(updatedItem.purchaseId);
+    if (existingPurchasedItem != null) {
+      await _purchasesDao.recalculatePurchaseTotal(existingPurchasedItem.purchaseId);
     }
   }
 
