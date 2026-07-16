@@ -64,7 +64,7 @@ features.
 
 ## Re-Inventing a better wheel
 
-### Main Screen
+### 📱 Main Screen
 
 The main screen is divided into two sections:
 
@@ -82,7 +82,7 @@ separate item autocompletion and purchases list. With this you can track prices
 of items from one store to another. This is for those people who wants to
 organize their shopping.
 
-### Purchased Items List
+### 📃 Purchased Items List
 
 On adding items to a purchase, every single attribute is optional for spontaneity.
 
@@ -125,7 +125,7 @@ where it is exactly; catering to ASD like neuro-types. But the Dynamic List
 reduces the visual noise to the maximum so, sticking to self selected
 attributes only helps not breaking the pattern.
 
-### Settings
+### 🔧 Settings
 
 - **Theme Mode**: Light Mode | Dark Mode | System (Default)
   - Respect user's choice first for not breaking the cohesion.
@@ -156,22 +156,26 @@ People like CPAs/Accountants who use keyboards and calculators on a daily basis
 might find the unexpected Top-Down number pad jarring due to muscle memory. The
 same narrative goes to phone users as well.
 
-### Empty Screens
+### 📁 Empty Screens
 
 Especially when there are multiple screens, Navigating through fully empty
 screens can cause confusion. Which is why pages often have empty messages or
 placeholders. How you word and present the message can influence user's
 thoughts which in turn influences the behavior and feeling.
 
-- Purchase Screen: When purchase screen is empty, It must have a positive tone
+- Purchases Screen: When purchase screen is empty, It must have a positive tone
   about no purchase being made _yet_ (anticipation and slightly defensive about
   spending financial resources).
-- List Screen: When list is empty, do not judge users for having an empty
+- Item List Screen: When list is empty, do not judge users for having an empty
   cart/list. It leaves a bad taste. Instead showing "Your Cart is Ready! - Add
   items to ..." respects and acknowledges users decision to make the purchase
   event.
+- Groups Screen: Dynamically shows Purchases/Groups list based on intent. If
+  purchase is created first without groups enabled, purchase list is shown
+  in full screen. If group is created first, group takes precedence until a
+  purchase is created. If that happens, they split screen accordingly.
 
-### Discounts
+### 🛒 Discounts
 
 Aside from dedicated budget tracking software, this is the area where almost
 all of the implementation falters. Many apps don't bother even adding one.
@@ -187,6 +191,21 @@ where things get tricky. Mainly there are three options:
 Offer is an abstract reusable pattern which can be used for different discount
 mechanisms like Coupons, Buy N Get N Free, Free Samples, Concessions etc.
 
+#### Discount Entry UX Problem
+
+Almost everywhere there is a discount entry field, it would just be an input
+given for fixed price or percentage. The problem is in real world, prices would
+be like: `[~Listing Price~ Selling Price]` than fixed values most of the
+time. This makes users to do mental calculation to figure out the discount
+amount per unit weight, creating unnecessary cognitive load.
+
+The best way is to give a dedicated discount calculating utility as input:
+
+- Price: `[Listing Price] - [Discount] = [Selling Price] per unit`
+- Percentage: `[Listing Price] x [Percentage]% = [Selling Price] /unit`
+
+Where three input fields can be edited and calculated in real time.
+
 ## The Discovery Problem
 
 If there are many features shown all at once, there's high chance of
@@ -198,7 +217,7 @@ Showing people what each and everything does and how it works. Or maybe even
 forcing you to go through the workflow for one time. Sometimes even wasting
 your time. But, if done correctly, it can be very effective.
 
-### User Onboarding
+### 🚀 User Onboarding
 
 Since this is meant to be a tool, we are going on a different direction by
 following the principle of **Progressive Disclosure**.

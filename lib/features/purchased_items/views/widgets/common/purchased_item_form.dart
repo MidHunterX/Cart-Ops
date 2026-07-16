@@ -229,7 +229,7 @@ class PurchasedItemFormState extends State<PurchasedItemForm> {
   }
 
   void _handleDiscountTap() async {
-    final newDiscount = await ItemDialogs.showDiscountDialog(context, _discountStr);
+    final newDiscount = await ItemDialogs.showDiscountDialog(context, _discountStr, _priceStr);
     if (newDiscount != null && mounted) {
       setState(() => _discountStr = newDiscount.isEmpty ? '0' : newDiscount);
     }
