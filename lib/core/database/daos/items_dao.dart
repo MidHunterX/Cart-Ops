@@ -16,6 +16,10 @@ class ItemsDao extends DatabaseAccessor<AppDatabase> with _$ItemsDaoMixin {
     return (select(items)..where((t) => t.groupId.isNull())).watch();
   }
 
+  Future<Item?> getItemById(int id) {
+    return (select(items)..where((t) => t.id.equals(id))).getSingleOrNull();
+  }
+
   // For AutoComplete
   Future<List<Item>> getItemsInGroup(int groupId) {
     return (select(items)..where((t) => t.groupId.equals(groupId))).get();

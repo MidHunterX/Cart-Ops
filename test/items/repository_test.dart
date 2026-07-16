@@ -95,13 +95,6 @@ void main() {
       expect(oldFile.existsSync(), isFalse);
     });
 
-    test('updateItemImage updates the image path directly', () async {
-      final itemId = await itemsRepository.insertItem(name: 'Orange');
-      await itemsRepository.updateItemImage(itemId, 'orange.png');
-      final updatedItem = await itemsRepository.findItem(itemId, null);
-      expect(updatedItem?.imagePath, 'orange.png');
-    });
-
     test('deleteItem removes item from DB and deletes local file', () async {
       final file = File('${tempDir.path}/item.png')..createSync();
       final itemId = await itemsRepository.insertItem(name: 'Deleted Item', imagePath: file.path);

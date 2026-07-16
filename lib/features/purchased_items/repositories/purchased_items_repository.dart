@@ -42,6 +42,14 @@ class PurchasedItemsRepository {
     if (targetItem != null) {
       finalItemId = targetItem.id;
       if (imagePath.present) {
+        if (targetItem.imagePath != null && targetItem.imagePath != imagePath.value) {
+          try {
+            final oldFile = File(targetItem.imagePath!);
+            if (await oldFile.exists()) {
+              await oldFile.delete();
+            }
+          } catch (_) {}
+        }
         await _itemsDao.updateItemImage(finalItemId, imagePath.value);
       }
     } else {
@@ -103,6 +111,14 @@ class PurchasedItemsRepository {
       if (targetItem != null) {
         finalItemId = targetItem.id;
         if (imagePath.present) {
+          if (targetItem.imagePath != null && targetItem.imagePath != imagePath.value) {
+            try {
+              final oldFile = File(targetItem.imagePath!);
+              if (await oldFile.exists()) {
+                await oldFile.delete();
+              }
+            } catch (_) {}
+          }
           await _itemsDao.updateItemImage(finalItemId, imagePath.value);
         }
       } else {
@@ -116,6 +132,17 @@ class PurchasedItemsRepository {
             ),
           );
         }
+      }
+    }
+
+    if (imagePath.present && existingPurchasedItem != null) {
+      if (existingPurchasedItem.imagePath != null && existingPurchasedItem.imagePath != imagePath.value) {
+        try {
+          final oldFile = File(existingPurchasedItem.imagePath!);
+          if (await oldFile.exists()) {
+            await oldFile.delete();
+          }
+        } catch (_) {}
       }
     }
 

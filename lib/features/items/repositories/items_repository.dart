@@ -48,19 +48,19 @@ class ItemsRepository {
     String? name,
     Value<String?> imagePath = const Value.absent(),
   }) async {
-    final oldItem = await findItem(id, null);
-    final oldImagePath = oldItem?.imagePath;
-    if (oldImagePath != null) {
-      final oldFile = File(oldImagePath);
-      if (await oldFile.exists()) {
-        await oldFile.delete();
+    if (imagePath.present) {
+      final oldItem = await _itemsDao.getItemById(id);
+      final oldImagePath = oldItem?.imagePath;
+      if (oldImagePath != null && oldImagePath != imagePath.value) {
+        try {
+          final oldFile = File(oldImagePath);
+          if (await oldFile.exists()) {
+            await oldFile.delete();
+          }
+        } catch (_) {}
       }
     }
     await _itemsDao.updateItem(id, name: name, imagePath: imagePath);
-  }
-
-  Future<void> updateItemImage(int itemId, String? imagePath) {
-    return _itemsDao.updateItemImage(itemId, imagePath);
   }
 
   Future<PurchasedItem?> getLastPurchasedDetails(int itemId) {
@@ -72,7 +72,7 @@ class ItemsRepository {
   }
 
   Future<bool> deleteItem(int id) async {
-    final item = await findItem(id, null);
+    final item = await _itemsDao.getItemById(id);
     final deleted = await _itemsDao.deleteItem(id);
 
     if (!deleted) throw Exception('Failed to delete item with id: $id');
