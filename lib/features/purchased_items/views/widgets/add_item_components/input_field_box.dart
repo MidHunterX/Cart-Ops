@@ -3,23 +3,27 @@ import 'package:flutter/material.dart';
 enum ActiveField { quantity, price }
 
 class InputFieldBox extends StatelessWidget {
-  final String label;
+  final String? label;
   final String value;
   final bool isActive;
   final VoidCallback onTap;
   final TextEditingController? controller;
   final FocusNode? focusNode;
   final String? placeholder;
+  final String? prefixText;
+  final String? suffixText;
 
   const InputFieldBox({
     super.key,
-    required this.label,
     required this.value,
     required this.isActive,
     required this.onTap,
+    this.label,
     this.controller,
     this.focusNode,
     this.placeholder,
+    this.prefixText,
+    this.suffixText,
   });
 
   @override
@@ -36,7 +40,7 @@ class InputFieldBox extends StatelessWidget {
           focusNode: focusNode,
           readOnly: true,
           showCursor: true,
-          style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+          style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold, fontSize: 18),
           decoration: InputDecoration(
             labelText: label,
             hintText: placeholder,
@@ -47,27 +51,29 @@ class InputFieldBox extends StatelessWidget {
               color: colorScheme.onSurfaceVariant,
               fontStyle: FontStyle.italic,
             ),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
+            border: UnderlineInputBorder(
               borderSide: BorderSide(
                 color: isActive ? colorScheme.primary : colorScheme.outline,
                 width: isActive ? 2 : 1,
               ),
             ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
+            enabledBorder: UnderlineInputBorder(
               borderSide: BorderSide(
                 color: isActive ? colorScheme.primary : colorScheme.outline,
                 width: isActive ? 2 : 1,
               ),
             ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
+            focusedBorder: UnderlineInputBorder(
               borderSide: BorderSide(color: colorScheme.primary, width: 2),
             ),
             filled: isActive,
             fillColor: isActive ? colorScheme.primaryContainer : null,
             contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            prefixText: prefixText,
+            suffixText: suffixText,
+            prefixStyle: textTheme.bodySmall?.copyWith(fontSize: 16),
+            suffixStyle: textTheme.bodySmall?.copyWith(fontSize: 16),
+            // floatingLabelBehavior: FloatingLabelBehavior.always,
           ),
           onTap: onTap,
         ),

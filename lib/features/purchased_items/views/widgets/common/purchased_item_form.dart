@@ -281,7 +281,7 @@ class PurchasedItemFormState extends State<PurchasedItemForm> {
             onWeightChanged: _handleWeightToggle,
           ),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 8),
 
         // CHART INTEGRATION
         if (_historyFuture != null)
@@ -299,7 +299,7 @@ class PurchasedItemFormState extends State<PurchasedItemForm> {
                 final displayHistory = snapshot.data?.take(maxDataPoints).toList();
 
                 return Padding(
-                  padding: const EdgeInsets.only(bottom: 16.0, left: 12, right: 12),
+                  padding: const EdgeInsets.only(bottom: 8.0, left: 12, right: 12),
                   child: ItemPriceHistoryChart(history: displayHistory ?? [], isMinimal: true),
                 );
               }
@@ -308,7 +308,9 @@ class PurchasedItemFormState extends State<PurchasedItemForm> {
           ),
 
         _buildFieldsRow(settings.weightUnit, settings.currencySymbol),
+
         const SizedBox(height: 16),
+
         AddItemKeypad(
           isLoading: widget.isLoading,
           itemName: widget.itemName,
@@ -337,55 +339,56 @@ class PurchasedItemFormState extends State<PurchasedItemForm> {
   }
 
   Widget _buildFieldsRow(String weightUnit, String currencySymbol) {
-    return IntrinsicHeight(
-      child: Row(
-        children: [
-          Expanded(
-            flex: 5,
-            child: _isWeight
-                ? InputFieldBox(
-                    label: _isWeight ? 'Weight ($weightUnit)' : 'Quantity',
-                    placeholder: _isWeight ? 'e.g. 2.3$weightUnit' : 'e.g. 2',
-                    value: _qtyStr,
-                    isActive: _activeField == ActiveField.quantity,
-                    onTap: () {
-                      setState(() => _activeField = ActiveField.quantity);
-                      _qtyFocusNode.requestFocus();
-                    },
-                    controller: _qtyController,
-                    focusNode: _qtyFocusNode,
-                  )
-                : UnitQuantitySelector(
-                    controller: _qtyController,
-                    focusNode: _qtyFocusNode,
-                    isActive: _activeField == ActiveField.quantity,
-                    onTap: () {
-                      setState(() => _activeField = ActiveField.quantity);
-                      _qtyFocusNode.requestFocus();
-                    },
-                    onIncrement: _incrementQuantity,
-                    onDecrement: _decrementQuantity,
-                  ),
+    return Row(
+      children: [
+        Expanded(
+          flex: 5,
+          child: _isWeight
+              ? InputFieldBox(
+                  label: _isWeight ? 'Weight ($weightUnit)' : 'Quantity',
+                  suffixText: _isWeight ? weightUnit : null,
+                  // placeholder: _isWeight ? 'e.g. 2.3$weightUnit' : 'e.g. 2',
+                  value: _qtyStr,
+                  isActive: _activeField == ActiveField.quantity,
+                  onTap: () {
+                    setState(() => _activeField = ActiveField.quantity);
+                    _qtyFocusNode.requestFocus();
+                  },
+                  controller: _qtyController,
+                  focusNode: _qtyFocusNode,
+                )
+              : UnitQuantitySelector(
+                  controller: _qtyController,
+                  focusNode: _qtyFocusNode,
+                  isActive: _activeField == ActiveField.quantity,
+                  onTap: () {
+                    setState(() => _activeField = ActiveField.quantity);
+                    _qtyFocusNode.requestFocus();
+                  },
+                  onIncrement: _incrementQuantity,
+                  onDecrement: _decrementQuantity,
+                ),
+        ),
+        Expanded(
+          flex: 8,
+          child: InputFieldBox(
+            label: _isWeight
+                ? '$currencySymbol Price (per $weightUnit)'
+                : '$currencySymbol Price (per item)',
+            prefixText: '$currencySymbol  ',
+            suffixText: _isWeight ? '/$weightUnit' : '',
+            // placeholder: 'e.g. ${currencySymbol}200',
+            value: _priceStr,
+            isActive: _activeField == ActiveField.price,
+            onTap: () {
+              setState(() => _activeField = ActiveField.price);
+              _priceFocusNode.requestFocus();
+            },
+            controller: _priceController,
+            focusNode: _priceFocusNode,
           ),
-          Expanded(
-            flex: 10,
-            child: InputFieldBox(
-              label: _isWeight
-                  ? '$currencySymbol Price (per kg)'
-                  : '$currencySymbol Price (per item)',
-              placeholder: 'e.g. ${currencySymbol}200',
-              value: _priceStr,
-              isActive: _activeField == ActiveField.price,
-              onTap: () {
-                setState(() => _activeField = ActiveField.price);
-                _priceFocusNode.requestFocus();
-              },
-              controller: _priceController,
-              focusNode: _priceFocusNode,
-            ),
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
