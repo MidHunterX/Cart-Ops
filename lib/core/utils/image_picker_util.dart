@@ -11,9 +11,9 @@ class ImagePickerUtil {
     final picker = ImagePicker();
     final pickedFile = await picker.pickImage(
       source: source,
-      imageQuality: 20,
-      maxWidth: 512,
-      maxHeight: 512,
+      imageQuality: 60,
+      maxWidth: 1024,
+      maxHeight: 1024,
     );
 
     if (pickedFile != null) {
