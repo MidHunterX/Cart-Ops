@@ -156,6 +156,13 @@ People like CPAs/Accountants who use keyboards and calculators on a daily basis
 might find the unexpected Top-Down number pad jarring due to muscle memory. The
 same narrative goes to phone users as well.
 
+##### Keypad Haptics
+
+Keypad is where all of the most important work is being done in this workflow.
+Taking price, weight, discount inputs without some kind of feedback makes our
+mind actively try to spend more time in visual confirmation on input fields.
+Proper haptic feedback is essential for a much smoother input-feedback loop.
+
 ### 📁 Empty Screens
 
 Especially when there are multiple screens, Navigating through fully empty

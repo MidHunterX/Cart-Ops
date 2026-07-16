@@ -55,11 +55,13 @@ resource management via technological assistance.
 - [x] Price history analytics on item autocompletion
 - [x] Track Monthly spend
 
-#### Data Import/Export
+### PHASE DELTA: POLISH
 
-- [ ] Export to CSV
-- [ ] Import from CSV
-- [ ] Export to PDF
+- [x] Modal discount calculation mini-tool
+- [x] Delete Image prompt timeout loading bar
+- [x] Pop up Image viewer
+- [x] Auto-detect recommended default settings
+- [x] Keypad Haptics
 
 ## 🔫 Developer Operations
 

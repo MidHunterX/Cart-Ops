@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:shopping_assist/core/utils/image_picker_util.dart';
 import 'package:shopping_assist/core/widgets/delete_loading_overlay.dart';
@@ -46,7 +47,20 @@ class _AddItemKeypadState extends State<AddItemKeypad> {
   bool _showDeleteOverlay = false;
   Key _overlayKey = UniqueKey();
 
+  void _triggerHaptic() {
+    HapticFeedback.lightImpact();
+  }
+
+  void _triggerHeavyHaptic() {
+    HapticFeedback.heavyImpact();
+  }
+
+  void _triggerSelectionHaptic() {
+    HapticFeedback.selectionClick();
+  }
+
   void _handlePick(ImageSource source) async {
+    _triggerHaptic();
     final file = await ImagePickerUtil.pickImage(source);
     if (file != null) {
       if (mounted) setState(() => _showDeleteOverlay = false);
@@ -56,9 +70,11 @@ class _AddItemKeypadState extends State<AddItemKeypad> {
 
   void _handleImageTap() {
     if (_showDeleteOverlay) {
+      _triggerHeavyHaptic(); // Destructive action
       setState(() => _showDeleteOverlay = false);
       widget.onImageRemoved();
     } else {
+      _triggerHaptic();
       setState(() {
         _showDeleteOverlay = true;
         _overlayKey = UniqueKey(); // Reset the animation
@@ -73,13 +89,22 @@ class _AddItemKeypadState extends State<AddItemKeypad> {
     VoidCallback? onLongPress,
     Color? backgroundColor,
     Color? foregroundColor,
+    bool isDestructive = false,
   }) {
     return Expanded(
       child: Padding(
         padding: const EdgeInsets.all(4.0),
         child: ElevatedButton(
-          onPressed: onTap,
-          onLongPress: onLongPress,
+          onPressed: () {
+            isDestructive ? _triggerHeavyHaptic() : _triggerHaptic();
+            onTap();
+          },
+          onLongPress: onLongPress != null
+              ? () {
+                  _triggerSelectionHaptic();
+                  onLongPress();
+                }
+              : null,
           style: ElevatedButton.styleFrom(
             backgroundColor: backgroundColor,
             foregroundColor: foregroundColor,
@@ -123,7 +148,10 @@ class _AddItemKeypadState extends State<AddItemKeypad> {
       child: Padding(
         padding: const EdgeInsets.all(4.0),
         child: OutlinedButton(
-          onPressed: () => widget.onKeyPressed(text),
+          onPressed: () {
+            _triggerHaptic();
+            widget.onKeyPressed(text);
+          },
           style: OutlinedButton.styleFrom(
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
             padding: EdgeInsets.zero,
@@ -298,6 +326,7 @@ class _AddItemKeypadState extends State<AddItemKeypad> {
               backgroundColor: destructiveBg,
               foregroundColor: destructiveFg,
               onTap: () => widget.onKeyPressed('C'),
+              isDestructive: true,
             ),
           ],
         ),
