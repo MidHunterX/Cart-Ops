@@ -74,7 +74,7 @@ class ItemDialogs {
   }
 }
 
-enum _EditType { discount, percentage }
+enum _EditType { discount, percentage, sellingPrice }
 
 class _DiscountCalculatorDialog extends StatefulWidget {
   final String initialDiscount;
@@ -118,15 +118,16 @@ class _DiscountCalculatorDialogState extends State<_DiscountCalculatorDialog> {
   }
 
   void _calculateInitial() {
-    double l = double.tryParse(_listingPriceCtrl.text) ?? 0.0;
-    double d = double.tryParse(_discountAmountCtrl.text) ?? 0.0;
-    if (l > 0) {
-      double p = (d / l) * 100;
-      _discountPercentCtrl.text = _format(p);
+    double list = double.tryParse(_listingPriceCtrl.text) ?? 0.0;
+    double disc = double.tryParse(_discountAmountCtrl.text) ?? 0.0;
+    if (disc == 0) return;
+    if (list > 0) {
+      double perc = (disc / list) * 100;
+      _discountPercentCtrl.text = _format(perc);
     }
-    double s = l - d;
-    if (s < 0) s = 0;
-    _sellingPriceCtrl.text = _format(s);
+    double sell = list - disc;
+    if (sell < 0) sell = 0;
+    _sellingPriceCtrl.text = _format(sell);
   }
 
   String _format(double value) {
@@ -147,12 +148,21 @@ class _DiscountCalculatorDialogState extends State<_DiscountCalculatorDialog> {
     double l = double.tryParse(val) ?? 0.0;
 
     if (_lastEdited == _EditType.percentage) {
+      // BEHAVIOR: recompute discount and selling price from new percentage
       double p = double.tryParse(_discountPercentCtrl.text) ?? 0.0;
       double d = l * (p / 100);
       double s = l - d;
       _discountAmountCtrl.text = _format(d);
       _sellingPriceCtrl.text = _format(s);
+    } else if (_lastEdited == _EditType.sellingPrice) {
+      // BEHAVIOR: recompute discount and percentage from new listing
+      double s = double.tryParse(_sellingPriceCtrl.text) ?? 0.0;
+      double d = l - s;
+      double p = l > 0 ? (d / l) * 100 : 0.0;
+      _discountAmountCtrl.text = _format(d);
+      _discountPercentCtrl.text = _format(p);
     } else {
+      // BEHAVIOR: recompute percentage and selling price from new listing
       double d = double.tryParse(_discountAmountCtrl.text) ?? 0.0;
       double p = l > 0 ? (d / l) * 100 : 0.0;
       double s = l - d;
@@ -193,7 +203,7 @@ class _DiscountCalculatorDialogState extends State<_DiscountCalculatorDialog> {
   void _onSellingPriceChanged(String val) {
     if (_isUpdating) return;
     _isUpdating = true;
-    _lastEdited = _EditType.discount;
+    _lastEdited = _EditType.sellingPrice;
     double s = double.tryParse(val) ?? 0.0;
     double l = double.tryParse(_listingPriceCtrl.text) ?? 0.0;
 
@@ -213,11 +223,12 @@ class _DiscountCalculatorDialogState extends State<_DiscountCalculatorDialog> {
           mainAxisSize: MainAxisSize.min,
           children: [
             TextField(
+              // NOTE: listing price is edited on forms instead. Single source of truth.
+              readOnly: true,
               controller: _listingPriceCtrl,
               keyboardType: const TextInputType.numberWithOptions(decimal: true),
               decoration: const InputDecoration(
                 labelText: 'Listing Price',
-                border: OutlineInputBorder(),
               ),
               onChanged: _onListingPriceChanged,
             ),

@@ -381,8 +381,8 @@ class PurchasedItemFormState extends State<PurchasedItemForm> {
           flex: 8,
           child: InputFieldBox(
             label: _isWeight
-                ? '$currencySymbol Price (per $weightUnit)'
-                : '$currencySymbol Price (per item)',
+                ? '$currencySymbol Listing Price (per $weightUnit)'
+                : '$currencySymbol Listing Price (per item)',
             prefixText: '$currencySymbol  ',
             suffixText: _isWeight ? '/$weightUnit' : '',
             // placeholder: 'e.g. ${currencySymbol}200',
