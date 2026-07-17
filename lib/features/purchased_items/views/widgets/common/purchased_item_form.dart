@@ -346,6 +346,25 @@ class PurchasedItemFormState extends State<PurchasedItemForm> {
     );
   }
 
+  void _handleUnitPriceCalulatorTap() async {
+    final result = await ItemDialogs.showUnitPriceCalculatorDialog(
+      context: context,
+      currentQuantity: _qtyStr,
+      currentFinalPrice: _priceStr,
+      isWeight: _isWeight,
+    );
+
+    if (result != null && result.isNotEmpty && mounted) {
+      setState(() {
+        _priceStr = result;
+        _priceController.text = result;
+        // After calculating price, usually the user might want to verify quantity
+        _activeField = ActiveField.quantity;
+        _focusActiveField();
+      });
+    }
+  }
+
   Widget _buildFieldsRow(String weightUnit, String currencySymbol) {
     return Row(
       children: [
@@ -379,21 +398,37 @@ class PurchasedItemFormState extends State<PurchasedItemForm> {
         ),
         Expanded(
           flex: 8,
-          child: InputFieldBox(
-            label: _isWeight
-                ? '$currencySymbol Listing Price (per $weightUnit)'
-                : '$currencySymbol Listing Price (per item)',
-            prefixText: '$currencySymbol  ',
-            suffixText: _isWeight ? '/$weightUnit' : '',
-            // placeholder: 'e.g. ${currencySymbol}200',
-            value: _priceStr,
-            isActive: _activeField == ActiveField.price,
-            onTap: () {
-              setState(() => _activeField = ActiveField.price);
-              _priceFocusNode.requestFocus();
-            },
-            controller: _priceController,
-            focusNode: _priceFocusNode,
+          child: Stack(
+            alignment: Alignment.centerRight,
+            children: [
+              InputFieldBox(
+                label: _isWeight
+                    ? '$currencySymbol Listing Price (per $weightUnit)'
+                    : '$currencySymbol Listing Price (per item)',
+                prefixText: '$currencySymbol  ',
+                // Overlaps with unit price calculator
+                // suffixText: _isWeight ? '/$weightUnit' : '',
+                value: _priceStr,
+                isActive: _activeField == ActiveField.price,
+                onTap: () {
+                  setState(() => _activeField = ActiveField.price);
+                  _priceFocusNode.requestFocus();
+                },
+                controller: _priceController,
+                focusNode: _priceFocusNode,
+              ),
+              Positioned(
+                right: 8,
+                top: 8,
+                child: IconButton(
+                  icon: const Icon(Icons.calculate_outlined, size: 20),
+                  onPressed: _handleUnitPriceCalulatorTap,
+                  tooltip: 'Calculate unit price',
+                  visualDensity: VisualDensity.compact,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+              ),
+            ],
           ),
         ),
       ],
