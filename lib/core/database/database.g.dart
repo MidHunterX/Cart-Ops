@@ -265,6 +265,21 @@ class $PurchasesTable extends Purchases
     type: DriftSqlType.double,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _isChecklistModeMeta = const VerificationMeta(
+    'isChecklistMode',
+  );
+  @override
+  late final GeneratedColumn<bool> isChecklistMode = GeneratedColumn<bool>(
+    'is_checklist_mode',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_checklist_mode" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
   static const VerificationMeta _groupIdMeta = const VerificationMeta(
     'groupId',
   );
@@ -287,6 +302,7 @@ class $PurchasesTable extends Purchases
     totalPrice,
     taxRate,
     budget,
+    isChecklistMode,
     groupId,
   ];
   @override
@@ -341,6 +357,15 @@ class $PurchasesTable extends Purchases
         budget.isAcceptableOrUnknown(data['budget']!, _budgetMeta),
       );
     }
+    if (data.containsKey('is_checklist_mode')) {
+      context.handle(
+        _isChecklistModeMeta,
+        isChecklistMode.isAcceptableOrUnknown(
+          data['is_checklist_mode']!,
+          _isChecklistModeMeta,
+        ),
+      );
+    }
     if (data.containsKey('group_id')) {
       context.handle(
         _groupIdMeta,
@@ -380,6 +405,10 @@ class $PurchasesTable extends Purchases
         DriftSqlType.double,
         data['${effectivePrefix}budget'],
       ),
+      isChecklistMode: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_checklist_mode'],
+      )!,
       groupId: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}group_id'],
@@ -400,6 +429,7 @@ class Purchase extends DataClass implements Insertable<Purchase> {
   final double? totalPrice;
   final double? taxRate;
   final double? budget;
+  final bool isChecklistMode;
   final int? groupId;
   const Purchase({
     required this.id,
@@ -408,6 +438,7 @@ class Purchase extends DataClass implements Insertable<Purchase> {
     this.totalPrice,
     this.taxRate,
     this.budget,
+    required this.isChecklistMode,
     this.groupId,
   });
   @override
@@ -425,6 +456,7 @@ class Purchase extends DataClass implements Insertable<Purchase> {
     if (!nullToAbsent || budget != null) {
       map['budget'] = Variable<double>(budget);
     }
+    map['is_checklist_mode'] = Variable<bool>(isChecklistMode);
     if (!nullToAbsent || groupId != null) {
       map['group_id'] = Variable<int>(groupId);
     }
@@ -445,6 +477,7 @@ class Purchase extends DataClass implements Insertable<Purchase> {
       budget: budget == null && nullToAbsent
           ? const Value.absent()
           : Value(budget),
+      isChecklistMode: Value(isChecklistMode),
       groupId: groupId == null && nullToAbsent
           ? const Value.absent()
           : Value(groupId),
@@ -463,6 +496,7 @@ class Purchase extends DataClass implements Insertable<Purchase> {
       totalPrice: serializer.fromJson<double?>(json['totalPrice']),
       taxRate: serializer.fromJson<double?>(json['taxRate']),
       budget: serializer.fromJson<double?>(json['budget']),
+      isChecklistMode: serializer.fromJson<bool>(json['isChecklistMode']),
       groupId: serializer.fromJson<int?>(json['groupId']),
     );
   }
@@ -476,6 +510,7 @@ class Purchase extends DataClass implements Insertable<Purchase> {
       'totalPrice': serializer.toJson<double?>(totalPrice),
       'taxRate': serializer.toJson<double?>(taxRate),
       'budget': serializer.toJson<double?>(budget),
+      'isChecklistMode': serializer.toJson<bool>(isChecklistMode),
       'groupId': serializer.toJson<int?>(groupId),
     };
   }
@@ -487,6 +522,7 @@ class Purchase extends DataClass implements Insertable<Purchase> {
     Value<double?> totalPrice = const Value.absent(),
     Value<double?> taxRate = const Value.absent(),
     Value<double?> budget = const Value.absent(),
+    bool? isChecklistMode,
     Value<int?> groupId = const Value.absent(),
   }) => Purchase(
     id: id ?? this.id,
@@ -495,6 +531,7 @@ class Purchase extends DataClass implements Insertable<Purchase> {
     totalPrice: totalPrice.present ? totalPrice.value : this.totalPrice,
     taxRate: taxRate.present ? taxRate.value : this.taxRate,
     budget: budget.present ? budget.value : this.budget,
+    isChecklistMode: isChecklistMode ?? this.isChecklistMode,
     groupId: groupId.present ? groupId.value : this.groupId,
   );
   Purchase copyWithCompanion(PurchasesCompanion data) {
@@ -509,6 +546,9 @@ class Purchase extends DataClass implements Insertable<Purchase> {
           : this.totalPrice,
       taxRate: data.taxRate.present ? data.taxRate.value : this.taxRate,
       budget: data.budget.present ? data.budget.value : this.budget,
+      isChecklistMode: data.isChecklistMode.present
+          ? data.isChecklistMode.value
+          : this.isChecklistMode,
       groupId: data.groupId.present ? data.groupId.value : this.groupId,
     );
   }
@@ -522,14 +562,23 @@ class Purchase extends DataClass implements Insertable<Purchase> {
           ..write('totalPrice: $totalPrice, ')
           ..write('taxRate: $taxRate, ')
           ..write('budget: $budget, ')
+          ..write('isChecklistMode: $isChecklistMode, ')
           ..write('groupId: $groupId')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode =>
-      Object.hash(id, name, purchaseDate, totalPrice, taxRate, budget, groupId);
+  int get hashCode => Object.hash(
+    id,
+    name,
+    purchaseDate,
+    totalPrice,
+    taxRate,
+    budget,
+    isChecklistMode,
+    groupId,
+  );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -540,6 +589,7 @@ class Purchase extends DataClass implements Insertable<Purchase> {
           other.totalPrice == this.totalPrice &&
           other.taxRate == this.taxRate &&
           other.budget == this.budget &&
+          other.isChecklistMode == this.isChecklistMode &&
           other.groupId == this.groupId);
 }
 
@@ -550,6 +600,7 @@ class PurchasesCompanion extends UpdateCompanion<Purchase> {
   final Value<double?> totalPrice;
   final Value<double?> taxRate;
   final Value<double?> budget;
+  final Value<bool> isChecklistMode;
   final Value<int?> groupId;
   const PurchasesCompanion({
     this.id = const Value.absent(),
@@ -558,6 +609,7 @@ class PurchasesCompanion extends UpdateCompanion<Purchase> {
     this.totalPrice = const Value.absent(),
     this.taxRate = const Value.absent(),
     this.budget = const Value.absent(),
+    this.isChecklistMode = const Value.absent(),
     this.groupId = const Value.absent(),
   });
   PurchasesCompanion.insert({
@@ -567,6 +619,7 @@ class PurchasesCompanion extends UpdateCompanion<Purchase> {
     this.totalPrice = const Value.absent(),
     this.taxRate = const Value.absent(),
     this.budget = const Value.absent(),
+    this.isChecklistMode = const Value.absent(),
     this.groupId = const Value.absent(),
   }) : name = Value(name),
        purchaseDate = Value(purchaseDate);
@@ -577,6 +630,7 @@ class PurchasesCompanion extends UpdateCompanion<Purchase> {
     Expression<double>? totalPrice,
     Expression<double>? taxRate,
     Expression<double>? budget,
+    Expression<bool>? isChecklistMode,
     Expression<int>? groupId,
   }) {
     return RawValuesInsertable({
@@ -586,6 +640,7 @@ class PurchasesCompanion extends UpdateCompanion<Purchase> {
       if (totalPrice != null) 'total_price': totalPrice,
       if (taxRate != null) 'tax_rate': taxRate,
       if (budget != null) 'budget': budget,
+      if (isChecklistMode != null) 'is_checklist_mode': isChecklistMode,
       if (groupId != null) 'group_id': groupId,
     });
   }
@@ -597,6 +652,7 @@ class PurchasesCompanion extends UpdateCompanion<Purchase> {
     Value<double?>? totalPrice,
     Value<double?>? taxRate,
     Value<double?>? budget,
+    Value<bool>? isChecklistMode,
     Value<int?>? groupId,
   }) {
     return PurchasesCompanion(
@@ -606,6 +662,7 @@ class PurchasesCompanion extends UpdateCompanion<Purchase> {
       totalPrice: totalPrice ?? this.totalPrice,
       taxRate: taxRate ?? this.taxRate,
       budget: budget ?? this.budget,
+      isChecklistMode: isChecklistMode ?? this.isChecklistMode,
       groupId: groupId ?? this.groupId,
     );
   }
@@ -631,6 +688,9 @@ class PurchasesCompanion extends UpdateCompanion<Purchase> {
     if (budget.present) {
       map['budget'] = Variable<double>(budget.value);
     }
+    if (isChecklistMode.present) {
+      map['is_checklist_mode'] = Variable<bool>(isChecklistMode.value);
+    }
     if (groupId.present) {
       map['group_id'] = Variable<int>(groupId.value);
     }
@@ -646,6 +706,7 @@ class PurchasesCompanion extends UpdateCompanion<Purchase> {
           ..write('totalPrice: $totalPrice, ')
           ..write('taxRate: $taxRate, ')
           ..write('budget: $budget, ')
+          ..write('isChecklistMode: $isChecklistMode, ')
           ..write('groupId: $groupId')
           ..write(')'))
         .toString();
@@ -1048,6 +1109,21 @@ class $PurchasedItemsTable extends PurchasedItems
     requiredDuringInsert: false,
     defaultValue: const Constant(0.0),
   );
+  static const VerificationMeta _isCheckedMeta = const VerificationMeta(
+    'isChecked',
+  );
+  @override
+  late final GeneratedColumn<bool> isChecked = GeneratedColumn<bool>(
+    'is_checked',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_checked" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
   static const VerificationMeta _purchaseIdMeta = const VerificationMeta(
     'purchaseId',
   );
@@ -1083,6 +1159,7 @@ class $PurchasedItemsTable extends PurchasedItems
     isWeight,
     quantity,
     discount,
+    isChecked,
     purchaseId,
     itemId,
   ];
@@ -1137,6 +1214,12 @@ class $PurchasedItemsTable extends PurchasedItems
         discount.isAcceptableOrUnknown(data['discount']!, _discountMeta),
       );
     }
+    if (data.containsKey('is_checked')) {
+      context.handle(
+        _isCheckedMeta,
+        isChecked.isAcceptableOrUnknown(data['is_checked']!, _isCheckedMeta),
+      );
+    }
     if (data.containsKey('purchase_id')) {
       context.handle(
         _purchaseIdMeta,
@@ -1188,6 +1271,10 @@ class $PurchasedItemsTable extends PurchasedItems
         DriftSqlType.double,
         data['${effectivePrefix}discount'],
       )!,
+      isChecked: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_checked'],
+      )!,
       purchaseId: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}purchase_id'],
@@ -1213,6 +1300,7 @@ class PurchasedItem extends DataClass implements Insertable<PurchasedItem> {
   final bool isWeight;
   final double? quantity;
   final double discount;
+  final bool isChecked;
   final int purchaseId;
   final int? itemId;
   const PurchasedItem({
@@ -1223,6 +1311,7 @@ class PurchasedItem extends DataClass implements Insertable<PurchasedItem> {
     required this.isWeight,
     this.quantity,
     required this.discount,
+    required this.isChecked,
     required this.purchaseId,
     this.itemId,
   });
@@ -1244,6 +1333,7 @@ class PurchasedItem extends DataClass implements Insertable<PurchasedItem> {
       map['quantity'] = Variable<double>(quantity);
     }
     map['discount'] = Variable<double>(discount);
+    map['is_checked'] = Variable<bool>(isChecked);
     map['purchase_id'] = Variable<int>(purchaseId);
     if (!nullToAbsent || itemId != null) {
       map['item_id'] = Variable<int>(itemId);
@@ -1266,6 +1356,7 @@ class PurchasedItem extends DataClass implements Insertable<PurchasedItem> {
           ? const Value.absent()
           : Value(quantity),
       discount: Value(discount),
+      isChecked: Value(isChecked),
       purchaseId: Value(purchaseId),
       itemId: itemId == null && nullToAbsent
           ? const Value.absent()
@@ -1286,6 +1377,7 @@ class PurchasedItem extends DataClass implements Insertable<PurchasedItem> {
       isWeight: serializer.fromJson<bool>(json['isWeight']),
       quantity: serializer.fromJson<double?>(json['quantity']),
       discount: serializer.fromJson<double>(json['discount']),
+      isChecked: serializer.fromJson<bool>(json['isChecked']),
       purchaseId: serializer.fromJson<int>(json['purchaseId']),
       itemId: serializer.fromJson<int?>(json['itemId']),
     );
@@ -1301,6 +1393,7 @@ class PurchasedItem extends DataClass implements Insertable<PurchasedItem> {
       'isWeight': serializer.toJson<bool>(isWeight),
       'quantity': serializer.toJson<double?>(quantity),
       'discount': serializer.toJson<double>(discount),
+      'isChecked': serializer.toJson<bool>(isChecked),
       'purchaseId': serializer.toJson<int>(purchaseId),
       'itemId': serializer.toJson<int?>(itemId),
     };
@@ -1314,6 +1407,7 @@ class PurchasedItem extends DataClass implements Insertable<PurchasedItem> {
     bool? isWeight,
     Value<double?> quantity = const Value.absent(),
     double? discount,
+    bool? isChecked,
     int? purchaseId,
     Value<int?> itemId = const Value.absent(),
   }) => PurchasedItem(
@@ -1324,6 +1418,7 @@ class PurchasedItem extends DataClass implements Insertable<PurchasedItem> {
     isWeight: isWeight ?? this.isWeight,
     quantity: quantity.present ? quantity.value : this.quantity,
     discount: discount ?? this.discount,
+    isChecked: isChecked ?? this.isChecked,
     purchaseId: purchaseId ?? this.purchaseId,
     itemId: itemId.present ? itemId.value : this.itemId,
   );
@@ -1336,6 +1431,7 @@ class PurchasedItem extends DataClass implements Insertable<PurchasedItem> {
       isWeight: data.isWeight.present ? data.isWeight.value : this.isWeight,
       quantity: data.quantity.present ? data.quantity.value : this.quantity,
       discount: data.discount.present ? data.discount.value : this.discount,
+      isChecked: data.isChecked.present ? data.isChecked.value : this.isChecked,
       purchaseId: data.purchaseId.present
           ? data.purchaseId.value
           : this.purchaseId,
@@ -1353,6 +1449,7 @@ class PurchasedItem extends DataClass implements Insertable<PurchasedItem> {
           ..write('isWeight: $isWeight, ')
           ..write('quantity: $quantity, ')
           ..write('discount: $discount, ')
+          ..write('isChecked: $isChecked, ')
           ..write('purchaseId: $purchaseId, ')
           ..write('itemId: $itemId')
           ..write(')'))
@@ -1368,6 +1465,7 @@ class PurchasedItem extends DataClass implements Insertable<PurchasedItem> {
     isWeight,
     quantity,
     discount,
+    isChecked,
     purchaseId,
     itemId,
   );
@@ -1382,6 +1480,7 @@ class PurchasedItem extends DataClass implements Insertable<PurchasedItem> {
           other.isWeight == this.isWeight &&
           other.quantity == this.quantity &&
           other.discount == this.discount &&
+          other.isChecked == this.isChecked &&
           other.purchaseId == this.purchaseId &&
           other.itemId == this.itemId);
 }
@@ -1394,6 +1493,7 @@ class PurchasedItemsCompanion extends UpdateCompanion<PurchasedItem> {
   final Value<bool> isWeight;
   final Value<double?> quantity;
   final Value<double> discount;
+  final Value<bool> isChecked;
   final Value<int> purchaseId;
   final Value<int?> itemId;
   const PurchasedItemsCompanion({
@@ -1404,6 +1504,7 @@ class PurchasedItemsCompanion extends UpdateCompanion<PurchasedItem> {
     this.isWeight = const Value.absent(),
     this.quantity = const Value.absent(),
     this.discount = const Value.absent(),
+    this.isChecked = const Value.absent(),
     this.purchaseId = const Value.absent(),
     this.itemId = const Value.absent(),
   });
@@ -1415,6 +1516,7 @@ class PurchasedItemsCompanion extends UpdateCompanion<PurchasedItem> {
     this.isWeight = const Value.absent(),
     this.quantity = const Value.absent(),
     this.discount = const Value.absent(),
+    this.isChecked = const Value.absent(),
     required int purchaseId,
     this.itemId = const Value.absent(),
   }) : purchaseId = Value(purchaseId);
@@ -1426,6 +1528,7 @@ class PurchasedItemsCompanion extends UpdateCompanion<PurchasedItem> {
     Expression<bool>? isWeight,
     Expression<double>? quantity,
     Expression<double>? discount,
+    Expression<bool>? isChecked,
     Expression<int>? purchaseId,
     Expression<int>? itemId,
   }) {
@@ -1437,6 +1540,7 @@ class PurchasedItemsCompanion extends UpdateCompanion<PurchasedItem> {
       if (isWeight != null) 'is_weight': isWeight,
       if (quantity != null) 'quantity': quantity,
       if (discount != null) 'discount': discount,
+      if (isChecked != null) 'is_checked': isChecked,
       if (purchaseId != null) 'purchase_id': purchaseId,
       if (itemId != null) 'item_id': itemId,
     });
@@ -1450,6 +1554,7 @@ class PurchasedItemsCompanion extends UpdateCompanion<PurchasedItem> {
     Value<bool>? isWeight,
     Value<double?>? quantity,
     Value<double>? discount,
+    Value<bool>? isChecked,
     Value<int>? purchaseId,
     Value<int?>? itemId,
   }) {
@@ -1461,6 +1566,7 @@ class PurchasedItemsCompanion extends UpdateCompanion<PurchasedItem> {
       isWeight: isWeight ?? this.isWeight,
       quantity: quantity ?? this.quantity,
       discount: discount ?? this.discount,
+      isChecked: isChecked ?? this.isChecked,
       purchaseId: purchaseId ?? this.purchaseId,
       itemId: itemId ?? this.itemId,
     );
@@ -1490,6 +1596,9 @@ class PurchasedItemsCompanion extends UpdateCompanion<PurchasedItem> {
     if (discount.present) {
       map['discount'] = Variable<double>(discount.value);
     }
+    if (isChecked.present) {
+      map['is_checked'] = Variable<bool>(isChecked.value);
+    }
     if (purchaseId.present) {
       map['purchase_id'] = Variable<int>(purchaseId.value);
     }
@@ -1509,6 +1618,7 @@ class PurchasedItemsCompanion extends UpdateCompanion<PurchasedItem> {
           ..write('isWeight: $isWeight, ')
           ..write('quantity: $quantity, ')
           ..write('discount: $discount, ')
+          ..write('isChecked: $isChecked, ')
           ..write('purchaseId: $purchaseId, ')
           ..write('itemId: $itemId')
           ..write(')'))
@@ -1878,6 +1988,7 @@ typedef $$PurchasesTableCreateCompanionBuilder =
       Value<double?> totalPrice,
       Value<double?> taxRate,
       Value<double?> budget,
+      Value<bool> isChecklistMode,
       Value<int?> groupId,
     });
 typedef $$PurchasesTableUpdateCompanionBuilder =
@@ -1888,6 +1999,7 @@ typedef $$PurchasesTableUpdateCompanionBuilder =
       Value<double?> totalPrice,
       Value<double?> taxRate,
       Value<double?> budget,
+      Value<bool> isChecklistMode,
       Value<int?> groupId,
     });
 
@@ -1967,6 +2079,11 @@ class $$PurchasesTableFilterComposer
 
   ColumnFilters<double> get budget => $composableBuilder(
     column: $table.budget,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isChecklistMode => $composableBuilder(
+    column: $table.isChecklistMode,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -2058,6 +2175,11 @@ class $$PurchasesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<bool> get isChecklistMode => $composableBuilder(
+    column: $table.isChecklistMode,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   $$GroupsTableOrderingComposer get groupId {
     final $$GroupsTableOrderingComposer composer = $composerBuilder(
       composer: this,
@@ -2112,6 +2234,11 @@ class $$PurchasesTableAnnotationComposer
 
   GeneratedColumn<double> get budget =>
       $composableBuilder(column: $table.budget, builder: (column) => column);
+
+  GeneratedColumn<bool> get isChecklistMode => $composableBuilder(
+    column: $table.isChecklistMode,
+    builder: (column) => column,
+  );
 
   $$GroupsTableAnnotationComposer get groupId {
     final $$GroupsTableAnnotationComposer composer = $composerBuilder(
@@ -2196,6 +2323,7 @@ class $$PurchasesTableTableManager
                 Value<double?> totalPrice = const Value.absent(),
                 Value<double?> taxRate = const Value.absent(),
                 Value<double?> budget = const Value.absent(),
+                Value<bool> isChecklistMode = const Value.absent(),
                 Value<int?> groupId = const Value.absent(),
               }) => PurchasesCompanion(
                 id: id,
@@ -2204,6 +2332,7 @@ class $$PurchasesTableTableManager
                 totalPrice: totalPrice,
                 taxRate: taxRate,
                 budget: budget,
+                isChecklistMode: isChecklistMode,
                 groupId: groupId,
               ),
           createCompanionCallback:
@@ -2214,6 +2343,7 @@ class $$PurchasesTableTableManager
                 Value<double?> totalPrice = const Value.absent(),
                 Value<double?> taxRate = const Value.absent(),
                 Value<double?> budget = const Value.absent(),
+                Value<bool> isChecklistMode = const Value.absent(),
                 Value<int?> groupId = const Value.absent(),
               }) => PurchasesCompanion.insert(
                 id: id,
@@ -2222,6 +2352,7 @@ class $$PurchasesTableTableManager
                 totalPrice: totalPrice,
                 taxRate: taxRate,
                 budget: budget,
+                isChecklistMode: isChecklistMode,
                 groupId: groupId,
               ),
           withReferenceMapper: (p0) => p0
@@ -2707,6 +2838,7 @@ typedef $$PurchasedItemsTableCreateCompanionBuilder =
       Value<bool> isWeight,
       Value<double?> quantity,
       Value<double> discount,
+      Value<bool> isChecked,
       required int purchaseId,
       Value<int?> itemId,
     });
@@ -2719,6 +2851,7 @@ typedef $$PurchasedItemsTableUpdateCompanionBuilder =
       Value<bool> isWeight,
       Value<double?> quantity,
       Value<double> discount,
+      Value<bool> isChecked,
       Value<int> purchaseId,
       Value<int?> itemId,
     });
@@ -2807,6 +2940,11 @@ class $$PurchasedItemsTableFilterComposer
 
   ColumnFilters<double> get discount => $composableBuilder(
     column: $table.discount,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isChecked => $composableBuilder(
+    column: $table.isChecked,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -2901,6 +3039,11 @@ class $$PurchasedItemsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<bool> get isChecked => $composableBuilder(
+    column: $table.isChecked,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   $$PurchasesTableOrderingComposer get purchaseId {
     final $$PurchasesTableOrderingComposer composer = $composerBuilder(
       composer: this,
@@ -2977,6 +3120,9 @@ class $$PurchasedItemsTableAnnotationComposer
 
   GeneratedColumn<double> get discount =>
       $composableBuilder(column: $table.discount, builder: (column) => column);
+
+  GeneratedColumn<bool> get isChecked =>
+      $composableBuilder(column: $table.isChecked, builder: (column) => column);
 
   $$PurchasesTableAnnotationComposer get purchaseId {
     final $$PurchasesTableAnnotationComposer composer = $composerBuilder(
@@ -3062,6 +3208,7 @@ class $$PurchasedItemsTableTableManager
                 Value<bool> isWeight = const Value.absent(),
                 Value<double?> quantity = const Value.absent(),
                 Value<double> discount = const Value.absent(),
+                Value<bool> isChecked = const Value.absent(),
                 Value<int> purchaseId = const Value.absent(),
                 Value<int?> itemId = const Value.absent(),
               }) => PurchasedItemsCompanion(
@@ -3072,6 +3219,7 @@ class $$PurchasedItemsTableTableManager
                 isWeight: isWeight,
                 quantity: quantity,
                 discount: discount,
+                isChecked: isChecked,
                 purchaseId: purchaseId,
                 itemId: itemId,
               ),
@@ -3084,6 +3232,7 @@ class $$PurchasedItemsTableTableManager
                 Value<bool> isWeight = const Value.absent(),
                 Value<double?> quantity = const Value.absent(),
                 Value<double> discount = const Value.absent(),
+                Value<bool> isChecked = const Value.absent(),
                 required int purchaseId,
                 Value<int?> itemId = const Value.absent(),
               }) => PurchasedItemsCompanion.insert(
@@ -3094,6 +3243,7 @@ class $$PurchasedItemsTableTableManager
                 isWeight: isWeight,
                 quantity: quantity,
                 discount: discount,
+                isChecked: isChecked,
                 purchaseId: purchaseId,
                 itemId: itemId,
               ),

@@ -18,11 +18,13 @@ class PurchasedItemWithDetails {
   PurchasedItemWithDetails(this.purchasedItem, this._item);
 
   // Custom getter to prevent crashes on screens that try accessing linked Item details.
-  Item get item => _item ?? Item(
-    id: purchasedItem.itemId ?? -1,
-    name: purchasedItem.name ?? '',
-    imagePath: purchasedItem.imagePath,
-  );
+  Item get item =>
+      _item ??
+      Item(
+        id: purchasedItem.itemId ?? -1,
+        name: purchasedItem.name ?? '',
+        imagePath: purchasedItem.imagePath,
+      );
 }
 
 class PurchasedItemWithPurchase {
@@ -43,7 +45,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(DatabaseConnection super.connection);
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
 
   @override
   MigrationStrategy get migration {
@@ -52,8 +54,10 @@ class AppDatabase extends _$AppDatabase {
         await m.createAll();
       },
       onUpgrade: (Migrator m, int from, int to) async {
-        // Future upgrades: add only new tables/columns here.
-        // Example: if (from < 2) await m.createTable(newTable);
+        if (from < 2) {
+          await m.addColumn(purchases, purchases.isChecklistMode);
+          await m.addColumn(purchasedItems, purchasedItems.isChecked);
+        }
       },
       beforeOpen: (details) async {
         // SQLite disables foreign keys by default O_o
