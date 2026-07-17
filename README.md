@@ -62,6 +62,7 @@ resource management via technological assistance.
 - [x] Pop up Image viewer
 - [x] Auto-detect recommended default settings
 - [x] Keypad Haptics
+- [x] Checklist Mode
 
 ## 🔫 Developer Operations
 

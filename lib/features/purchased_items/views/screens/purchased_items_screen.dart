@@ -197,8 +197,18 @@ class _PurchasedItemsScreenState extends State<PurchasedItemsScreen> {
     int displayTotalItems = totalItemsListLength;
     double displayTotalPrice = _currentPurchase.totalPrice ?? 0.0;
 
-    if (_currentPurchase.isChecklistMode) {
-      displayTotalItems = _purchasedItems.where((item) => item.purchasedItem.isChecked).length;
+    bool? allCheckedState;
+    if (_currentPurchase.isChecklistMode && totalItemsListLength > 0) {
+      final checkedCount = _purchasedItems.where((item) => item.purchasedItem.isChecked).length;
+      if (checkedCount == 0) {
+        allCheckedState = false;
+      } else if (checkedCount == totalItemsListLength) {
+        allCheckedState = true;
+      } else {
+        allCheckedState = null; // Indeterminate
+      }
+
+      displayTotalItems = checkedCount;
       displayTotalPrice = _purchasedItems.where((item) => item.purchasedItem.isChecked).fold(0.0, (
         sum,
         item,
@@ -234,16 +244,6 @@ class _PurchasedItemsScreenState extends State<PurchasedItemsScreen> {
                   _currentPurchase.id,
                   !_currentPurchase.isChecklistMode,
                 );
-              } else if (value == 'select_all') {
-                context.read<PurchasedItemsRepository>().setAllItemsCheckState(
-                  _currentPurchase.id,
-                  true,
-                );
-              } else if (value == 'deselect_all') {
-                context.read<PurchasedItemsRepository>().setAllItemsCheckState(
-                  _currentPurchase.id,
-                  false,
-                );
               }
             },
             itemBuilder: (context) => [
@@ -254,10 +254,6 @@ class _PurchasedItemsScreenState extends State<PurchasedItemsScreen> {
                   _currentPurchase.isChecklistMode ? 'Disable Checklist' : 'Enable Checklist',
                 ),
               ),
-              if (_currentPurchase.isChecklistMode)
-                const PopupMenuItem(value: 'select_all', child: Text('Select All')),
-              if (_currentPurchase.isChecklistMode)
-                const PopupMenuItem(value: 'deselect_all', child: Text('Deselect All')),
             ],
           ),
         ],
@@ -275,6 +271,26 @@ class _PurchasedItemsScreenState extends State<PurchasedItemsScreen> {
                       isChecklistMode: _currentPurchase.isChecklistMode,
                       total: displayTotalPrice,
                       budget: _currentPurchase.budget,
+                      allChecked: allCheckedState,
+                      onToggleAll: (bool? checkAll) {
+                        bool isAllChecked = checkAll == null;
+                        bool isNoneChecked = checkAll == true;
+                        bool isSomeChecked = checkAll == false;
+                        bool lessItemsChecked = displayTotalItems < (totalItemsListLength / 2);
+                        isAllChecked
+                            ? checkAll = false
+                            : isNoneChecked
+                            ? checkAll = true
+                            : isSomeChecked
+                            ? lessItemsChecked
+                                  ? checkAll = false
+                                  : checkAll = true
+                            : null;
+                        context.read<PurchasedItemsRepository>().setAllItemsCheckState(
+                          _currentPurchase.id,
+                          checkAll,
+                        );
+                      },
                     ),
                   ),
                   if (_isListEmpty)

@@ -9,6 +9,9 @@ class PurchaseSummaryCard extends StatelessWidget {
   final bool isChecklistMode;
   final double total;
   final double? budget;
+  // Checklist Feature
+  final bool? allChecked;
+  final ValueChanged<bool?>? onToggleAll;
 
   final double headerIconSize = 28;
 
@@ -19,6 +22,8 @@ class PurchaseSummaryCard extends StatelessWidget {
     this.isChecklistMode = false,
     required this.total,
     this.budget,
+    this.allChecked,
+    this.onToggleAll,
   });
 
   @override
@@ -56,12 +61,22 @@ class PurchaseSummaryCard extends StatelessWidget {
   Widget _buildItemsCount(BuildContext context, ColorScheme colorScheme) {
     return Row(
       children: [
-        Icon(
-          isChecklistMode ? Icons.checklist : Icons.shopping_cart_outlined,
-          color: colorScheme.onPrimaryContainer,
-          size: headerIconSize,
-        ),
-        const SizedBox(width: 12),
+        if (isChecklistMode)
+          Checkbox(
+            value: allChecked,
+            tristate: true,
+            onChanged: onToggleAll,
+            side: BorderSide(color: colorScheme.onPrimaryContainer, width: 2),
+            checkColor: colorScheme.onPrimary,
+            activeColor: colorScheme.onPrimaryContainer,
+          )
+        else
+          Icon(
+            Icons.shopping_cart_outlined,
+            color: colorScheme.onPrimaryContainer,
+            size: headerIconSize,
+          ),
+        const SizedBox(width: 8),
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

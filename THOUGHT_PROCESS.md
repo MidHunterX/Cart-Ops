@@ -137,6 +137,15 @@ where it is exactly; catering to ASD like neuro-types. But the Dynamic List
 reduces the visual noise to the maximum so, sticking to self selected
 attributes only helps not breaking the pattern.
 
+### 📜 Checklist Mode
+
+Purchased Item List can be toggled into Checklist Mode. In this mode, you can
+reuse the same interface for:
+
+- Using list as a grocery list and toggling items as completed
+- Toggle list to check how much each set of items cost together
+- Find how much lesser the total cost would be without certain items
+
 ### 🔧 Settings
 
 - **Theme Mode**: Light Mode | Dark Mode | System (Default)
@@ -221,7 +230,7 @@ The best way is to give a dedicated discount calculating utility as input:
 
 Where three input fields can be edited and calculated in real time.
 
-## The Discovery Problem
+### 🚀 User Onboarding
 
 If there are many features shown all at once, there's high chance of
 experiencing cognitive friction since you have to find out the primary
@@ -232,10 +241,8 @@ Showing people what each and everything does and how it works. Or maybe even
 forcing you to go through the workflow for one time. Sometimes even wasting
 your time. But, if done correctly, it can be very effective.
 
-### 🚀 User Onboarding
-
-Since this is meant to be a tool, we are going on a different direction by
-following the principle of **Progressive Disclosure**.
+User onboarding is plain simple naturally following the principle of
+**Progressive Disclosure**.
 
 1. At first it will be just a simple app. There's a button to add purchase
    event which automatically sets up everything just ready to receive
@@ -250,3 +257,7 @@ following the principle of **Progressive Disclosure**.
    pricing fluctuations and trends over time.
 4. You can go to settings and enable groups feature to enable purchase groups
    only if you want.
+
+## Problems Faced :(
+
+### Power User UI for Price Inputs?
