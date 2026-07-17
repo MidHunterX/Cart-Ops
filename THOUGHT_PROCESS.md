@@ -66,21 +66,33 @@ features.
 
 ### 📱 Main Screen
 
-The main screen is divided into two sections:
+Dynamically shows Purchases/Groups list based on intent and behavior.
 
-#### Purchases List
+#### Split Screen
+
+If both groups and ungrouped purchases are present, the main screen is divided
+into two sections:
+
+##### Groups
+
+A horizontally scrollable list of created groups. Each group have it's own
+separate item autocompletion and purchases list. With this you can track prices
+of items from one store to another. This is for those people who wants to
+organize their shopping.
+
+##### Purchases
 
 Clicking `Add purchase` Creates a new purchase event with 'Purchase' as
 default name along with current date and time then immediately takes you into
 the next interface, ready to add Purchased Items. This is for those spontaneous
 people who just wants to create purchased items right now.
 
-#### My Groups
+#### Dedicated Screen
 
-A horizontally scrollable list of created groups. Each group have it's own
-separate item autocompletion and purchases list. With this you can track prices
-of items from one store to another. This is for those people who wants to
-organize their shopping.
+If only one of the groups or ungrouped purchases are present, the main screen
+turns into a dedicated screen for the respective list. If only groups is
+present, group specific details and a big grid view will be shown. If only
+ungrouped purchases is present, a list view will be shown.
 
 ### 📃 Purchased Items List
 
@@ -177,10 +189,6 @@ thoughts which in turn influences the behavior and feeling.
   cart/list. It leaves a bad taste. Instead showing "Your Cart is Ready! - Add
   items to ..." respects and acknowledges users decision to make the purchase
   event.
-- Groups Screen: Dynamically shows Purchases/Groups list based on intent. If
-  purchase is created first without groups enabled, purchase list is shown
-  in full screen. If group is created first, group takes precedence until a
-  purchase is created. If that happens, they split screen accordingly.
 
 ### 🛒 Discounts
 
