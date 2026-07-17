@@ -136,7 +136,8 @@ class PurchasedItemsRepository {
     }
 
     if (imagePath.present && existingPurchasedItem != null) {
-      if (existingPurchasedItem.imagePath != null && existingPurchasedItem.imagePath != imagePath.value) {
+      if (existingPurchasedItem.imagePath != null &&
+          existingPurchasedItem.imagePath != imagePath.value) {
         try {
           final oldFile = File(existingPurchasedItem.imagePath!);
           if (await oldFile.exists()) {
@@ -181,5 +182,15 @@ class PurchasedItemsRepository {
     if (purchasedItem != null) {
       await _purchasesDao.recalculatePurchaseTotal(purchasedItem.purchaseId);
     }
+  }
+
+  Future<void> toggleItemCheck(int id, bool isChecked) {
+    return _purchasedItemsDao.updatePurchasedItem(
+      PurchasedItemsCompanion(id: Value(id), isChecked: Value(isChecked)),
+    );
+  }
+
+  Future<void> setAllItemsCheckState(int purchaseId, bool isChecked) {
+    return _purchasedItemsDao.setAllItemsCheckState(purchaseId, isChecked);
   }
 }

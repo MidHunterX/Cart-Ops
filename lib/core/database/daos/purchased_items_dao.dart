@@ -38,4 +38,10 @@ class PurchasedItemsDao extends DatabaseAccessor<AppDatabase> with _$PurchasedIt
 
   Future deletePurchasedItem(int id) =>
       (delete(purchasedItems)..where((t) => t.id.equals(id))).go();
+
+  Future<void> setAllItemsCheckState(int purchaseId, bool isChecked) {
+    return (update(purchasedItems)..where((t) => t.purchaseId.equals(purchaseId))).write(
+      PurchasedItemsCompanion(isChecked: Value(isChecked)),
+    );
+  }
 }

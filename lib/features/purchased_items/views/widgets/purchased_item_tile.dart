@@ -35,6 +35,8 @@ class PurchasedItemTile extends StatelessWidget {
   final int totalItems;
 
   final bool isSelected;
+  final bool isChecklistMode;
+  final ValueChanged<bool?>? onToggleCheck;
   final VoidCallback onMenuOpened;
   final VoidCallback onMenuClosed;
 
@@ -43,8 +45,9 @@ class PurchasedItemTile extends StatelessWidget {
     required this.details,
     required this.index,
     required this.totalItems,
-
     this.isSelected = false,
+    this.isChecklistMode = false,
+    this.onToggleCheck,
     required this.onMenuOpened,
     required this.onMenuClosed,
   });
@@ -71,10 +74,11 @@ class PurchasedItemTile extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         final maxWidth = constraints.maxWidth;
-        final isSmallScreen = maxWidth < 360;
+        final availableWidth = isChecklistMode ? maxWidth - 48.0 : maxWidth;
+        final isSmallScreen = availableWidth < 360;
 
-        final double qtyWidth = (maxWidth * 0.18).clamp(65.0, 85.0);
-        final double totalAreaWidth = (maxWidth * 0.25).clamp(80.0, 115.0);
+        final double qtyWidth = (availableWidth * 0.18).clamp(65.0, 85.0);
+        final double totalAreaWidth = (availableWidth * 0.25).clamp(80.0, 115.0);
         final double imgSize = isSmallScreen ? 40.0 : 50.0;
         final double spacing = isSmallScreen ? 8.0 : 12.0;
 
@@ -83,77 +87,90 @@ class PurchasedItemTile extends StatelessWidget {
             Material(
               color: tileBgColor,
               child: InkWell(
+                onTap: isChecklistMode ? () => onToggleCheck?.call(!pItem.isChecked) : null,
                 onLongPress: () => _showEditSheet(context),
                 child: Padding(
                   padding: const EdgeInsets.symmetric(vertical: 12.0),
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      SizedBox(
-                        width: qtyWidth,
-                        child: _buildQuantitySection(
-                          context,
-                          pItem,
-                          hasQty,
-                          isSmallScreen,
-                          weightUnit,
-                          colorScheme,
-                        ),
-                      ),
-                      SizedBox(width: spacing),
-
-                      if (details.item.imagePath != null ||
-                          details.purchasedItem.imagePath != null ||
-                          settings.compactItemList == false) ...[
-                        _buildImageSection(details, colorScheme, imgSize),
-                        SizedBox(width: spacing),
-                      ],
-
+                      if (isChecklistMode)
+                        Checkbox(value: pItem.isChecked, onChanged: onToggleCheck),
                       Expanded(
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Expanded(
-                              child: _buildItemDetails(
-                                context,
-                                item,
-                                pItem,
-                                settings,
-                                colorScheme,
-                                currency,
-                                weightUnit,
-                                hasPrice,
-                                discountApplied,
-                                pricePerUnit,
+                        child: Opacity(
+                          opacity: isChecklistMode && !pItem.isChecked ? 0.5 : 1.0,
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              SizedBox(
+                                width: qtyWidth,
+                                child: _buildQuantitySection(
+                                  context,
+                                  pItem,
+                                  hasQty,
+                                  isSmallScreen,
+                                  weightUnit,
+                                  colorScheme,
+                                ),
                               ),
-                            ),
-                            SizedBox(width: spacing),
+                              SizedBox(width: spacing),
 
-                            SizedBox(
-                              width: totalAreaWidth,
-                              child: _buildTotalPriceSection(
-                                context,
-                                pItem,
-                                colorScheme,
-                                currency,
-                                weightUnit,
-                                hasPrice,
-                                hasQty,
-                                discountApplied,
-                                totalPrice,
-                                qty,
-                                isSmallScreen,
+                              if (details.item.imagePath != null ||
+                                  details.purchasedItem.imagePath != null ||
+                                  settings.compactItemList == false) ...[
+                                _buildImageSection(details, colorScheme, imgSize),
+                                SizedBox(width: spacing),
+                              ],
+
+                              Expanded(
+                                child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    Expanded(
+                                      child: _buildItemDetails(
+                                        context,
+                                        item,
+                                        pItem,
+                                        settings,
+                                        colorScheme,
+                                        currency,
+                                        weightUnit,
+                                        hasPrice,
+                                        discountApplied,
+                                        pricePerUnit,
+                                      ),
+                                    ),
+                                    SizedBox(width: spacing),
+
+                                    SizedBox(
+                                      width: totalAreaWidth,
+                                      child: _buildTotalPriceSection(
+                                        context,
+                                        pItem,
+                                        colorScheme,
+                                        currency,
+                                        weightUnit,
+                                        hasPrice,
+                                        hasQty,
+                                        discountApplied,
+                                        totalPrice,
+                                        qty,
+                                        isSmallScreen,
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
-                            ),
-                          ],
-                        ),
-                      ),
 
-                      SizedBox(
-                        width: 40,
-                        child: Align(
-                          alignment: Alignment.topRight,
-                          child: _buildPopupMenu(context, colorScheme),
+                              SizedBox(
+                                width: 40,
+                                child: Align(
+                                  alignment: Alignment.topRight,
+                                  child: _buildPopupMenu(context, colorScheme),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ],

@@ -14,6 +14,7 @@ class Purchases extends Table {
   RealColumn get totalPrice => real().nullable()();
   RealColumn get taxRate => real().nullable()(); // override global tax rate
   RealColumn get budget => real().nullable()();
+  BoolColumn get isChecklistMode => boolean().withDefault(const Constant(false))();
   // Optional Group
   IntColumn get groupId =>
       integer().nullable().references(Groups, #id, onDelete: KeyAction.cascade)();
@@ -37,6 +38,7 @@ class PurchasedItems extends Table {
   BoolColumn get isWeight => boolean().withDefault(const Constant(false))();
   RealColumn get quantity => real().nullable()(); // int => unit, float => weight
   RealColumn get discount => real().withDefault(const Constant(0.0))();
+  BoolColumn get isChecked => boolean().withDefault(const Constant(false))();
   IntColumn get purchaseId => integer().references(Purchases, #id, onDelete: KeyAction.cascade)();
   IntColumn get itemId =>
       integer().nullable().references(Items, #id, onDelete: KeyAction.cascade)();

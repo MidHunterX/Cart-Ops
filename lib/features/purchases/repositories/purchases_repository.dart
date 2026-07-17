@@ -26,12 +26,6 @@ class PurchasesRepository {
     return _purchasesDao.getPurchaseById(id);
   }
 
-  /*Future<int> getPurchasesCount([int? groupId, bool? all]) => all == true
-      ? _purchasesDao.getPurchasesCount(groupId, true)
-      : groupId == null
-      ? _purchasesDao.getPurchasesCount(null)
-      : _purchasesDao.getPurchasesCount(groupId);*/
-
   Future<void> updatePurchase(int id, String name, DateTime date) {
     return _purchasesDao.updatePurchase(
       PurchasesCompanion(id: Value(id), name: Value(name), purchaseDate: Value(date)),
@@ -40,6 +34,12 @@ class PurchasesRepository {
 
   Future<void> updatePurchaseBudget(int id, double? budget) {
     return _purchasesDao.updatePurchase(PurchasesCompanion(id: Value(id), budget: Value(budget)));
+  }
+
+  Future<void> updateChecklistMode(int id, bool mode) {
+    return _purchasesDao.updatePurchase(
+      PurchasesCompanion(id: Value(id), isChecklistMode: Value(mode)),
+    );
   }
 
   Future<void> deletePurchase(int id) => _purchasesDao.deletePurchase(id);

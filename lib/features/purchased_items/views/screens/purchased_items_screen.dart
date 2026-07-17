@@ -165,7 +165,7 @@ class _PurchasedItemsScreenState extends State<PurchasedItemsScreen> {
   Widget _buildItemTile(
     PurchasedItemWithDetails details,
     int index,
-    int totalItems,
+    int totalItemsListLength,
     Animation<double> animation,
   ) {
     return SizeTransition(
@@ -173,8 +173,15 @@ class _PurchasedItemsScreenState extends State<PurchasedItemsScreen> {
       child: PurchasedItemTile(
         details: details,
         index: index,
-        totalItems: totalItems,
+        totalItems: totalItemsListLength,
         isSelected: _selectedItemId == details.purchasedItem.id,
+        isChecklistMode: _currentPurchase.isChecklistMode,
+        onToggleCheck: (val) {
+          context.read<PurchasedItemsRepository>().toggleItemCheck(
+            details.purchasedItem.id,
+            val ?? false,
+          );
+        },
         onMenuOpened: () => setState(() => _selectedItemId = details.purchasedItem.id),
         onMenuClosed: () => setState(() => _selectedItemId = null),
       ),
@@ -186,8 +193,22 @@ class _PurchasedItemsScreenState extends State<PurchasedItemsScreen> {
     final colorScheme = Theme.of(context).colorScheme;
     final settings = context.watch<SettingsProvider>();
 
-    final totalItems = _purchasedItems.length;
-    final totalPrice = _currentPurchase.totalPrice ?? 0.0;
+    final totalItemsListLength = _purchasedItems.length;
+    int displayTotalItems = totalItemsListLength;
+    double displayTotalPrice = _currentPurchase.totalPrice ?? 0.0;
+
+    if (_currentPurchase.isChecklistMode) {
+      displayTotalItems = _purchasedItems.where((item) => item.purchasedItem.isChecked).length;
+      displayTotalPrice = _purchasedItems.where((item) => item.purchasedItem.isChecked).fold(0.0, (
+        sum,
+        item,
+      ) {
+        final price = item.purchasedItem.price ?? 0.0;
+        final qty = item.purchasedItem.quantity ?? 0.0;
+        final discount = item.purchasedItem.discount;
+        return sum + ((price - discount) * qty);
+      });
+    }
 
     return Scaffold(
       resizeToAvoidBottomInset: false, // perf: nothing to resize here on keyboard
@@ -208,10 +229,35 @@ class _PurchasedItemsScreenState extends State<PurchasedItemsScreen> {
             onSelected: (value) {
               if (value == 'budget') {
                 _showBudgetDialog(context);
+              } else if (value == 'toggle_checklist') {
+                context.read<PurchasesRepository>().updateChecklistMode(
+                  _currentPurchase.id,
+                  !_currentPurchase.isChecklistMode,
+                );
+              } else if (value == 'select_all') {
+                context.read<PurchasedItemsRepository>().setAllItemsCheckState(
+                  _currentPurchase.id,
+                  true,
+                );
+              } else if (value == 'deselect_all') {
+                context.read<PurchasedItemsRepository>().setAllItemsCheckState(
+                  _currentPurchase.id,
+                  false,
+                );
               }
             },
             itemBuilder: (context) => [
               const PopupMenuItem(value: 'budget', child: Text('Set Budget')),
+              PopupMenuItem(
+                value: 'toggle_checklist',
+                child: Text(
+                  _currentPurchase.isChecklistMode ? 'Disable Checklist' : 'Enable Checklist',
+                ),
+              ),
+              if (_currentPurchase.isChecklistMode)
+                const PopupMenuItem(value: 'select_all', child: Text('Select All')),
+              if (_currentPurchase.isChecklistMode)
+                const PopupMenuItem(value: 'deselect_all', child: Text('Deselect All')),
             ],
           ),
         ],
@@ -224,8 +270,10 @@ class _PurchasedItemsScreenState extends State<PurchasedItemsScreen> {
                 slivers: [
                   SliverToBoxAdapter(
                     child: PurchaseSummaryCard(
-                      itemCount: totalItems,
-                      total: totalPrice,
+                      itemCount: displayTotalItems,
+                      totalItems: totalItemsListLength,
+                      isChecklistMode: _currentPurchase.isChecklistMode,
+                      total: displayTotalPrice,
                       budget: _currentPurchase.budget,
                     ),
                   ),
@@ -248,7 +296,7 @@ class _PurchasedItemsScreenState extends State<PurchasedItemsScreen> {
                           return _buildItemTile(
                             _purchasedItems[index],
                             index,
-                            totalItems,
+                            totalItemsListLength,
                             animation,
                           );
                         },

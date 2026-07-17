@@ -5,12 +5,21 @@ import 'package:provider/provider.dart';
 
 class PurchaseSummaryCard extends StatelessWidget {
   final int itemCount;
+  final int? totalItems;
+  final bool isChecklistMode;
   final double total;
   final double? budget;
 
   final double headerIconSize = 28;
 
-  const PurchaseSummaryCard({super.key, required this.itemCount, required this.total, this.budget});
+  const PurchaseSummaryCard({
+    super.key,
+    required this.itemCount,
+    this.totalItems,
+    this.isChecklistMode = false,
+    required this.total,
+    this.budget,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -48,7 +57,7 @@ class PurchaseSummaryCard extends StatelessWidget {
     return Row(
       children: [
         Icon(
-          Icons.shopping_cart_outlined,
+          isChecklistMode ? Icons.checklist : Icons.shopping_cart_outlined,
           color: colorScheme.onPrimaryContainer,
           size: headerIconSize,
         ),
@@ -57,14 +66,16 @@ class PurchaseSummaryCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              itemCount.toString().padLeft(2, '0'),
+              isChecklistMode && totalItems != null
+                  ? '${itemCount.toString().padLeft(2, '0')}/${totalItems.toString().padLeft(2, '0')}'
+                  : itemCount.toString().padLeft(2, '0'),
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                 fontWeight: FontWeight.bold,
                 color: colorScheme.onPrimaryContainer,
               ),
             ),
             Text(
-              'Items',
+              isChecklistMode ? 'Checked Items' : 'Items',
               style: Theme.of(
                 context,
               ).textTheme.bodySmall?.copyWith(color: colorScheme.onPrimaryContainer),
@@ -95,7 +106,7 @@ class PurchaseSummaryCard extends StatelessWidget {
               ),
             ),
             Text(
-              'Total',
+              isChecklistMode ? 'Selected Total' : 'Total',
               style: Theme.of(
                 context,
               ).textTheme.bodySmall?.copyWith(color: colorScheme.onPrimaryContainer),
