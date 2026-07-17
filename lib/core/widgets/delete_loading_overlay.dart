@@ -19,18 +19,30 @@ class DeleteLoadingOverlay extends StatefulWidget {
 class _DeleteLoadingOverlayState extends State<DeleteLoadingOverlay>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
-  late Animation<double> _animation;
+  late Animation<double> _progressAnimation;
+  late Animation<double> _fadeAnimation;
 
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(duration: widget.duration, vsync: this)..forward();
-    _animation = Tween<double>(begin: 0.0, end: 1.0).animate(_controller);
+
+    _controller = AnimationController(duration: widget.duration, vsync: this);
+    _progressAnimation = Tween<double>(begin: 0.0, end: 1.3).animate(_controller);
+
+    _fadeAnimation = Tween<double>(begin: 1.0, end: 0.0).animate(
+      CurvedAnimation(
+        parent: _controller,
+        curve: const Interval(0.9, 1.0, curve: Curves.easeOut),
+      ),
+    );
+
     _controller.addStatusListener((status) {
       if (status == AnimationStatus.completed) {
         widget.onComplete();
       }
     });
+
+    _controller.forward();
   }
 
   @override
@@ -50,37 +62,46 @@ class _DeleteLoadingOverlayState extends State<DeleteLoadingOverlay>
             child: LayoutBuilder(
               builder: (context, constraints) {
                 return AnimatedBuilder(
-                  animation: _animation,
+                  animation: _controller,
                   builder: (context, child) {
-                    final barWidth = constraints.maxWidth * _animation.value;
-                    return Stack(
-                      children: [
-                        // Dark overlay background
-                        Container(color: Colors.black.withValues(alpha: 0.6)),
-                        // Translucent growing fill bar – now using constraints.maxWidth
-                        Align(
-                          alignment: Alignment.centerLeft,
-                          child: Container(
-                            width: barWidth,
-                            height: double.infinity,
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                begin: Alignment.centerLeft,
-                                end: Alignment.centerRight,
-                                colors: [
-                                  Colors.red.withValues(alpha: 0.5),
-                                  Colors.red.withValues(alpha: 0.7),
-                                  Colors.red.withValues(alpha: 1.0),
-                                ],
+                    final barWidth = constraints.maxWidth * _progressAnimation.value;
+                    final opacity = _fadeAnimation.value;
+
+                    return Opacity(
+                      opacity: opacity,
+                      child: Stack(
+                        children: [
+                          // Dark overlay background
+                          Container(color: Colors.black.withValues(alpha: 0.6 * opacity)),
+                          // Translucent growing fill bar
+                          Align(
+                            alignment: Alignment.centerLeft,
+                            child: Container(
+                              width: barWidth,
+                              height: double.infinity,
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  begin: Alignment.centerLeft,
+                                  end: Alignment.centerRight,
+                                  colors: [
+                                    Colors.red.withValues(alpha: 0.5 * opacity),
+                                    Colors.red.withValues(alpha: 0.7 * opacity),
+                                    Colors.red.withValues(alpha: 1.0 * opacity),
+                                  ],
+                                ),
                               ),
                             ),
                           ),
-                        ),
-                        // Icon in center on top of everything
-                        const Center(
-                          child: Icon(Icons.delete_outline, color: Colors.white, size: 40),
-                        ),
-                      ],
+                          // Icon in center on top of everything
+                          Center(
+                            child: Icon(
+                              Icons.delete_outline,
+                              color: Colors.white.withValues(alpha: opacity),
+                              size: 40,
+                            ),
+                          ),
+                        ],
+                      ),
                     );
                   },
                 );
