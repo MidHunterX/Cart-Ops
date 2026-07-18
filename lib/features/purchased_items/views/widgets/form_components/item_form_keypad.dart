@@ -289,7 +289,9 @@ class _ItemFormKeypadState extends State<ItemFormKeypad> {
               ),
             ),
             _buildActionBtn(
-              text: hasDiscount ? 'Disc: ${widget.discountStr}%' : 'Discount',
+              text: hasDiscount
+                  ? '${double.parse(widget.discountStr).toStringAsFixed(2)}%'
+                  : 'Discount',
               backgroundColor: hasDiscount ? inputActiveBg : inputInactiveBg,
               foregroundColor: hasDiscount ? inputActiveFg : inputInactiveFg,
               onTap: widget.onDiscountTap,

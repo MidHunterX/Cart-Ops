@@ -48,16 +48,8 @@ class _UnitPriceCalculatorDialogState extends State<UnitPriceCalculatorDialog> {
   @override
   void initState() {
     super.initState();
-    _totalAmountCtrl = TextEditingController(
-      text: widget.initialFinalPrice.isEmpty || widget.initialFinalPrice == '0'
-          ? '0'
-          : widget.initialFinalPrice,
-    );
-    _quantityCtrl = TextEditingController(
-      text: widget.initialQuantity.isEmpty || widget.initialQuantity == '0'
-          ? '1'
-          : widget.initialQuantity,
-    );
+    _totalAmountCtrl = TextEditingController(text: widget.initialFinalPrice);
+    _quantityCtrl = TextEditingController(text: widget.initialQuantity);
     _resultCtrl = TextEditingController();
 
     _calculate();
