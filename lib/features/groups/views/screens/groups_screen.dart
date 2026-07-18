@@ -62,13 +62,14 @@ class _GroupsScreenState extends State<GroupsScreen> {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
     final settings = context.watch<SettingsProvider>();
     final purchasesRepo = context.read<PurchasesRepository>();
 
     bool hasPurchases = _ungroupedPurchasesCount > 0;
     bool hasGroups = _groups.isNotEmpty;
-    // If groups enabled or has groups, show groups
-    // If no purchases and groups enabled, show groups
+
+    // LOGIC FOR COMBINATIONS
     bool onlyGroups = (!hasPurchases && hasGroups);
     bool showGroups = (hasGroups || settings.isGroupEnabled) || onlyGroups;
     // If purchases and groups disabled, show purchases
@@ -76,12 +77,10 @@ class _GroupsScreenState extends State<GroupsScreen> {
     bool showPurchases = hasPurchases || onlyPurchases;
     // If both enabled, show titles
     bool showTitles = showGroups && showPurchases;
+    // Complete Void (Full Empty Screen)
+    bool completeVoid = !hasPurchases && !hasGroups && !_isLoadingGroups;
 
-    // TODO: Create this Full Empty Screen with instructions/eastereggs
-    // This screen contains two buttons FAB for purchase and + group
-    // bool completeVoid = !hasPurchases && !hasGroups;
-
-    const double groupTileHeight = 150;
+    const double groupTileHeight = 160;
 
     return Scaffold(
       appBar: AppBar(
@@ -103,7 +102,7 @@ class _GroupsScreenState extends State<GroupsScreen> {
       ),
       floatingActionButton: DextrousFloatingActionButton(
         isCenter: settings.dominantHand == DominantHand.center,
-        icon: Icons.shopping_cart,
+        icon: Icons.shopping_cart_checkout,
         label: 'Add Purchase',
         onPressed: () async {
           final purchase = await purchasesRepo.createPurchase(null);
@@ -123,40 +122,52 @@ class _GroupsScreenState extends State<GroupsScreen> {
           ? FloatingActionButtonLocation.startFloat
           : FloatingActionButtonLocation.centerFloat,
       body: CustomScrollView(
+        physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
         slivers: [
-          if (showTitles)
-            SliverPadding(
-              padding: const EdgeInsets.fromLTRB(16, 24, 16, 16),
-              sliver: SliverToBoxAdapter(
-                child: Text('Groups', style: Theme.of(context).textTheme.headlineSmall),
-              ),
-            ),
-
-          if (showGroups) ...[
-            if (_isLoadingGroups)
-              const SliverToBoxAdapter(
-                child: SizedBox(
-                  height: groupTileHeight,
-                  child: Center(child: CircularProgressIndicator()),
+          if (completeVoid)
+            _buildEmptyStateSliver(context, colorScheme, textTheme, settings.isGroupEnabled)
+          else ...[
+            if (showTitles)
+              SliverPadding(
+                padding: const EdgeInsets.fromLTRB(20, 16, 20, 12),
+                sliver: SliverToBoxAdapter(
+                  child: Text(
+                    'Groups',
+                    style: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                  ),
                 ),
-              )
-            else if (onlyGroups)
-              ..._buildGroupsOnlySlivers(context, colorScheme)
-            else
-              SliverToBoxAdapter(child: _buildGroupsView(context, colorScheme, groupTileHeight)),
+              ),
+
+            if (showGroups) ...[
+              if (_isLoadingGroups)
+                const SliverToBoxAdapter(
+                  child: SizedBox(
+                    height: groupTileHeight,
+                    child: Center(child: CircularProgressIndicator()),
+                  ),
+                )
+              else if (onlyGroups)
+                ..._buildGroupsOnlySlivers(context, colorScheme, textTheme)
+              else
+                SliverToBoxAdapter(child: _buildGroupsView(context, colorScheme, groupTileHeight)),
+            ],
+
+            if (showTitles)
+              SliverPadding(
+                padding: const EdgeInsets.fromLTRB(20, 24, 20, 12),
+                sliver: SliverToBoxAdapter(
+                  child: Text(
+                    'Purchases',
+                    style: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ),
+
+            if (showPurchases) PurchasesList(stream: purchasesRepo.watchPurchases(), group: null),
           ],
 
-          const SliverPadding(padding: EdgeInsets.only(top: 18)),
-
-          if (showTitles)
-            SliverPadding(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-              sliver: SliverToBoxAdapter(
-                child: Text('Purchases', style: Theme.of(context).textTheme.headlineSmall),
-              ),
-            ),
-
-          if (showPurchases) PurchasesList(stream: purchasesRepo.watchPurchases(), group: null),
+          // bottom padding for FAB
+          const SliverPadding(padding: EdgeInsets.only(bottom: 100)),
         ],
       ),
     );
@@ -165,6 +176,7 @@ class _GroupsScreenState extends State<GroupsScreen> {
   Widget _buildGroupTile(BuildContext context, Group group, ColorScheme colorScheme) {
     return Card.filled(
       clipBehavior: Clip.antiAlias,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: InkWell(
         onTap: () => Navigator.push(
           context,
@@ -173,30 +185,48 @@ class _GroupsScreenState extends State<GroupsScreen> {
         child: Stack(
           children: [
             Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.storefront, size: 36, color: colorScheme.primary),
-                  const SizedBox(height: 12),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                    child: Text(
+              child: Padding(
+                padding: const EdgeInsets.all(12.0),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.storefront, size: 36, color: colorScheme.primary),
+                    const SizedBox(height: 12),
+                    Text(
                       group.name,
                       textAlign: TextAlign.center,
-                      style: TextStyle(color: colorScheme.onSurface),
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        color: colorScheme.onSurface,
+                        fontWeight: FontWeight.w600,
+                      ),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
             Positioned(
-              top: 0,
-              right: 0,
-              child: IconButton(
-                icon: const Icon(Icons.close, size: 18),
-                onPressed: () => _confirmDeleteGroup(context, group),
+              top: 4,
+              right: 4,
+              child: PopupMenuButton<String>(
+                icon: Icon(Icons.more_vert, size: 20, color: colorScheme.onSurfaceVariant),
+                tooltip: 'Group Options',
+                onSelected: (value) {
+                  if (value == 'delete') _confirmDeleteGroup(context, group);
+                },
+                itemBuilder: (context) => [
+                  PopupMenuItem(
+                    value: 'delete',
+                    child: Row(
+                      children: [
+                        Icon(Icons.delete_outline, color: colorScheme.error, size: 20),
+                        const SizedBox(width: 12),
+                        Text('Delete Group', style: TextStyle(color: colorScheme.error)),
+                      ],
+                    ),
+                  ),
+                ],
               ),
             ),
           ],
@@ -209,8 +239,9 @@ class _GroupsScreenState extends State<GroupsScreen> {
     return SizedBox(
       height: groupTileHeight,
       child: ListView.separated(
+        physics: const BouncingScrollPhysics(),
         scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 16),
+        padding: const EdgeInsets.symmetric(horizontal: 20),
         itemCount: _groups.length + 1,
         separatorBuilder: (context, index) => const SizedBox(width: 16),
         itemBuilder: (context, index) {
@@ -229,7 +260,11 @@ class _GroupsScreenState extends State<GroupsScreen> {
     );
   }
 
-  List<Widget> _buildGroupsOnlySlivers(BuildContext context, ColorScheme colorScheme) {
+  List<Widget> _buildGroupsOnlySlivers(
+    BuildContext context,
+    ColorScheme colorScheme,
+    TextTheme textTheme,
+  ) {
     return [
       SliverToBoxAdapter(
         child: Padding(
@@ -237,21 +272,25 @@ class _GroupsScreenState extends State<GroupsScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const SizedBox(height: 32),
-              Icon(Icons.storefront, size: 80, color: colorScheme.surfaceTint),
+              const SizedBox(height: 16),
+              Container(
+                padding: const EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  color: colorScheme.primaryContainer,
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(Icons.storefront, size: 56, color: colorScheme.onPrimaryContainer),
+              ),
               const SizedBox(height: 24),
               Text(
                 'Your Groups',
-                style: Theme.of(
-                  context,
-                ).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),
+                style: textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
               Text(
                 'All your purchases are organized in groups',
-                style: Theme.of(
-                  context,
-                ).textTheme.bodyMedium?.copyWith(color: colorScheme.onSurfaceVariant),
+                textAlign: TextAlign.center,
+                style: textTheme.bodyMedium?.copyWith(color: colorScheme.onSurfaceVariant),
               ),
               const SizedBox(height: 32),
             ],
@@ -259,13 +298,13 @@ class _GroupsScreenState extends State<GroupsScreen> {
         ),
       ),
       SliverPadding(
-        padding: const EdgeInsets.symmetric(horizontal: 24),
+        padding: const EdgeInsets.symmetric(horizontal: 20),
         sliver: SliverGrid(
           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2, // Two columns
+            crossAxisCount: 2,
             crossAxisSpacing: 16,
             mainAxisSpacing: 16,
-            childAspectRatio: 1, // Square tiles
+            childAspectRatio: 1,
           ),
           delegate: SliverChildBuilderDelegate((context, index) {
             if (index == _groups.length) {
@@ -275,13 +314,17 @@ class _GroupsScreenState extends State<GroupsScreen> {
           }, childCount: _groups.length + 1),
         ),
       ),
-      // Add extra padding at the bottom so the FAB doesn't overlay the bottom grid item
-      const SliverPadding(padding: EdgeInsets.only(bottom: 88)),
     ];
   }
 
   Widget _buildAddGroupTile(BuildContext context, ColorScheme colorScheme) {
-    return Card.outlined(
+    return Card(
+      elevation: 0,
+      color: Colors.transparent,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(color: colorScheme.primary.withValues(alpha: 0.4), width: 2),
+      ),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: () => showDialog(context: context, builder: (_) => const AddGroupDialog()),
@@ -289,11 +332,131 @@ class _GroupsScreenState extends State<GroupsScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.add, size: 36, color: colorScheme.secondary),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: colorScheme.primaryContainer.withValues(alpha: 0.5),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(Icons.add, size: 28, color: colorScheme.primary),
+              ),
               const SizedBox(height: 12),
-              Text('Add Group', style: TextStyle(color: colorScheme.secondary)),
+              Text(
+                'Add Group',
+                style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                  color: colorScheme.primary,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildEmptyStateSliver(
+    BuildContext context,
+    ColorScheme colorScheme,
+    TextTheme textTheme,
+    bool isEasterEgg,
+  ) {
+    final purchasesRepo = context.read<PurchasesRepository>();
+    return SliverFillRemaining(
+      hasScrollBody: false,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 32.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.auto_awesome_mosaic_outlined,
+              size: 80,
+              color: colorScheme.primary.withValues(alpha: 0.5),
+            ),
+            const SizedBox(height: 24),
+            Text(
+              isEasterEgg ? 'Welcome to the Real World!' : 'Welcome to Cart Ops!',
+              style: textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 12),
+            isEasterEgg
+                ? Text(
+                    'You tap the blue pill, You go back shopping. '
+                    'You tap the red pill, You live the structured life. '
+                    'And I show you how deep the rabbit hole goes.',
+                    textAlign: TextAlign.center,
+                    style: textTheme.bodyLarge?.copyWith(color: colorScheme.onSurfaceVariant),
+                  )
+                : Text(
+                    'Start organizing your shopping easily.'
+                    'Add your first purchase below.',
+                    textAlign: TextAlign.center,
+                    style: textTheme.bodyLarge?.copyWith(color: colorScheme.onSurfaceVariant),
+                  ),
+            const SizedBox(height: 16),
+            if (isEasterEgg)
+              Stack(
+                children: [
+                  Opacity(
+                    opacity: 0.4,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      spacing: 60,
+                      children: [
+                        Transform.scale(
+                          scaleY: -1,
+                          child: const Text('🤚', style: TextStyle(fontSize: 90)),
+                        ),
+                        Transform.scale(
+                          scaleX: -1,
+                          scaleY: -1,
+                          child: const Text('🤚', style: TextStyle(fontSize: 90)),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    spacing: 8,
+                    children: [
+                      FilledButton.icon(
+                        icon: const Icon(Icons.create_new_folder_outlined),
+                        style: FilledButton.styleFrom(
+                          backgroundColor: Colors.red,
+                          foregroundColor: Colors.white,
+                        ),
+                        label: const Text('Groups'),
+                        onPressed: () =>
+                            showDialog(context: context, builder: (_) => const AddGroupDialog()),
+                      ),
+                      SizedBox(height: 60),
+                      FilledButton.icon(
+                        icon: const Icon(Icons.add_shopping_cart_outlined),
+                        style: FilledButton.styleFrom(
+                          backgroundColor: Colors.blue,
+                          foregroundColor: Colors.white,
+                        ),
+                        label: const Text('Purchase'),
+                        onPressed: () async {
+                          final purchase = await purchasesRepo.createPurchase(null);
+                          if (context.mounted) {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) =>
+                                    PurchasedItemsScreen(purchase: purchase, group: null),
+                              ),
+                            );
+                          }
+                        },
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+          ],
         ),
       ),
     );

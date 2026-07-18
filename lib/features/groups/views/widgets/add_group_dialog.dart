@@ -33,7 +33,7 @@ class _AddGroupDialogState extends State<AddGroupDialog> {
       content: TextField(
         controller: _controller,
         decoration: const InputDecoration(
-          hintText: 'e.g. Lulu Hypermarket, Hardware Store',
+          hintText: 'e.g. Hypermarket, Hardware Store',
         ),
         autofocus: true,
         onSubmitted: (_) => _submit(),

@@ -269,6 +269,7 @@ User onboarding is plain simple naturally following the principle of
 4. You can go to settings and enable groups feature to enable purchase groups
    only if you want.
 
-## Problems Faced :(
+## 🥚 Easter Egg
 
-### Power User UI for Price Inputs?
+Enable `Purchase Groups` feature while no purchases or groups have been made.
+Take the correct choice to go into a specialized Home Screen UI for Groups.
