@@ -147,18 +147,21 @@ class _ItemFormKeypadState extends State<ItemFormKeypad> {
     return Expanded(
       child: Padding(
         padding: const EdgeInsets.all(4.0),
-        child: OutlinedButton(
-          onPressed: () {
+        child: Listener(
+          onPointerDown: (_) {
             _triggerHaptic();
             widget.onKeyPressed(text);
           },
-          style: OutlinedButton.styleFrom(
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-            padding: EdgeInsets.zero,
-          ),
-          child: SizedBox(
-            height: 56,
-            child: Center(child: Text(text, style: Theme.of(context).textTheme.titleMedium)),
+          child: OutlinedButton(
+            onPressed: () {},
+            style: OutlinedButton.styleFrom(
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              padding: EdgeInsets.zero,
+            ),
+            child: SizedBox(
+              height: 56,
+              child: Center(child: Text(text, style: Theme.of(context).textTheme.titleMedium)),
+            ),
           ),
         ),
       ),
