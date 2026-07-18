@@ -215,6 +215,17 @@ where things get tricky. Mainly there are three options:
 Offer is an abstract reusable pattern which can be used for different discount
 mechanisms like Coupons, Buy N Get N Free, Free Samples, Concessions etc.
 
+The optimal way to implement generally is by:
+
+| Column | Type                        |
+| ------ | --------------------------- |
+| type   | ENUM('PERCENTAGE', 'FIXED') |
+| value  | DECIMAL(10,2)               |
+
+But this app is all about doing heavy crud operations around calculations where
+values changes constantly. So, percentage should be the only source of truth.
+This way, the discount scales correctly with price corrections.
+
 #### Discount Entry UX Problem
 
 Almost everywhere there is a discount entry field, it would just be an input
