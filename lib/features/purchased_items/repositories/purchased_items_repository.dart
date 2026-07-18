@@ -39,6 +39,9 @@ class PurchasedItemsRepository {
     }
 
     int? finalItemId;
+    // By default, the purchased item retains the image unless it's transferred.
+    Value<String?> finalPurchasedItemImagePath = imagePath;
+
     if (targetItem != null) {
       finalItemId = targetItem.id;
       if (imagePath.present) {
@@ -51,6 +54,8 @@ class PurchasedItemsRepository {
           } catch (_) {}
         }
         await _itemsDao.updateItemImage(finalItemId, imagePath.value);
+        // Transfer ownership to the existing main item
+        finalPurchasedItemImagePath = const Value<String?>(null);
       }
     } else {
       final trimmedName = name.trim();
@@ -58,13 +63,15 @@ class PurchasedItemsRepository {
         finalItemId = await _itemsDao.insertItem(
           ItemsCompanion.insert(name: trimmedName, groupId: Value(group?.id), imagePath: imagePath),
         );
+        // Transfer ownership to the newly created item
+        finalPurchasedItemImagePath = const Value<String?>(null);
       }
     }
 
     int newItemId = await _purchasedItemsDao.insertPurchasedItem(
       PurchasedItemsCompanion.insert(
         name: Value(name.trim().isEmpty ? null : name.trim()),
-        imagePath: imagePath,
+        imagePath: finalPurchasedItemImagePath,
         price: Value(price),
         quantity: Value(qty),
         isWeight: Value(isWeight),
@@ -102,6 +109,22 @@ class PurchasedItemsRepository {
     bool isItemRequirementsMet =
         name != null && name.trim().isNotEmpty && price != null && qty != null;
 
+    // EDGE CASE: If a new image is provided right before handover, clean up
+    // the old image owned by the PurchasedItem so it doesn't get orphaned.
+    if (imagePath.present && existingPurchasedItem != null) {
+      if (existingPurchasedItem.imagePath != null &&
+          existingPurchasedItem.imagePath != imagePath.value) {
+        try {
+          final oldFile = File(existingPurchasedItem.imagePath!);
+          if (await oldFile.exists()) {
+            await oldFile.delete();
+          }
+        } catch (_) {}
+      }
+    }
+
+    Value<String?> finalPurchasedItemImagePath = imagePath;
+
     if (isItemRequirementsMet) {
       Item? targetItem;
       if (itemId != null) {
@@ -120,30 +143,29 @@ class PurchasedItemsRepository {
             } catch (_) {}
           }
           await _itemsDao.updateItemImage(finalItemId, imagePath.value);
+          // Transfer ownership to existing linked item
+          finalPurchasedItemImagePath = const Value<String?>(null);
         }
       } else {
         final trimmedName = name.trim();
         if (trimmedName.isNotEmpty) {
+          // Identify which image to pass: the new one if supplied, else the existing one
+          String? imageToTransfer = imagePath.present
+              ? imagePath.value
+              : existingPurchasedItem?.imagePath;
+
           finalItemId = await _itemsDao.insertItem(
             ItemsCompanion.insert(
               name: trimmedName,
               groupId: Value(finalGroupId),
-              imagePath: imagePath,
+              imagePath: Value(imageToTransfer),
             ),
           );
-        }
-      }
-    }
 
-    if (imagePath.present && existingPurchasedItem != null) {
-      if (existingPurchasedItem.imagePath != null &&
-          existingPurchasedItem.imagePath != imagePath.value) {
-        try {
-          final oldFile = File(existingPurchasedItem.imagePath!);
-          if (await oldFile.exists()) {
-            await oldFile.delete();
-          }
-        } catch (_) {}
+          // OWNERSHIP TRANSFER: Because the new item now owns the image, we strip
+          // it from the PurchasedItem to maintain a single source of truth.
+          finalPurchasedItemImagePath = const Value<String?>(null);
+        }
       }
     }
 
@@ -156,7 +178,7 @@ class PurchasedItemsRepository {
         quantity: Value(qty),
         discount: Value(discount),
         isWeight: Value(isWeight),
-        imagePath: imagePath,
+        imagePath: finalPurchasedItemImagePath,
       ),
     );
 
