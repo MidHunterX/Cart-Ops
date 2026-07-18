@@ -162,7 +162,7 @@ class _EditPurchasedItemSheetState extends State<EditPurchasedItemSheet> {
       itemName: _name,
       initialPrice: widget.purchasedItem.price?.toPriceString() ?? '',
       initialQty: widget.purchasedItem.quantity?.toPriceString() ?? '',
-      initialDiscount: widget.purchasedItem.discount.toPriceString(),
+      initialDiscount: widget.purchasedItem.discount.toString(),
       initialIsWeight: widget.purchasedItem.isWeight,
       initialActiveField: widget.initialField,
       initialImagePath: widget.item.imagePath,

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:decimal/decimal.dart';
 
 enum _EditType { discount, percentage, sellingPrice }
 
@@ -34,6 +35,11 @@ class _DiscountCalculatorDialogState extends State<DiscountCalculatorDialog> {
   late TextEditingController _discountPercentCtrl;
   late TextEditingController _sellingPriceCtrl;
 
+  /// To prevent round-tripping issues (where both 200 and 200.1 are 13% of 230)
+  /// More decimal precision is needed for more percentage resolution
+  /// 4 is good for typical retail calculations
+  int retailPrecision = 4;
+
   bool _isUpdating = false;
   _EditType _lastEdited = _EditType.percentage; // Default mapping behavior
 
@@ -60,53 +66,59 @@ class _DiscountCalculatorDialogState extends State<DiscountCalculatorDialog> {
   }
 
   void _calculateInitial() {
-    double list = double.tryParse(_listingPriceCtrl.text) ?? 0.0;
-    double perc = double.tryParse(_discountPercentCtrl.text) ?? 0.0;
-    if (perc == 0) return;
-    if (list > 0) {
-      double disc = list * (perc / 100);
+    Decimal list = Decimal.tryParse(_listingPriceCtrl.text) ?? Decimal.zero;
+    Decimal perc = Decimal.tryParse(_discountPercentCtrl.text) ?? Decimal.zero;
+    if (perc == Decimal.zero) return;
+    if (list > Decimal.zero) {
+      final discRat = (list * perc) / Decimal.parse('100');
+      Decimal disc = discRat.toDecimal(scaleOnInfinitePrecision: retailPrecision);
       _discountAmountCtrl.text = _format(disc);
-      double sell = list - disc;
-      if (sell < 0) sell = 0;
+      Decimal sell = list - disc;
+      if (sell < Decimal.zero) sell = Decimal.zero;
       _sellingPriceCtrl.text = _format(sell);
     }
   }
 
-  String _format(double value) {
-    if (value == 0 || value.isNaN || value.isInfinite) return '';
-    String s = value.toStringAsFixed(2);
-    if (s.endsWith('.00')) {
-      return s.substring(0, s.length - 3);
-    }
-    if (s.endsWith('0')) {
-      return s.substring(0, s.length - 1);
-    }
-    return s;
+  String _format(Decimal value, {int precision = 2}) {
+    if (value == Decimal.zero) return '';
+    String str = value.toDouble().toStringAsFixed(precision);
+    if (str.endsWith('.00')) return str.substring(0, str.length - 3);
+    if (str.endsWith('0')) return str.substring(0, str.length - 1);
+    return str;
   }
 
   void _onListingPriceChanged(String val) {
     if (_isUpdating) return;
     _isUpdating = true;
-    double l = double.tryParse(val) ?? 0.0;
+    Decimal list = Decimal.tryParse(val) ?? Decimal.zero;
 
     if (_lastEdited == _EditType.percentage) {
-      double p = double.tryParse(_discountPercentCtrl.text) ?? 0.0;
-      double d = l * (p / 100);
-      double s = l - d;
-      _discountAmountCtrl.text = _format(d);
-      _sellingPriceCtrl.text = _format(s);
+      Decimal perc = Decimal.tryParse(_discountPercentCtrl.text) ?? Decimal.zero;
+      final discRat = (list * perc) / Decimal.parse('100');
+      Decimal disc = discRat.toDecimal(scaleOnInfinitePrecision: retailPrecision);
+      Decimal sell = list - disc;
+      _discountAmountCtrl.text = _format(disc);
+      _sellingPriceCtrl.text = _format(sell);
     } else if (_lastEdited == _EditType.sellingPrice) {
-      double s = double.tryParse(_sellingPriceCtrl.text) ?? 0.0;
-      double d = l - s;
-      double p = l > 0 ? (d / l) * 100 : 0.0;
-      _discountAmountCtrl.text = _format(d);
-      _discountPercentCtrl.text = _format(p);
+      Decimal sell = Decimal.tryParse(_sellingPriceCtrl.text) ?? Decimal.zero;
+      Decimal disc = list - sell;
+      Decimal perc = Decimal.zero;
+      if (list > Decimal.zero) {
+        final percRat = (disc / list) * Decimal.parse('100').toRational();
+        perc = percRat.toDecimal(scaleOnInfinitePrecision: retailPrecision);
+      }
+      _discountAmountCtrl.text = _format(disc);
+      _discountPercentCtrl.text = _format(perc, precision: retailPrecision);
     } else {
-      double d = double.tryParse(_discountAmountCtrl.text) ?? 0.0;
-      double p = l > 0 ? (d / l) * 100 : 0.0;
-      double s = l - d;
-      _discountPercentCtrl.text = _format(p);
-      _sellingPriceCtrl.text = _format(s);
+      Decimal disc = Decimal.tryParse(_discountAmountCtrl.text) ?? Decimal.zero;
+      Decimal perc = Decimal.zero;
+      if (list > Decimal.zero) {
+        final pRat = (disc / list) * Decimal.parse('100').toRational();
+        perc = pRat.toDecimal(scaleOnInfinitePrecision: retailPrecision);
+      }
+      Decimal sell = list - disc;
+      _discountPercentCtrl.text = _format(perc, precision: retailPrecision);
+      _sellingPriceCtrl.text = _format(sell);
     }
     _isUpdating = false;
   }
@@ -115,13 +127,17 @@ class _DiscountCalculatorDialogState extends State<DiscountCalculatorDialog> {
     if (_isUpdating) return;
     _isUpdating = true;
     _lastEdited = _EditType.discount;
-    double d = double.tryParse(val) ?? 0.0;
-    double l = double.tryParse(_listingPriceCtrl.text) ?? 0.0;
+    Decimal disc = Decimal.tryParse(val) ?? Decimal.zero;
+    Decimal list = Decimal.tryParse(_listingPriceCtrl.text) ?? Decimal.zero;
 
-    double p = l > 0 ? (d / l) * 100 : 0.0;
-    double s = l - d;
-    _discountPercentCtrl.text = _format(p);
-    _sellingPriceCtrl.text = _format(s);
+    Decimal perc = Decimal.zero;
+    if (list > Decimal.zero) {
+      final percRat = (disc / list) * Decimal.parse('100').toRational();
+      perc = percRat.toDecimal(scaleOnInfinitePrecision: retailPrecision);
+    }
+    Decimal sell = list - disc;
+    _discountPercentCtrl.text = _format(perc, precision: retailPrecision);
+    _sellingPriceCtrl.text = _format(sell);
     _isUpdating = false;
   }
 
@@ -129,13 +145,14 @@ class _DiscountCalculatorDialogState extends State<DiscountCalculatorDialog> {
     if (_isUpdating) return;
     _isUpdating = true;
     _lastEdited = _EditType.percentage;
-    double p = double.tryParse(val) ?? 0.0;
-    double l = double.tryParse(_listingPriceCtrl.text) ?? 0.0;
+    Decimal perc = Decimal.tryParse(val) ?? Decimal.zero;
+    Decimal list = Decimal.tryParse(_listingPriceCtrl.text) ?? Decimal.zero;
 
-    double d = l * (p / 100);
-    double s = l - d;
-    _discountAmountCtrl.text = _format(d);
-    _sellingPriceCtrl.text = _format(s);
+    final discRat = (list * perc) / Decimal.parse('100');
+    Decimal disc = discRat.toDecimal(scaleOnInfinitePrecision: retailPrecision);
+    Decimal sell = list - disc;
+    _discountAmountCtrl.text = _format(disc);
+    _sellingPriceCtrl.text = _format(sell);
     _isUpdating = false;
   }
 
@@ -143,13 +160,17 @@ class _DiscountCalculatorDialogState extends State<DiscountCalculatorDialog> {
     if (_isUpdating) return;
     _isUpdating = true;
     _lastEdited = _EditType.sellingPrice;
-    double s = double.tryParse(val) ?? 0.0;
-    double l = double.tryParse(_listingPriceCtrl.text) ?? 0.0;
+    Decimal sell = Decimal.tryParse(val) ?? Decimal.zero;
+    Decimal list = Decimal.tryParse(_listingPriceCtrl.text) ?? Decimal.zero;
 
-    double d = l - s;
-    double p = l > 0 ? (d / l) * 100 : 0.0;
-    _discountAmountCtrl.text = _format(d);
-    _discountPercentCtrl.text = _format(p);
+    Decimal disc = list - sell;
+    Decimal perc = Decimal.zero;
+    if (list > Decimal.zero) {
+      final percRat = (disc / list) * Decimal.parse('100').toRational();
+      perc = percRat.toDecimal(scaleOnInfinitePrecision: retailPrecision);
+    }
+    _discountAmountCtrl.text = _format(disc);
+    _discountPercentCtrl.text = _format(perc, precision: retailPrecision);
     _isUpdating = false;
   }
 
