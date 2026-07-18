@@ -157,7 +157,7 @@ void main() {
       final purchase = await purchasesRepository.createPurchase(null);
       final file = File('${tempDir.path}/purchased_item.png')..createSync();
       await purchasedItemsRepository.addPurchasedItem(
-        name: 'Watermelon',
+        name: '',
         price: 4.0,
         qty: 1.0,
         discount: 0.0,
@@ -174,6 +174,31 @@ void main() {
       final afterDelete = await purchasedItemsRepository.watchPurchasedItems(purchase.id).first;
       expect(afterDelete.isEmpty, isTrue);
       expect(file.existsSync(), isFalse);
+    });
+
+    test('deletePurchasedItem removes record'
+        'but cannot not delete local image'
+        'after transferring image ownership to item', () async {
+      final purchase = await purchasesRepository.createPurchase(null);
+      final file = File('${tempDir.path}/purchased_item.png')..createSync();
+      await purchasedItemsRepository.addPurchasedItem(
+        name: 'Watermelon',
+        price: 4.0,
+        qty: 1.0,
+        discount: 0.0,
+        isWeight: true,
+        purchaseId: purchase.id,
+        group: null,
+        imagePath: Value(file.path),
+      );
+      final purchasedItems = await purchasedItemsRepository.watchPurchasedItems(purchase.id).first;
+      expect(purchasedItems.length, 1);
+      final purchasedItemId = purchasedItems.first.purchasedItem.id;
+      expect(file.existsSync(), isTrue);
+      await purchasedItemsRepository.deletePurchasedItem(purchasedItemId);
+      final afterDelete = await purchasedItemsRepository.watchPurchasedItems(purchase.id).first;
+      expect(afterDelete.isEmpty, isTrue);
+      expect(file.existsSync(), isTrue);
     });
 
     test('getAvailableItems filters global items appropriately by group', () async {
@@ -617,5 +642,163 @@ void main() {
       final updatedPurchase = await purchasesRepository.watchPurchaseById(purchase.id).first;
       expect(updatedPurchase.totalPrice, 30.0);
     });
+  });
+
+  group('Image Ownership and Item Promotion Lifecycle', () {
+    test('deletePurchasedItem removes local image if it was NEVER eligible for an Item', () async {
+      final purchase = await purchasesRepository.createPurchase(null);
+      final file = File('${tempDir.path}/unpromoted_item.png')..createSync();
+
+      // Created with just an image (no name/price/qty) -> NOT eligible
+      final purchasedItemId = await purchasedItemsRepository.addPurchasedItem(
+        name: '',
+        price: null,
+        qty: null,
+        discount: 0.0,
+        isWeight: false,
+        purchaseId: purchase.id,
+        group: null,
+        imagePath: Value(file.path),
+      );
+
+      final purchasedItems = await purchasedItemsRepository.watchPurchasedItems(purchase.id).first;
+      final savedItem = purchasedItems.first;
+
+      // Assert: PurchasedItem owns the image, Item is not created (triggers fallback)
+      expect(savedItem.purchasedItem.imagePath, file.path);
+      expect(savedItem.hasPlaceholderItem, isTrue);
+
+      await purchasedItemsRepository.deletePurchasedItem(purchasedItemId);
+
+      expect(file.existsSync(), isFalse);
+    });
+
+    test(
+      'addPurchasedItem directly promotes to Item, transfers ownership, and protects image on deletion',
+      () async {
+        final purchase = await purchasesRepository.createPurchase(null);
+        final file = File('${tempDir.path}/promoted_on_creation.png')..createSync();
+
+        // Created with all required fields -> ELIGIBLE immediately
+        final purchasedItemId = await purchasedItemsRepository.addPurchasedItem(
+          name: 'Watermelon',
+          price: 4.0,
+          qty: 1.0,
+          discount: 0.0,
+          isWeight: true,
+          purchaseId: purchase.id,
+          group: null,
+          imagePath: Value(file.path),
+        );
+
+        final purchasedItems = await purchasedItemsRepository
+            .watchPurchasedItems(purchase.id)
+            .first;
+        final savedItem = purchasedItems.first;
+
+        // Assert: Ownership transferred to main Item
+        expect(savedItem.purchasedItem.imagePath, isNull);
+        expect(savedItem.item, isNotNull);
+        expect(savedItem.item.imagePath, file.path);
+
+        await purchasedItemsRepository.deletePurchasedItem(purchasedItemId);
+
+        // Assert: Image survives PurchasedItem deletion because main Item owns it
+        expect(file.existsSync(), isTrue);
+      },
+    );
+
+    test(
+      'updatePurchasedItem triggers promotion, transfers existing image ownership, and protects it',
+      () async {
+        final purchase = await purchasesRepository.createPurchase(null);
+        final file = File('${tempDir.path}/promoted_on_update.png')..createSync();
+
+        final purchasedItemId = await purchasedItemsRepository.addPurchasedItem(
+          name: '',
+          price: null,
+          qty: null,
+          discount: 0.0,
+          isWeight: false,
+          purchaseId: purchase.id,
+          group: null,
+          imagePath: Value(file.path),
+        );
+
+        // Update with missing requirements -> ELIGIBLE now
+        await purchasedItemsRepository.updatePurchasedItem(
+          id: purchasedItemId,
+          name: 'Milk',
+          price: 2.5,
+          qty: 1.0,
+          discount: 0.0,
+          isWeight: false,
+        );
+
+        final purchasedItems = await purchasedItemsRepository
+            .watchPurchasedItems(purchase.id)
+            .first;
+        final savedItem = purchasedItems.first;
+
+        // Assert: Image path was transferred from PurchasedItem to new Item
+        expect(savedItem.purchasedItem.imagePath, isNull);
+        expect(savedItem.item, isNotNull);
+        expect(savedItem.item.imagePath, file.path);
+
+        await purchasedItemsRepository.deletePurchasedItem(purchasedItemId);
+
+        // Assert: Protected by Item ownership
+        expect(file.existsSync(), isTrue);
+      },
+    );
+
+    test(
+      'EDGE CASE: updatePurchasedItem with new image right before promotion cleans up old image and transfers new one',
+      () async {
+        final purchase = await purchasesRepository.createPurchase(null);
+        final oldFile = File('${tempDir.path}/old_image.png')..createSync();
+        final newFile = File('${tempDir.path}/new_image.png')..createSync();
+
+        final purchasedItemId = await purchasedItemsRepository.addPurchasedItem(
+          name: '',
+          price: null,
+          qty: null,
+          discount: 0.0,
+          isWeight: false,
+          purchaseId: purchase.id,
+          group: null,
+          imagePath: Value(oldFile.path),
+        );
+
+        // Update triggers promotion AND provides a brand new image simultaneously
+        await purchasedItemsRepository.updatePurchasedItem(
+          id: purchasedItemId,
+          name: 'Eggs',
+          price: 3.0,
+          qty: 12.0,
+          discount: 0.0,
+          isWeight: false,
+          imagePath: Value(newFile.path),
+        );
+
+        // Assert: The repository deleted the old orphaned file during cleanup
+        expect(oldFile.existsSync(), isFalse);
+
+        final purchasedItems = await purchasedItemsRepository
+            .watchPurchasedItems(purchase.id)
+            .first;
+        final savedItem = purchasedItems.first;
+
+        // Assert: New item took ownership of the NEW image
+        expect(savedItem.purchasedItem.imagePath, isNull);
+        expect(savedItem.item, isNotNull);
+        expect(savedItem.item.imagePath, newFile.path);
+
+        await purchasedItemsRepository.deletePurchasedItem(purchasedItemId);
+
+        // Assert: Main item still owns new image
+        expect(newFile.existsSync(), isTrue);
+      },
+    );
   });
 }

@@ -18,6 +18,7 @@ class PurchasedItemWithDetails {
   PurchasedItemWithDetails(this.purchasedItem, this._item);
 
   // Custom getter to prevent crashes on screens that try accessing linked Item details.
+  // check: lib/features/purchased_items/views/widgets/purchased_item_tile.dart
   Item get item =>
       _item ??
       Item(
@@ -25,6 +26,7 @@ class PurchasedItemWithDetails {
         name: purchasedItem.name ?? '',
         imagePath: purchasedItem.imagePath,
       );
+  bool get hasPlaceholderItem => _item == null;
 }
 
 class PurchasedItemWithPurchase {
