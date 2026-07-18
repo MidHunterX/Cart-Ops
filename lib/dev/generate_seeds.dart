@@ -159,7 +159,7 @@ class DatabaseSeeder {
         price: Value(25),
         quantity: Value(3.57),
         isWeight: Value(true),
-        discount: Value(4),
+        discount: Value(16),
         imagePath: Value(imgpathFruits),
         purchaseId: purchaseId,
       ),
@@ -171,7 +171,7 @@ class DatabaseSeeder {
         price: Value(25),
         quantity: Value(4),
         isWeight: Value(false),
-        discount: Value(5),
+        discount: Value(20),
         imagePath: Value(imgpathLunch),
         purchaseId: purchaseId,
       ),
@@ -336,8 +336,9 @@ class DatabaseSeeder {
           ? double.parse((_random.nextDouble() * 4 + 0.5).toStringAsFixed(2)) // 0.5kg to 4.5kg
           : (_random.nextInt(5) + 1).toDouble(); // 1 to 5 units
 
-      final discount = _random.nextDouble() > 0.8
-          ? double.parse((_random.nextDouble() * 5).toStringAsFixed(2)) // 20% chance of discount
+      // 20% chance of discount
+      final discountPercent = _random.nextDouble() > 0.8
+          ? double.parse((_random.nextDouble() * 50).toStringAsFixed(2)) // 0% to 50%
           : 0.0;
 
       await _db.purchasedItemsDao.insertPurchasedItem(
@@ -346,13 +347,13 @@ class DatabaseSeeder {
           price: Value(price),
           quantity: Value(qty),
           isWeight: Value(isWeight),
-          discount: Value(discount),
+          discount: Value(discountPercent),
           purchaseId: purchaseId,
           itemId: Value(itemId),
         ),
       );
 
-      totalPrice += (price * qty) - discount;
+      totalPrice += (price * qty) - discountPercent;
     }
 
     // Update the purchase with the calculated total price
