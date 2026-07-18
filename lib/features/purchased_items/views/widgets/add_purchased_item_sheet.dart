@@ -6,8 +6,8 @@ import 'package:shopping_assist/core/database/database.dart';
 import 'package:shopping_assist/core/utils/image_picker_util.dart';
 import 'package:shopping_assist/features/items/repositories/items_repository.dart';
 import 'package:shopping_assist/features/purchased_items/repositories/purchased_items_repository.dart';
-import 'package:shopping_assist/features/purchased_items/views/widgets/add_item_components/input_field_box.dart';
-import 'add_item_components/item_dialogs.dart';
+import 'package:shopping_assist/features/purchased_items/views/widgets/form_components/input_field_box.dart';
+import 'form_components/item_name_dialog.dart';
 import 'common/purchased_item_form.dart';
 
 class AddPurchasedItemSheet extends StatefulWidget {
@@ -78,7 +78,7 @@ class _AddPurchasedItemSheetState extends State<AddPurchasedItemSheet> {
   }
 
   void _showNameDialog() {
-    ItemDialogs.showNameDialog(
+    ItemNameDialog.show(
       context: context,
       currentName: _name,
       allItems: _allItems,

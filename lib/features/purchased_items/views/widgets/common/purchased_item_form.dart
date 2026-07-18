@@ -7,9 +7,10 @@ import 'package:shopping_assist/features/items/repositories/items_repository.dar
 import 'package:shopping_assist/features/items/views/widgets/item_price_history_chart.dart';
 import 'package:shopping_assist/features/purchased_items/utils/keypad_logic.dart';
 import 'package:shopping_assist/features/settings/providers/settings_provider.dart';
-import '../add_item_components/input_field_box.dart';
-import '../add_item_components/add_item_keypad.dart';
-import '../add_item_components/item_dialogs.dart';
+import '../form_components/input_field_box.dart';
+import '../form_components/item_form_keypad.dart';
+import '../form_components/unit_price_calculator_dialog.dart';
+import '../form_components/discount_calculator_dialog.dart';
 import 'purchased_item_form_header.dart';
 import 'unit_quantity_selector.dart';
 
@@ -237,7 +238,7 @@ class PurchasedItemFormState extends State<PurchasedItemForm> {
   }
 
   void _handleDiscountTap() async {
-    final newDiscount = await ItemDialogs.showDiscountDialog(context, _discountStr, _priceStr);
+    final newDiscount = await DiscountCalculatorDialog.show(context, _discountStr, _priceStr);
     if (newDiscount != null && mounted) {
       setState(() => _discountStr = newDiscount.isEmpty ? '0' : newDiscount);
     }
@@ -319,7 +320,7 @@ class PurchasedItemFormState extends State<PurchasedItemForm> {
 
         const SizedBox(height: 16),
 
-        AddItemKeypad(
+        ItemFormKeypad(
           isLoading: widget.isLoading,
           itemName: widget.itemName,
           imagePath: _imageRemoved ? null : _imagePath,
@@ -347,7 +348,7 @@ class PurchasedItemFormState extends State<PurchasedItemForm> {
   }
 
   void _handleUnitPriceCalulatorTap() async {
-    final result = await ItemDialogs.showUnitPriceCalculatorDialog(
+    final result = await UnitPriceCalculatorDialog.show(
       context: context,
       currentQuantity: _qtyStr,
       currentFinalPrice: _priceStr,
@@ -358,7 +359,6 @@ class PurchasedItemFormState extends State<PurchasedItemForm> {
       setState(() {
         _priceStr = result;
         _priceController.text = result;
-        // After calculating price, usually the user might want to verify quantity
         _activeField = ActiveField.quantity;
         _focusActiveField();
       });
