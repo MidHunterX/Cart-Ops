@@ -265,10 +265,10 @@ class PurchasedItemFormState extends State<PurchasedItemForm> {
       return;
     }
 
-    if (pricePerUnit != null && (discount < 0 || discount >= pricePerUnit)) {
+    if (pricePerUnit != null && (discount < 0 || discount > 100)) {
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(const SnackBar(content: Text('Invalid discount amount')));
+      ).showSnackBar(const SnackBar(content: Text('Invalid discount percentage')));
       return;
     }
 

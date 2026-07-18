@@ -71,8 +71,9 @@ class PurchasesDao extends DatabaseAccessor<AppDatabase> with _$PurchasesDaoMixi
     for (final item in items) {
       final price = item.price ?? 0.0;
       final qty = item.quantity ?? 0.0;
-      final discount = item.discount;
-      total += ((price - discount) * qty); // TODO: Add overall discount toggle
+      final discountPercent = item.discount;
+      final discountAmount = price * (discountPercent / 100);
+      total += ((price - discountAmount) * qty);
     }
     await (update(
       purchases,

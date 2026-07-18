@@ -10,22 +10,34 @@ import 'package:shopping_assist/core/utils/number_formatter.dart';
 import 'edit_purchased_item_sheet.dart';
 import 'add_item_components/input_field_box.dart' show ActiveField;
 
-double _calcTotalPrice(double price, double discount, double quantity) {
+double _calcTotalPrice(double price, double discountPercent, double quantity) {
+  final Decimal priceDec = Decimal.parse(price.toString());
+  final Decimal discountDec = Decimal.parse(discountPercent.toString());
+  final Decimal quantityDec = Decimal.parse(quantity.toString());
+
+  final discount = (discountDec / Decimal.parse('100'));
+  final Decimal discountAmount = priceDec * discount.toDecimal();
+  final Decimal total = (priceDec - discountAmount) * quantityDec;
+  return total.toDouble();
+}
+
+double _calcTotalDiscount(double price, double discountPercent, double quantity) {
   final priceDec = Decimal.parse(price.toString());
-  final discountDec = Decimal.parse(discount.toString());
+  final discountDec = Decimal.parse(discountPercent.toString());
   final quantityDec = Decimal.parse(quantity.toString());
 
-  final total = (priceDec - discountDec) * quantityDec;
+  final discount = (discountDec / Decimal.parse('100')).toDecimal();
+  final total = priceDec * discount * quantityDec;
   return total.toDouble();
 }
 
-double _calcTotalDiscount(double discount, double quantity) {
-  final total = Decimal.parse(discount.toString()) * Decimal.parse(quantity.toString());
-  return total.toDouble();
-}
+double _calcRateAfterDiscount(double price, double discountPercent) {
+  final priceDec = Decimal.parse(price.toString());
+  final discountDec = Decimal.parse(discountPercent.toString());
 
-double _calcRateAfterDiscount(double price, double discount) {
-  final total = Decimal.parse(price.toString()) - Decimal.parse(discount.toString());
+  final discount = (discountDec / Decimal.parse('100')).toDecimal();
+  final discountAmount = priceDec * discount;
+  final total = priceDec - discountAmount;
   return total.toDouble();
 }
 
@@ -397,7 +409,7 @@ class PurchasedItemTile extends StatelessWidget {
           FittedBox(
             fit: BoxFit.scaleDown,
             child: Text(
-              _calcTotalDiscount(-pItem.discount, qty).toCurrencyString(currency),
+              _calcTotalDiscount(pItem.price??0, -pItem.discount, qty).toCurrencyString(currency),
               style: Theme.of(context).textTheme.bodySmall?.copyWith(color: colorScheme.error),
             ),
           ),

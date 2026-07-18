@@ -37,7 +37,7 @@ class PurchasedItems extends Table {
   RealColumn get price => real().nullable()();
   BoolColumn get isWeight => boolean().withDefault(const Constant(false))();
   RealColumn get quantity => real().nullable()(); // int => unit, float => weight
-  RealColumn get discount => real().withDefault(const Constant(0.0))();
+  RealColumn get discount => real().withDefault(const Constant(0.0))(); // Stored as a percentage
   BoolColumn get isChecked => boolean().withDefault(const Constant(false))();
   IntColumn get purchaseId => integer().references(Purchases, #id, onDelete: KeyAction.cascade)();
   IntColumn get itemId =>

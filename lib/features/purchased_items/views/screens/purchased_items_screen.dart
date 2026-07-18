@@ -215,8 +215,9 @@ class _PurchasedItemsScreenState extends State<PurchasedItemsScreen> {
       ) {
         final price = item.purchasedItem.price ?? 0.0;
         final qty = item.purchasedItem.quantity ?? 0.0;
-        final discount = item.purchasedItem.discount;
-        return sum + ((price - discount) * qty);
+        final discountPercent = item.purchasedItem.discount;
+        final discountAmount = price * (discountPercent / 100);
+        return sum + ((price - discountAmount) * qty);
       });
     }
 

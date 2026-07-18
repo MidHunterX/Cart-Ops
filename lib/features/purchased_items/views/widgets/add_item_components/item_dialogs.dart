@@ -109,16 +109,16 @@ class _DiscountCalculatorDialogState extends State<_DiscountCalculatorDialog> {
   late TextEditingController _sellingPriceCtrl;
 
   bool _isUpdating = false;
-  _EditType _lastEdited = _EditType.discount;
+  _EditType _lastEdited = _EditType.percentage; // Default mapping behavior
 
   @override
   void initState() {
     super.initState();
     _listingPriceCtrl = TextEditingController(text: widget.initialPrice);
-    _discountAmountCtrl = TextEditingController(
+    _discountPercentCtrl = TextEditingController(
       text: widget.initialDiscount == '0' ? '' : widget.initialDiscount,
     );
-    _discountPercentCtrl = TextEditingController();
+    _discountAmountCtrl = TextEditingController();
     _sellingPriceCtrl = TextEditingController();
 
     _calculateInitial();
@@ -135,15 +135,15 @@ class _DiscountCalculatorDialogState extends State<_DiscountCalculatorDialog> {
 
   void _calculateInitial() {
     double list = double.tryParse(_listingPriceCtrl.text) ?? 0.0;
-    double disc = double.tryParse(_discountAmountCtrl.text) ?? 0.0;
-    if (disc == 0) return;
+    double perc = double.tryParse(_discountPercentCtrl.text) ?? 0.0;
+    if (perc == 0) return;
     if (list > 0) {
-      double perc = (disc / list) * 100;
-      _discountPercentCtrl.text = _format(perc);
+      double disc = list * (perc / 100);
+      _discountAmountCtrl.text = _format(disc);
+      double sell = list - disc;
+      if (sell < 0) sell = 0;
+      _sellingPriceCtrl.text = _format(sell);
     }
-    double sell = list - disc;
-    if (sell < 0) sell = 0;
-    _sellingPriceCtrl.text = _format(sell);
   }
 
   String _format(double value) {
@@ -292,7 +292,7 @@ class _DiscountCalculatorDialogState extends State<_DiscountCalculatorDialog> {
       actions: [
         TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
         FilledButton(
-          onPressed: () => Navigator.pop(context, _discountAmountCtrl.text),
+          onPressed: () => Navigator.pop(context, _discountPercentCtrl.text),
           child: const Text('Save'),
         ),
       ],

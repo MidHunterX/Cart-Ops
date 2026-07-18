@@ -289,7 +289,7 @@ class _AddItemKeypadState extends State<AddItemKeypad> {
               ),
             ),
             _buildActionBtn(
-              text: hasDiscount ? 'Disc: ${widget.discountStr}' : 'Discount',
+              text: hasDiscount ? 'Disc: ${widget.discountStr}%' : 'Discount',
               backgroundColor: hasDiscount ? inputActiveBg : inputInactiveBg,
               foregroundColor: hasDiscount ? inputActiveFg : inputInactiveFg,
               onTap: widget.onDiscountTap,
