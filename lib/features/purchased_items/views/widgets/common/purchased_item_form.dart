@@ -347,12 +347,14 @@ class PurchasedItemFormState extends State<PurchasedItemForm> {
     );
   }
 
-  void _handleUnitPriceCalulatorTap() async {
+  void _handleUnitPriceCalulatorTap(String currencySymbol, String weightUnit) async {
     final result = await UnitPriceCalculatorDialog.show(
       context: context,
       currentQuantity: _qtyStr,
       currentFinalPrice: _priceStr,
       isWeight: _isWeight,
+      currencySymbol: currencySymbol,
+      weightUnit: weightUnit,
     );
 
     if (result != null && result.isNotEmpty && mounted) {
@@ -422,7 +424,7 @@ class PurchasedItemFormState extends State<PurchasedItemForm> {
                 top: 8,
                 child: IconButton(
                   icon: const Icon(Icons.calculate_outlined, size: 20),
-                  onPressed: _handleUnitPriceCalulatorTap,
+                  onPressed: () => _handleUnitPriceCalulatorTap(currencySymbol, weightUnit),
                   tooltip: 'Calculate unit price',
                   visualDensity: VisualDensity.compact,
                   color: Theme.of(context).colorScheme.primary,

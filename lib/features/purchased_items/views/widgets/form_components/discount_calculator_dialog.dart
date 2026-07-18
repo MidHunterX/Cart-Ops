@@ -12,13 +12,15 @@ class DiscountCalculatorDialog extends StatefulWidget {
     required this.initialPrice,
   });
 
-  static Future<String?> show(BuildContext context, String currentDiscount, String currentPrice) async {
+  static Future<String?> show(
+    BuildContext context,
+    String currentDiscount,
+    String currentPrice,
+  ) async {
     return showDialog<String>(
       context: context,
-      builder: (context) => DiscountCalculatorDialog(
-        initialDiscount: currentDiscount,
-        initialPrice: currentPrice,
-      ),
+      builder: (context) =>
+          DiscountCalculatorDialog(initialDiscount: currentDiscount, initialPrice: currentPrice),
     );
   }
 
@@ -154,7 +156,7 @@ class _DiscountCalculatorDialogState extends State<DiscountCalculatorDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text('Calculate Discount', style: Theme.of(context).textTheme.titleLarge),
+      title: Text('Discount Calculator', style: Theme.of(context).textTheme.titleLarge),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,

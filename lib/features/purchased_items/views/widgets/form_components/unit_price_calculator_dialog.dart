@@ -4,12 +4,16 @@ class UnitPriceCalculatorDialog extends StatefulWidget {
   final String initialQuantity;
   final String initialFinalPrice;
   final bool isWeight;
+  final String? currencySymbol;
+  final String? weightUnit;
 
   const UnitPriceCalculatorDialog({
     super.key,
     required this.initialQuantity,
     required this.initialFinalPrice,
     required this.isWeight,
+    this.currencySymbol,
+    this.weightUnit,
   });
 
   static Future<String?> show({
@@ -17,6 +21,8 @@ class UnitPriceCalculatorDialog extends StatefulWidget {
     required String currentQuantity,
     required String currentFinalPrice,
     required bool isWeight,
+    String? currencySymbol,
+    String? weightUnit,
   }) async {
     return showDialog<String>(
       context: context,
@@ -24,6 +30,8 @@ class UnitPriceCalculatorDialog extends StatefulWidget {
         initialQuantity: currentQuantity,
         initialFinalPrice: currentFinalPrice,
         isWeight: isWeight,
+        currencySymbol: currencySymbol ?? '',
+        weightUnit: weightUnit ?? 'weight',
       ),
     );
   }
@@ -85,33 +93,33 @@ class _UnitPriceCalculatorDialogState extends State<UnitPriceCalculatorDialog> {
         mainAxisSize: MainAxisSize.min,
         children: [
           TextField(
-            controller: _totalAmountCtrl,
-            autofocus: true,
+            controller: _quantityCtrl,
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            decoration: const InputDecoration(
-              labelText: 'Total Amount',
-              border: OutlineInputBorder(),
-              prefixText: '',
+            decoration: InputDecoration(
+              suffixText: widget.isWeight ? '${widget.weightUnit}' : '',
+              labelText: widget.isWeight ? 'Total ${widget.weightUnit}' : 'Total Quantity',
+              border: const OutlineInputBorder(),
             ),
             onChanged: (_) => _calculate(),
           ),
           const SizedBox(height: 16),
           TextField(
-            controller: _quantityCtrl,
+            controller: _totalAmountCtrl,
+            autofocus: true,
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
             decoration: InputDecoration(
-              labelText: widget.isWeight ? 'Total Weight' : 'Total Quantity/Pack Size',
-              border: const OutlineInputBorder(),
-              helperText: 'e.g., 6 for a 6-pack, or 1.5 for 1.5kg',
+              prefixText: widget.currencySymbol,
+              labelText: 'Total Price',
+              border: OutlineInputBorder(),
             ),
             onChanged: (_) => _calculate(),
           ),
           const SizedBox(height: 16),
           TextField(
             controller: _resultCtrl,
-            readOnly: true,
             decoration: InputDecoration(
-              labelText: 'Price Per Unit',
+              prefixText: widget.currencySymbol,
+              labelText: widget.isWeight ? 'Price per ${widget.weightUnit}' : 'Price per Unit',
               filled: true,
               fillColor: Theme.of(context).colorScheme.secondaryContainer,
               border: const OutlineInputBorder(),
