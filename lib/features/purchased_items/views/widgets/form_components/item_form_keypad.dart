@@ -5,7 +5,7 @@ import 'package:shopping_assist/core/utils/image_picker_util.dart';
 import 'package:shopping_assist/core/widgets/delete_loading_overlay.dart';
 import 'package:shopping_assist/core/widgets/item_image_view.dart';
 
-class AddItemKeypad extends StatefulWidget {
+class ItemFormKeypad extends StatefulWidget {
   final bool isLoading;
   final String itemName;
   final String? imagePath;
@@ -21,7 +21,7 @@ class AddItemKeypad extends StatefulWidget {
   final VoidCallback onIncrement;
   final VoidCallback onDecrement;
 
-  const AddItemKeypad({
+  const ItemFormKeypad({
     super.key,
     required this.isLoading,
     required this.itemName,
@@ -40,10 +40,10 @@ class AddItemKeypad extends StatefulWidget {
   });
 
   @override
-  State<AddItemKeypad> createState() => _AddItemKeypadState();
+  State<ItemFormKeypad> createState() => _ItemFormKeypadState();
 }
 
-class _AddItemKeypadState extends State<AddItemKeypad> {
+class _ItemFormKeypadState extends State<ItemFormKeypad> {
   bool _showDeleteOverlay = false;
   Key _overlayKey = UniqueKey();
 

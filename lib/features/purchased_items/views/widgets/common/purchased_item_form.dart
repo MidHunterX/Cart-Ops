@@ -8,7 +8,7 @@ import 'package:shopping_assist/features/items/views/widgets/item_price_history_
 import 'package:shopping_assist/features/purchased_items/utils/keypad_logic.dart';
 import 'package:shopping_assist/features/settings/providers/settings_provider.dart';
 import '../form_components/input_field_box.dart';
-import '../form_components/add_item_keypad.dart';
+import '../form_components/item_form_keypad.dart';
 import '../form_components/item_dialogs.dart';
 import 'purchased_item_form_header.dart';
 import 'unit_quantity_selector.dart';
@@ -319,7 +319,7 @@ class PurchasedItemFormState extends State<PurchasedItemForm> {
 
         const SizedBox(height: 16),
 
-        AddItemKeypad(
+        ItemFormKeypad(
           isLoading: widget.isLoading,
           itemName: widget.itemName,
           imagePath: _imageRemoved ? null : _imagePath,
