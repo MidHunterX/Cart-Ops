@@ -72,10 +72,17 @@ To generate DAOs:
 dart run build_runner build
 ```
 
-To generate app icons:
+To generate app icons before build:
 
 ```bash
 dart run flutter_launcher_icons
+```
+
+Create schema snapshot of current database for testing migrations:
+
+```
+dart run drift_dev schema dump lib/core/database/database.dart drift_schemas/
+dart run drift_dev schema generate drift_schemas/ test/generated_migrations/
 ```
 
 ## 🚨 Known Operational Defects
