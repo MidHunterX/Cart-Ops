@@ -45,7 +45,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(DatabaseConnection super.connection);
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   @override
   MigrationStrategy get migration {
@@ -57,6 +57,17 @@ class AppDatabase extends _$AppDatabase {
         if (from < 2) {
           await m.addColumn(purchases, purchases.isChecklistMode);
           await m.addColumn(purchasedItems, purchasedItems.isChecked);
+        }
+        if (from < 3) {
+          // Convert existing fixed discount values to percentages
+          await customStatement('''
+            UPDATE purchased_items
+            SET discount = CASE
+              WHEN price IS NOT NULL AND price > 0 THEN (discount / price) * 100
+              ELSE 0
+            END
+            WHERE discount > 0;
+          ''');
         }
       },
       beforeOpen: (details) async {
