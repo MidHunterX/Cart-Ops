@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../data/settings_data.dart';
 
@@ -159,4 +160,19 @@ class SettingsProvider extends ChangeNotifier {
     _loadTelephoneSettings();
     _loadGroupSettings();
   }
+}
+
+extension SettingsContext on BuildContext {
+  SettingsProvider get settings => watch<SettingsProvider>();
+  SettingsProvider get settingsRead => read<SettingsProvider>();
+
+  String get currencySymbol => settings.currencySymbol;
+  String get weightUnit => settings.weightUnit;
+  String get currencyCode => settings.currencyCode;
+  bool get isCompactItemList => settings.compactItemList;
+  ThemeMode get themeMode => settings.themeMode;
+  Color get seedColor => settings.seedColor;
+  String get dominantHand => settings.dominantHand;
+  bool get isTelephoneLayout => settings.isTelephoneLayout;
+  bool get isGroupEnabled => settings.isGroupEnabled;
 }
