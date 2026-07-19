@@ -219,7 +219,7 @@ class PurchasedItemFormState extends State<PurchasedItemForm> {
 
   void _incrementQuantity() {
     setState(() {
-      int currentQty = int.tryParse(_qtyStr) ?? 1;
+      int currentQty = double.tryParse(_qtyStr)?.toInt() ?? 1;
       currentQty++;
       _qtyStr = currentQty.toString();
       _qtyController.text = _qtyStr;
@@ -228,7 +228,7 @@ class PurchasedItemFormState extends State<PurchasedItemForm> {
 
   void _decrementQuantity() {
     setState(() {
-      int currentQty = int.tryParse(_qtyStr) ?? 1;
+      int currentQty = double.tryParse(_qtyStr)?.toInt() ?? 1;
       if (currentQty > 1) {
         currentQty--;
         _qtyStr = currentQty.toString();

@@ -90,7 +90,7 @@ class _UnitPriceCalculatorDialogState extends State<UnitPriceCalculatorDialog> {
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
             decoration: InputDecoration(
               suffixText: widget.isWeight ? '${widget.weightUnit}' : '',
-              labelText: widget.isWeight ? 'Total ${widget.weightUnit}' : 'Total Quantity',
+              labelText: widget.isWeight ? 'Total Weight (${widget.weightUnit})' : 'Total Quantity',
               border: const OutlineInputBorder(),
             ),
             onChanged: (_) => _calculate(),
@@ -110,12 +110,15 @@ class _UnitPriceCalculatorDialogState extends State<UnitPriceCalculatorDialog> {
           const SizedBox(height: 16),
           TextField(
             controller: _resultCtrl,
+            readOnly: true, // finding total price should be calculated by main form
             decoration: InputDecoration(
               prefixText: widget.currencySymbol,
+              suffixText: widget.isWeight ? '/${widget.weightUnit}' : '',
               labelText: widget.isWeight ? 'Price per ${widget.weightUnit}' : 'Price per Unit',
               filled: true,
               fillColor: Theme.of(context).colorScheme.secondaryContainer,
               border: const OutlineInputBorder(),
+              helperText: '* Calculated from above values',
             ),
           ),
         ],

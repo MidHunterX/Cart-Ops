@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:decimal/decimal.dart';
 import 'package:shopping_assist/features/purchased_items/views/widgets/form_components/calculator_title.dart';
+import 'package:shopping_assist/features/settings/providers/settings_provider.dart';
 
 enum _EditType { discount, percentage, sellingPrice }
 
@@ -187,7 +188,10 @@ class _DiscountCalculatorDialogState extends State<DiscountCalculatorDialog> {
               readOnly: true,
               controller: _listingPriceCtrl,
               keyboardType: const TextInputType.numberWithOptions(decimal: true),
-              decoration: const InputDecoration(labelText: 'Listing Price'),
+              decoration: InputDecoration(
+                labelText: 'Listing Price',
+                prefixText: context.currencySymbol,
+              ),
               onChanged: _onListingPriceChanged,
             ),
             const SizedBox(height: 16),
@@ -197,10 +201,10 @@ class _DiscountCalculatorDialogState extends State<DiscountCalculatorDialog> {
                   child: TextField(
                     controller: _discountAmountCtrl,
                     keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                    decoration: const InputDecoration(
+                    decoration: InputDecoration(
                       labelText: 'Discount',
                       border: OutlineInputBorder(),
-                      prefixText: '- ',
+                      prefixText: '-${context.currencySymbol}',
                     ),
                     onChanged: _onDiscountAmountChanged,
                   ),
@@ -210,10 +214,12 @@ class _DiscountCalculatorDialogState extends State<DiscountCalculatorDialog> {
                   child: TextField(
                     controller: _discountPercentCtrl,
                     keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                    decoration: const InputDecoration(
+                    decoration: InputDecoration(
                       labelText: 'Percentage',
                       border: OutlineInputBorder(),
                       suffixText: '%',
+                      filled: true,
+                      fillColor: Theme.of(context).colorScheme.secondaryContainer,
                     ),
                     onChanged: _onDiscountPercentChanged,
                   ),
