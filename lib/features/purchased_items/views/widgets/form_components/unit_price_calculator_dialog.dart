@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shopping_assist/features/purchased_items/views/widgets/form_components/calculator_title.dart';
 
 class UnitPriceCalculatorDialog extends StatefulWidget {
   final String initialQuantity;
@@ -80,7 +81,7 @@ class _UnitPriceCalculatorDialogState extends State<UnitPriceCalculatorDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text('Unit Price Calculator', style: Theme.of(context).textTheme.titleLarge),
+      title: CalculatorTitle(mainText: 'Unit Price', icon: Icons.calculate_outlined),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [

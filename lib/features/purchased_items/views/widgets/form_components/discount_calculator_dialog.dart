@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:decimal/decimal.dart';
+import 'package:shopping_assist/features/purchased_items/views/widgets/form_components/calculator_title.dart';
 
 enum _EditType { discount, percentage, sellingPrice }
 
@@ -177,7 +178,7 @@ class _DiscountCalculatorDialogState extends State<DiscountCalculatorDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text('Discount Calculator', style: Theme.of(context).textTheme.titleLarge),
+      title: CalculatorTitle(mainText: 'Discount', icon: Icons.discount_outlined),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
