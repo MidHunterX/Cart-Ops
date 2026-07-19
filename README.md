@@ -15,6 +15,25 @@ financial resource management via technological assistance.
 ![Dart](https://img.shields.io/badge/Dart-0175C2?style=for-the-badge&logo=dart&logoColor=white)
 ![SQLite](https://img.shields.io/badge/Sqlite-003B57?style=for-the-badge&logo=sqlite&logoColor=white)
 
+## 🚀 Getting Started
+
+- Get dependencies:
+  ```bash
+  flutter pub get
+  ```
+- Generate DAOs:
+  ```bash
+  dart run build_runner build
+  ```
+- Generate app icons:
+  ```bash
+  dart run flutter_launcher_icons
+  ```
+- Build release APK:
+  ```bash
+  flutter build apk --release --target-platform android-arm64
+  ```
+
 ## 🎯 Mission Objectives
 
 ![General Plan](./.assets/Cart-Ops-Mockup.svg)
@@ -67,18 +86,6 @@ financial resource management via technological assistance.
 - [x] Checklist Mode
 
 ## 🔫 Developer Operations
-
-To generate DAOs:
-
-```bash
-dart run build_runner build
-```
-
-To generate app icons before build:
-
-```bash
-dart run flutter_launcher_icons
-```
 
 Create schema snapshot of current database for testing migrations:
 

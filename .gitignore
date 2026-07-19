@@ -4,6 +4,9 @@
 /android/app/src/main/res/drawable-*/ic_launcher*.png
 /ios/Runner/Assets.xcassets/AppIcon.appiconset/Contents.json
 
+# build_runner generated files
+*.g.dart
+
 # Miscellaneous
 *.class
 *.log
