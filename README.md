@@ -1,13 +1,15 @@
-![Dark military-style banner for 'CART OPS' featuring a green circular emblem
-with a white shopping cart icon and white wings on either side, set against a
-black-and-gray digital camouflage background. Below the emblem are five gold
-stars, followed by large white stencil text reading 'CART OPS' and the subtitle
-'ADVANCED COMMERCE OPERATOR TOOL'.](./.assets/cartops_banner.jpg)
+![
+Cart Ops mobile app promotional banner collage in dark theme. Features multiple
+screenshots showing groups and purchases lists, item entry keypad with
+real-time totals and price graph, item details with price history trend, and
+tracked purchased food items. Center overlay displays purple shopping cart logo
+with 'CART_OPS Advanced Commerce Operator Toolset' text.
+](./.assets/cartops_banner2.jpg)
 
 # Cart Ops
 
-Personal commerce operator tool focusing on cognitive delegation of financial
-resource management via technological assistance.
+Your personal commerce operator toolset focusing on cognitive delegation of
+financial resource management via technological assistance.
 
 ![Flutter](https://img.shields.io/badge/Flutter-02569B?style=for-the-badge&logo=flutter&logoColor=white)
 ![Dart](https://img.shields.io/badge/Dart-0175C2?style=for-the-badge&logo=dart&logoColor=white)
