@@ -68,9 +68,8 @@ class PurchasedItemTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final pItem = details.purchasedItem;
     final item = details.item;
-    final settings = context.watch<SettingsProvider>();
-    final currency = settings.currencySymbol;
-    final weightUnit = settings.weightUnit;
+    final currency = context.currencySymbol;
+    final weightUnit = context.weightUnit;
     final colorScheme = Theme.of(context).colorScheme;
 
     final pricePerUnit = pItem.price ?? 0.0;
@@ -129,7 +128,7 @@ class PurchasedItemTile extends StatelessWidget {
 
                               if (details.item.imagePath != null ||
                                   details.purchasedItem.imagePath != null ||
-                                  settings.compactItemList == false) ...[
+                                  context.isCompactItemList == false) ...[
                                 _buildImageSection(details, colorScheme, imgSize),
                                 SizedBox(width: spacing),
                               ],
@@ -143,7 +142,6 @@ class PurchasedItemTile extends StatelessWidget {
                                         context,
                                         item,
                                         pItem,
-                                        settings,
                                         colorScheme,
                                         currency,
                                         weightUnit,
@@ -255,7 +253,6 @@ class PurchasedItemTile extends StatelessWidget {
     BuildContext context,
     Item item,
     PurchasedItem pItem,
-    SettingsProvider settings,
     ColorScheme colorScheme,
     String currency,
     String weightUnit,
@@ -266,9 +263,9 @@ class PurchasedItemTile extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (item.name != '' || settings.compactItemList == false) ...[
+        if (item.name != '' || context.isCompactItemList == false) ...[
           Text(
-            item.name == '' && settings.compactItemList == false ? '--' : item.name,
+            item.name == '' && context.isCompactItemList == false ? '--' : item.name,
             style: Theme.of(context).textTheme.titleMedium,
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
@@ -279,7 +276,6 @@ class PurchasedItemTile extends StatelessWidget {
           context,
           item,
           pItem,
-          settings,
           colorScheme,
           currency,
           weightUnit,
@@ -295,7 +291,6 @@ class PurchasedItemTile extends StatelessWidget {
     BuildContext context,
     Item item,
     PurchasedItem pItem,
-    SettingsProvider settings,
     ColorScheme colorScheme,
     String currency,
     String weightUnit,
@@ -325,7 +320,7 @@ class PurchasedItemTile extends StatelessWidget {
         children: [
           Text(
             ratePerItem,
-            style: settings.compactItemList == false || item.name != ''
+            style: context.isCompactItemList == false || item.name != ''
                 ? Theme.of(context).textTheme.bodySmall?.copyWith(
                     decoration: TextDecoration.lineThrough,
                     color: colorScheme.onSurfaceVariant,
@@ -337,7 +332,7 @@ class PurchasedItemTile extends StatelessWidget {
           ),
           Text(
             '$ratePerDiscountedItem$unit',
-            style: settings.compactItemList == false || item.name != ''
+            style: context.isCompactItemList == false || item.name != ''
                 ? Theme.of(context).textTheme.bodySmall?.copyWith(
                     fontWeight: FontWeight.bold,
                     color: colorScheme.primary,
@@ -353,7 +348,7 @@ class PurchasedItemTile extends StatelessWidget {
 
     return Text(
       '$ratePerItem$unit',
-      style: item.name == '' && settings.compactItemList == true
+      style: item.name == '' && context.isCompactItemList == true
           ? Theme.of(context).textTheme.titleMedium
           : Theme.of(context).textTheme.bodySmall,
     );
@@ -409,7 +404,7 @@ class PurchasedItemTile extends StatelessWidget {
           FittedBox(
             fit: BoxFit.scaleDown,
             child: Text(
-              _calcTotalDiscount(pItem.price??0, -pItem.discount, qty).toCurrencyString(currency),
+              _calcTotalDiscount(pItem.price ?? 0, -pItem.discount, qty).toCurrencyString(currency),
               style: Theme.of(context).textTheme.bodySmall?.copyWith(color: colorScheme.error),
             ),
           ),

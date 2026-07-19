@@ -1,6 +1,5 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:shopping_assist/core/database/database.dart';
 import 'package:shopping_assist/features/settings/providers/settings_provider.dart';
 import 'package:shopping_assist/core/utils/number_formatter.dart';
@@ -13,7 +12,6 @@ class ItemPriceHistoryChart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final settings = context.watch<SettingsProvider>();
     final validHistory = history.where((h) => h.purchasedItem.price != null).toList();
     if (validHistory.length < 2) return const SizedBox.shrink();
 
@@ -92,7 +90,7 @@ class ItemPriceHistoryChart extends StatelessWidget {
               getTooltipItems: (touchedSpots) {
                 return touchedSpots.map((touchedSpot) {
                   return LineTooltipItem(
-                    touchedSpot.y.toCurrencyString(settings.currencySymbol),
+                    touchedSpot.y.toCurrencyString(context.currencySymbol),
                     textTheme.bodySmall?.copyWith(
                           fontWeight: FontWeight.bold,
                           color: colorScheme.onSurface,

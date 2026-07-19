@@ -223,9 +223,6 @@ class _MonthHeaderTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final settings = context.watch<SettingsProvider>();
-    final currency = settings.currencySymbol;
-
     final now = DateTime.now();
     final isCurrentMonth = header.month.year == now.year && header.month.month == now.month;
 
@@ -248,7 +245,7 @@ class _MonthHeaderTile extends StatelessWidget {
               ),
             ),
             Text(
-              header.total.toCurrencyString(currency),
+              header.total.toCurrencyString(context.currencySymbol),
               style: Theme.of(context).textTheme.titleSmall?.copyWith(color: colorScheme.secondary),
             ),
           ],
@@ -294,8 +291,6 @@ class _PurchaseTileState extends State<_PurchaseTile> {
     final colorScheme = Theme.of(context).colorScheme;
     final purchase = widget.purchase;
     final tileBgColor = _isMenuOpen ? colorScheme.surfaceContainerHighest : null;
-    final settings = context.watch<SettingsProvider>();
-    final currency = settings.currencySymbol;
 
     return SizeTransition(
       sizeFactor: widget.animation,
@@ -313,7 +308,7 @@ class _PurchaseTileState extends State<_PurchaseTile> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  purchase.totalPrice?.toCurrencyString(currency) ?? '0.00',
+                  purchase.totalPrice?.toCurrencyString(context.currencySymbol) ?? '0.00',
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                     color: Theme.of(context).colorScheme.primary,

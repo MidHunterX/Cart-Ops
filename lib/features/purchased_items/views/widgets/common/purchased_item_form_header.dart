@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:shopping_assist/features/settings/providers/settings_provider.dart';
 
 class PurchasedItemFormHeader extends StatelessWidget {
@@ -16,9 +15,8 @@ class PurchasedItemFormHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final settings = context.watch<SettingsProvider>();
-    final currencySymbol = settings.currencySymbol;
-    final weightUnit = settings.weightUnit;
+    final currencySymbol = context.currencySymbol;
+    final weightUnit = context.weightUnit;
     final colorScheme = Theme.of(context).colorScheme;
 
     return Row(

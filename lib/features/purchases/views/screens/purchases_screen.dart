@@ -17,7 +17,6 @@ class PurchasesScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final repo = context.read<PurchasesRepository>();
-    final settings = context.watch<SettingsProvider>();
 
     return Scaffold(
       appBar: AppBar(
@@ -39,7 +38,7 @@ class PurchasesScreen extends StatelessWidget {
         ],
       ),
       floatingActionButton: DextrousFloatingActionButton(
-        isCenter: settings.dominantHand == DominantHand.center,
+        isCenter: context.dominantHand == DominantHand.center,
         icon: Icons.shopping_cart,
         label: 'Add Purchase',
         onPressed: () async {
@@ -57,9 +56,9 @@ class PurchasesScreen extends StatelessWidget {
           }
         },
       ),
-      floatingActionButtonLocation: settings.dominantHand == DominantHand.right
+      floatingActionButtonLocation: context.dominantHand == DominantHand.right
           ? FloatingActionButtonLocation.endFloat
-          : settings.dominantHand == DominantHand.left
+          : context.dominantHand == DominantHand.left
           ? FloatingActionButtonLocation.startFloat
           : FloatingActionButtonLocation.centerFloat,
       body: CustomScrollView(

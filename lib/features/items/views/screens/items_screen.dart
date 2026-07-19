@@ -20,7 +20,6 @@ class ItemsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final repo = context.watch<ItemsRepository>();
-    final settings = context.watch<SettingsProvider>();
 
     return Scaffold(
       appBar: AppBar(
@@ -66,7 +65,7 @@ class ItemsScreen extends StatelessWidget {
         },
       ),
       floatingActionButton: DextrousFloatingActionButton(
-        isCenter: settings.dominantHand == DominantHand.center,
+        isCenter: context.dominantHand == DominantHand.center,
         icon: Icons.inventory_2_outlined,
         label: 'Add Item',
         onPressed: () => showDialog(
@@ -74,9 +73,9 @@ class ItemsScreen extends StatelessWidget {
           builder: (_) => AddItemDialog(groupId: group?.id),
         ),
       ),
-      floatingActionButtonLocation: settings.dominantHand == DominantHand.right
+      floatingActionButtonLocation: context.dominantHand == DominantHand.right
           ? FloatingActionButtonLocation.endFloat
-          : settings.dominantHand == DominantHand.left
+          : context.dominantHand == DominantHand.left
           ? FloatingActionButtonLocation.startFloat
           : FloatingActionButtonLocation.centerFloat,
     );

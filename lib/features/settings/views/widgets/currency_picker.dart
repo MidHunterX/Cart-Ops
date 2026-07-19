@@ -4,9 +4,7 @@ import 'package:shopping_assist/features/settings/providers/settings_provider.da
 import '../../data/settings_data.dart';
 
 class CurrencyPicker extends StatefulWidget {
-  final SettingsProvider settings;
-
-  const CurrencyPicker({super.key, required this.settings});
+  const CurrencyPicker({super.key});
 
   @override
   State<CurrencyPicker> createState() => _CurrencyPickerState();
@@ -62,7 +60,7 @@ class _CurrencyPickerState extends State<CurrencyPicker> {
             itemBuilder: (context, index) {
               final currency = _filteredCurrencies[index];
               return ListTile(
-                selected: currency.code == widget.settings.currencyCode,
+                selected: currency.code == context.currencyCode,
                 leading: Text(currency.flag, style: const TextStyle(fontSize: 24)),
                 title: Text(currency.code),
                 trailing: Text(
@@ -71,7 +69,7 @@ class _CurrencyPickerState extends State<CurrencyPicker> {
                 ),
                 subtitle: Text(currency.name),
                 onTap: () {
-                  widget.settings.setCurrency(currency.code);
+                  context.settingsRead.setCurrency(currency.code);
                   Navigator.pop(context);
                 },
               );

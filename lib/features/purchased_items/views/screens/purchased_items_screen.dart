@@ -191,8 +191,6 @@ class _PurchasedItemsScreenState extends State<PurchasedItemsScreen> {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final settings = context.watch<SettingsProvider>();
-
     final totalItemsListLength = _purchasedItems.length;
     int displayTotalItems = totalItemsListLength;
     double displayTotalPrice = _currentPurchase.totalPrice ?? 0.0;
@@ -323,7 +321,7 @@ class _PurchasedItemsScreenState extends State<PurchasedItemsScreen> {
               ),
       ),
       floatingActionButton: DextrousFloatingActionButton(
-        isCenter: settings.dominantHand == DominantHand.center,
+        isCenter: context.dominantHand == DominantHand.center,
         icon: Icons.add,
         label: 'Add Item',
         onPressed: () => showModalBottomSheet(
@@ -336,9 +334,9 @@ class _PurchasedItemsScreenState extends State<PurchasedItemsScreen> {
               AddPurchasedItemSheet(purchase: _currentPurchase, group: widget.group),
         ),
       ),
-      floatingActionButtonLocation: settings.dominantHand == DominantHand.right
+      floatingActionButtonLocation: context.dominantHand == DominantHand.right
           ? FloatingActionButtonLocation.endFloat
-          : settings.dominantHand == DominantHand.left
+          : context.dominantHand == DominantHand.left
           ? FloatingActionButtonLocation.startFloat
           : FloatingActionButtonLocation.centerFloat,
     );

@@ -63,7 +63,6 @@ class _GroupsScreenState extends State<GroupsScreen> {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
-    final settings = context.watch<SettingsProvider>();
     final purchasesRepo = context.read<PurchasesRepository>();
 
     bool hasPurchases = _ungroupedPurchasesCount > 0;
@@ -71,9 +70,9 @@ class _GroupsScreenState extends State<GroupsScreen> {
 
     // LOGIC FOR COMBINATIONS
     bool onlyGroups = (!hasPurchases && hasGroups);
-    bool showGroups = (hasGroups || settings.isGroupEnabled) || onlyGroups;
+    bool showGroups = (hasGroups || context.isGroupEnabled) || onlyGroups;
     // If purchases and groups disabled, show purchases
-    bool onlyPurchases = (!settings.isGroupEnabled && !hasGroups);
+    bool onlyPurchases = (!context.isGroupEnabled && !hasGroups);
     bool showPurchases = hasPurchases || onlyPurchases;
     // If both enabled, show titles
     bool showTitles = showGroups && showPurchases;
@@ -101,7 +100,7 @@ class _GroupsScreenState extends State<GroupsScreen> {
         ],
       ),
       floatingActionButton: DextrousFloatingActionButton(
-        isCenter: settings.dominantHand == DominantHand.center,
+        isCenter: context.dominantHand == DominantHand.center,
         icon: Icons.shopping_cart_checkout,
         label: 'Add Purchase',
         onPressed: () async {
@@ -116,16 +115,16 @@ class _GroupsScreenState extends State<GroupsScreen> {
           }
         },
       ),
-      floatingActionButtonLocation: settings.dominantHand == DominantHand.right
+      floatingActionButtonLocation: context.dominantHand == DominantHand.right
           ? FloatingActionButtonLocation.endFloat
-          : settings.dominantHand == DominantHand.left
+          : context.dominantHand == DominantHand.left
           ? FloatingActionButtonLocation.startFloat
           : FloatingActionButtonLocation.centerFloat,
       body: CustomScrollView(
         physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
         slivers: [
           if (completeVoid)
-            _buildEmptyStateSliver(context, colorScheme, textTheme, settings.isGroupEnabled)
+            _buildEmptyStateSliver(context, colorScheme, textTheme, context.isGroupEnabled)
           else ...[
             if (showTitles)
               SliverPadding(

@@ -3,9 +3,7 @@ import 'package:shopping_assist/features/settings/providers/settings_provider.da
 import '../../data/settings_data.dart';
 
 class WeightUnitPicker extends StatelessWidget {
-  final SettingsProvider settings;
-
-  const WeightUnitPicker({super.key, required this.settings});
+  const WeightUnitPicker({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -22,11 +20,11 @@ class WeightUnitPicker extends StatelessWidget {
             return ListTile(
               title: Text('${option.name} (${option.unit})'),
               subtitle: Text(option.system),
-              trailing: settings.weightUnit == option.unit
+              trailing: context.weightUnit == option.unit
                   ? Icon(Icons.check, color: Theme.of(context).colorScheme.primary)
                   : null,
               onTap: () {
-                settings.setWeightUnit(option.unit);
+                context.settingsRead.setWeightUnit(option.unit);
                 Navigator.pop(context);
               },
             );

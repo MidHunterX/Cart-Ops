@@ -278,7 +278,6 @@ class PurchasedItemFormState extends State<PurchasedItemForm> {
 
   @override
   Widget build(BuildContext context) {
-    final settings = context.watch<SettingsProvider>();
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -303,7 +302,7 @@ class PurchasedItemFormState extends State<PurchasedItemForm> {
                   context,
                   snapshot.data!,
                   maxWidth: bottomSheetWidth,
-                  extraLetters: settings.currencySymbol.length + 1, // currency + space
+                  extraLetters: context.currencySymbol.length + 1, // currency + space
                 );
                 final displayHistory = snapshot.data?.take(maxDataPoints).toList();
 
@@ -316,7 +315,7 @@ class PurchasedItemFormState extends State<PurchasedItemForm> {
             },
           ),
 
-        _buildFieldsRow(settings.weightUnit, settings.currencySymbol),
+        _buildFieldsRow(context.weightUnit, context.currencySymbol),
 
         const SizedBox(height: 16),
 
@@ -334,7 +333,7 @@ class PurchasedItemFormState extends State<PurchasedItemForm> {
             _imageRemoved = true;
           }),
           discountStr: _discountStr,
-          isTeleKeypad: settings.isTelephoneLayout,
+          isTeleKeypad: context.isTelephoneLayout,
           onKeyPressed: _handleKeypadPress,
           onNameTap: widget.onNameTap,
           onDiscountTap: _handleDiscountTap,

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:shopping_assist/features/settings/providers/settings_provider.dart';
 import './widgets/theme_colorpicker_v2.dart';
 import './widgets/section_header.dart';
@@ -13,7 +12,7 @@ class SettingsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final settings = context.watch<SettingsProvider>();
+    final settings = context.settings;
 
     return Scaffold(
       appBar: AppBar(title: const Text('Settings')),
@@ -23,9 +22,9 @@ class SettingsScreen extends StatelessWidget {
 
           ListTile(
             title: const Text('Theme Mode'),
-            subtitle: Text(settings.themeMode.name.toUpperCase()),
+            subtitle: Text(context.themeMode.name.toUpperCase()),
             trailing: ThemeModeSelector(
-              currentThemeMode: settings.themeMode,
+              currentThemeMode: context.themeMode,
               onThemeModeChanged: settings.setThemeMode,
             ),
           ),
@@ -33,7 +32,7 @@ class SettingsScreen extends StatelessWidget {
           ListTile(
             title: const Text('Theme Color'),
             subtitle: ThemeColorPicker(
-              selectedColor: settings.seedColor,
+              selectedColor: context.seedColor,
               onColorSelected: settings.setSeedColor,
             ),
           ),
@@ -44,7 +43,7 @@ class SettingsScreen extends StatelessWidget {
 
           ListTile(
             title: const Text('Currency'),
-            subtitle: Text(settings.currencyCode),
+            subtitle: Text(context.currencyCode),
             trailing: const Icon(Icons.arrow_drop_down),
             onTap: () => showModalBottomSheet(
               context: context,
@@ -52,20 +51,20 @@ class SettingsScreen extends StatelessWidget {
               useSafeArea: true,
               showDragHandle: true,
               builder: (context) {
-                return CurrencyPicker(settings: settings);
+                return const CurrencyPicker();
               },
             ),
           ),
 
           ListTile(
             title: const Text('Weight Unit'),
-            subtitle: Text(settings.weightUnit),
+            subtitle: Text(context.weightUnit),
             trailing: const Icon(Icons.arrow_drop_down),
             onTap: () => showModalBottomSheet(
               context: context,
               showDragHandle: true,
               builder: (context) {
-                return WeightUnitPicker(settings: settings);
+                return const WeightUnitPicker();
               },
             ),
           ),
@@ -76,10 +75,8 @@ class SettingsScreen extends StatelessWidget {
 
           SwitchListTile(
             title: const Text('Purchase Groups'),
-            subtitle: Text(
-              settings.isGroupEnabled ? 'Enabled' : 'Disabled',
-            ),
-            value: settings.isGroupEnabled,
+            subtitle: Text(context.isGroupEnabled ? 'Enabled' : 'Disabled'),
+            value: context.isGroupEnabled,
             onChanged: settings.setGroupFeatureStatus,
           ),
 
@@ -90,22 +87,22 @@ class SettingsScreen extends StatelessWidget {
           SwitchListTile(
             title: const Text('Dynamic Item List'),
             subtitle: Text(
-              settings.compactItemList ? 'Enabled (Compact)' : 'Disabled (Structured)',
+              context.isCompactItemList ? 'Enabled (Compact)' : 'Disabled (Structured)',
             ),
-            value: settings.compactItemList,
+            value: context.isCompactItemList,
             onChanged: settings.setCompactItemList,
           ),
 
           ListTile(
             title: const Text('Dominant Hand'),
-            subtitle: Text(settings.dominantHand),
+            subtitle: Text(context.dominantHand),
             trailing: const Icon(Icons.arrow_drop_down),
             onTap: () => showModalBottomSheet(
               context: context,
               showDragHandle: true,
               builder: (context) {
                 return FabLocationPicker(
-                  currentLocation: settings.dominantHand,
+                  currentLocation: context.dominantHand,
                   onChanged: (newLocation) {
                     settings.setFab(newLocation);
                   },
@@ -116,7 +113,7 @@ class SettingsScreen extends StatelessWidget {
 
           ListTile(
             title: const Text('Keypad Layout'),
-            subtitle: Text(settings.isTelephoneLayout ? 'Telephone Style' : 'Calculator Style'),
+            subtitle: Text(context.isTelephoneLayout ? 'Telephone Style' : 'Calculator Style'),
             trailing: SegmentedButton<String>(
               segments: const [
                 ButtonSegment(
@@ -130,7 +127,7 @@ class SettingsScreen extends StatelessWidget {
                   icon: Icon(Icons.phone_android),
                 ),
               ],
-              selected: {settings.isTelephoneLayout ? 'telephone' : 'calculator'},
+              selected: {context.isTelephoneLayout ? 'telephone' : 'calculator'},
               onSelectionChanged: (Set<String> newSelection) {
                 final newValue = newSelection.first;
                 settings.setTelephoneLayout(newValue == 'telephone');

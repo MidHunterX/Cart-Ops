@@ -15,9 +15,8 @@ class ItemDetailScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final repo = context.watch<ItemsRepository>();
-    final settings = context.watch<SettingsProvider>();
-    final currency = settings.currencySymbol;
-    final weightUnit = settings.weightUnit;
+    final currency = context.currencySymbol;
+    final weightUnit = context.weightUnit;
     final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
