@@ -155,6 +155,7 @@ class _EditPurchasedItemSheetState extends State<EditPurchasedItemSheet> {
 
   @override
   Widget build(BuildContext context) {
+    double discount = widget.purchasedItem.discount;
     return PurchasedItemForm(
       key: _formKey,
       itemId: _itemId,
@@ -162,7 +163,7 @@ class _EditPurchasedItemSheetState extends State<EditPurchasedItemSheet> {
       itemName: _name,
       initialPrice: widget.purchasedItem.price?.toPriceString() ?? '',
       initialQty: widget.purchasedItem.quantity?.toPriceString() ?? '',
-      initialDiscount: widget.purchasedItem.discount.toString(),
+      initialDiscount: discount > 0 ? discount.toString() : '',
       initialIsWeight: widget.purchasedItem.isWeight,
       initialActiveField: widget.initialField,
       initialImagePath: widget.item.imagePath,
