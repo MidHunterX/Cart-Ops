@@ -250,7 +250,7 @@ class _PurchasedItemsScreenState extends State<PurchasedItemsScreen> {
               PopupMenuItem(
                 value: 'toggle_checklist',
                 child: Text(
-                  _currentPurchase.isChecklistMode ? 'Disable Checklist' : 'Enable Checklist',
+                  _currentPurchase.isChecklistMode ? 'Hide Checklist' : 'Show Checklist',
                 ),
               ),
             ],

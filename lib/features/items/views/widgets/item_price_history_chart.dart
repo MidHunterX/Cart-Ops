@@ -12,6 +12,7 @@ class ItemPriceHistoryChart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final currency = context.currencySymbol;
     final validHistory = history.where((h) => h.purchasedItem.price != null).toList();
     if (validHistory.length < 2) return const SizedBox.shrink();
 
@@ -90,7 +91,7 @@ class ItemPriceHistoryChart extends StatelessWidget {
               getTooltipItems: (touchedSpots) {
                 return touchedSpots.map((touchedSpot) {
                   return LineTooltipItem(
-                    touchedSpot.y.toCurrencyString(context.currencySymbol),
+                    touchedSpot.y.toCurrencyString(currency),
                     textTheme.bodySmall?.copyWith(
                           fontWeight: FontWeight.bold,
                           color: colorScheme.onSurface,
