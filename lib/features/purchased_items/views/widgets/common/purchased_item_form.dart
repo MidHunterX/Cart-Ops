@@ -421,9 +421,8 @@ class PurchasedItemFormState extends State<PurchasedItemForm> {
               ),
               Positioned(
                 right: 8,
-                top: 8,
                 child: IconButton(
-                  icon: const Icon(Icons.calculate_outlined, size: 20),
+                  icon: const Icon(Icons.calculate_outlined),
                   onPressed: () => _handleUnitPriceCalulatorTap(currencySymbol, weightUnit),
                   tooltip: 'Calculate unit price',
                   visualDensity: VisualDensity.compact,
