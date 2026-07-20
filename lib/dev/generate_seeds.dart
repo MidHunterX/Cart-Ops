@@ -48,8 +48,6 @@ class DatabaseSeeder {
       _random = Random();
 
   Future<void> personalSeed() async {
-    print('Starting Personal Database Seeder...');
-
     final imgpathFruits = await _createSeedImageFromBase64(baseFruits);
     final imgpathLunch = await _createSeedImageFromBase64(baseLunch);
     final imgpathMurukku = await _createSeedImageFromBase64(baseMurukku);
@@ -178,14 +176,10 @@ class DatabaseSeeder {
     );
 
     await _db.purchasesDao.recalculatePurchaseTotal(purchaseId);
-
-    print('Personal Seed Complete');
   }
 
   /// Clears existing data and seeds the database with random data.
   Future<void> seed() async {
-    print('Starting Database Seeder...');
-
     // Optional: Clear existing data before seeding
     await _clearDatabase();
 
@@ -199,7 +193,6 @@ class DatabaseSeeder {
       groupIds.add(groupId);
       groupItemsMap[groupId] = [];
     }
-    print('Seeded ${_config.numGroups} Groups');
 
     // 2. Seed Items (Grouped)
     for (final groupId in groupIds) {
@@ -222,7 +215,6 @@ class DatabaseSeeder {
       );
       orphanItemIds.add(itemId);
     }
-    print('Seeded Items');
 
     // Collect all purchase intents to interleave and sort them chronologically
     final pendingPurchases = <({int? groupId, List<int> availableItemIds})>[];
@@ -260,9 +252,6 @@ class DatabaseSeeder {
       final intent = pendingPurchases[i];
       await _createPurchaseWithItems(intent.groupId, intent.availableItemIds, purchaseDates[i]);
     }
-
-    print('Seeded Purchases and Purchased Items');
-    print('Database Seeding Completed!');
   }
 
   /// Helper to generate realistic item names

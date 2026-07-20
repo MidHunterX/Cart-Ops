@@ -99,6 +99,7 @@ class ItemsScreen extends StatelessWidget {
                     context,
                     MaterialPageRoute(builder: (_) => ItemDetailScreen(item: item)),
                   ),
+            onLongPress: () => _showEditDialog(context, item),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [

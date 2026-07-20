@@ -232,6 +232,7 @@ class _PurchasedItemsScreenState extends State<PurchasedItemsScreen> {
             ),
           ],
         ),
+        surfaceTintColor: colorScheme.primaryContainer,
         backgroundColor: colorScheme.primaryContainer,
         actions: [
           PopupMenuButton<String>(
@@ -249,9 +250,7 @@ class _PurchasedItemsScreenState extends State<PurchasedItemsScreen> {
               const PopupMenuItem(value: 'budget', child: Text('Set Budget')),
               PopupMenuItem(
                 value: 'toggle_checklist',
-                child: Text(
-                  _currentPurchase.isChecklistMode ? 'Hide Checklist' : 'Show Checklist',
-                ),
+                child: Text(_currentPurchase.isChecklistMode ? 'Hide Checklist' : 'Show Checklist'),
               ),
             ],
           ),
@@ -261,62 +260,66 @@ class _PurchasedItemsScreenState extends State<PurchasedItemsScreen> {
         duration: const Duration(milliseconds: 300),
         child: _isLoading
             ? const Center(child: CircularProgressIndicator())
-            : CustomScrollView(
-                slivers: [
-                  SliverToBoxAdapter(
-                    child: PurchaseSummaryCard(
-                      itemCount: displayTotalItems,
-                      totalItems: totalItemsListLength,
-                      isChecklistMode: _currentPurchase.isChecklistMode,
-                      total: displayTotalPrice,
-                      budget: _currentPurchase.budget,
-                      allChecked: allCheckedState,
-                      onToggleAll: (bool? checkAll) {
-                        bool isAllChecked = checkAll == null;
-                        bool isNoneChecked = checkAll == true;
-                        bool isSomeChecked = checkAll == false;
-                        bool lessItemsChecked = displayTotalItems < (totalItemsListLength / 2);
-                        isAllChecked
-                            ? checkAll = false
-                            : isNoneChecked
-                            ? checkAll = true
-                            : isSomeChecked
-                            ? lessItemsChecked
-                                  ? checkAll = false
-                                  : checkAll = true
-                            : null;
-                        context.read<PurchasedItemsRepository>().setAllItemsCheckState(
-                          _currentPurchase.id,
-                          checkAll,
-                        );
-                      },
+            : Column(
+                children: [
+                  PurchaseSummaryCard(
+                    itemCount: displayTotalItems,
+                    totalItems: totalItemsListLength,
+                    isChecklistMode: _currentPurchase.isChecklistMode,
+                    total: displayTotalPrice,
+                    budget: _currentPurchase.budget,
+                    allChecked: allCheckedState,
+                    onToggleAll: (bool? checkAll) {
+                      bool isAllChecked = checkAll == null;
+                      bool isNoneChecked = checkAll == true;
+                      bool isSomeChecked = checkAll == false;
+                      bool lessItemsChecked = displayTotalItems < (totalItemsListLength / 2);
+                      isAllChecked
+                          ? checkAll = false
+                          : isNoneChecked
+                          ? checkAll = true
+                          : isSomeChecked
+                          ? lessItemsChecked
+                                ? checkAll = false
+                                : checkAll = true
+                          : null;
+                      context.read<PurchasedItemsRepository>().setAllItemsCheckState(
+                        _currentPurchase.id,
+                        checkAll,
+                      );
+                    },
+                  ),
+                  Expanded(
+                    child: CustomScrollView(
+                      slivers: [
+                        if (_isListEmpty)
+                          const SliverFillRemaining(
+                            hasScrollBody: false,
+                            child: EmptyState(
+                              icon: Icons.shopping_cart_outlined,
+                              title: 'Your Cart is Ready',
+                              message: 'Add items to your purchase to see the running total.',
+                            ),
+                          ),
+                        if (_isListEmpty == false)
+                          SliverPadding(
+                            padding: const EdgeInsets.only(bottom: 80),
+                            sliver: SliverAnimatedList(
+                              key: _listKey,
+                              initialItemCount: _purchasedItems.length,
+                              itemBuilder: (context, index, animation) {
+                                return _buildItemTile(
+                                  _purchasedItems[index],
+                                  index,
+                                  totalItemsListLength,
+                                  animation,
+                                );
+                              },
+                            ),
+                          ),
+                      ],
                     ),
                   ),
-                  if (_isListEmpty)
-                    const SliverFillRemaining(
-                      hasScrollBody: false,
-                      child: EmptyState(
-                        icon: Icons.shopping_cart_outlined,
-                        title: 'Your Cart is Ready',
-                        message: 'Add items to your purchase to see the running total.',
-                      ),
-                    ),
-                  if (_isListEmpty == false)
-                    SliverPadding(
-                      padding: const EdgeInsets.only(bottom: 80),
-                      sliver: SliverAnimatedList(
-                        key: _listKey,
-                        initialItemCount: _purchasedItems.length,
-                        itemBuilder: (context, index, animation) {
-                          return _buildItemTile(
-                            _purchasedItems[index],
-                            index,
-                            totalItemsListLength,
-                            animation,
-                          );
-                        },
-                      ),
-                    ),
                 ],
               ),
       ),
