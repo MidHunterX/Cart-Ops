@@ -14,7 +14,8 @@ extension NumberFormatting on double {
   ///
   /// Example:
   /// 1.2345 -> "1.23"
-  /// 1.0 -> "1.00"
+  /// 1.001 -> "1.00"
+  /// 1.0 -> "1"
   String toPriceString() {
     if (this == truncateToDouble()) return truncate().toString();
     return toStringAsFixed(2);

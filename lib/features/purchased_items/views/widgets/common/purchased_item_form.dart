@@ -350,9 +350,10 @@ class PurchasedItemFormState extends State<PurchasedItemForm> {
     final result = await UnitPriceCalculatorDialog.show(
       context: context,
       currentQuantity: _qtyStr,
-      currentFinalPrice: _priceStr,
+      currentListingPrice: _priceStr,
       isWeight: _isWeight,
       currencySymbol: currencySymbol,
+      discount: double.tryParse(_discountStr) ?? 0.0,
       weightUnit: weightUnit,
     );
 

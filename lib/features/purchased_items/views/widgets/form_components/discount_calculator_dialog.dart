@@ -231,8 +231,9 @@ class _DiscountCalculatorDialogState extends State<DiscountCalculatorDialog> {
             TextField(
               controller: _sellingPriceCtrl,
               keyboardType: const TextInputType.numberWithOptions(decimal: true),
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 labelText: 'Selling Price',
+                prefixText: context.currencySymbol,
                 border: OutlineInputBorder(),
               ),
               onChanged: _onSellingPriceChanged,

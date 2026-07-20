@@ -229,7 +229,7 @@ But this app is all about doing heavy crud operations around calculations where
 values changes constantly. So, percentage should be the only source of truth.
 This way, the discount scales correctly with price corrections.
 
-#### Discount Entry UX Problem
+### Discount Entry UX Problem
 
 Almost everywhere there is a discount entry field, it would just be an input
 given for fixed price or percentage. The problem is in real world, prices would
@@ -243,6 +243,25 @@ The best way is to give a dedicated discount calculating utility as input:
 - Percentage: `[Listing Price] x [Percentage]% = [Selling Price] /unit`
 
 Where three input fields can be edited and calculated in real time.
+
+### Pricing Entry UX Problem
+
+In most of the apps there are quantity and price entry fields. What if I don't
+know what to put in price field? For example, if I got 5 kg of Rice for 256 in
+total, what should I put into the price field? Either I'll have to do manual
+calculation or just set the unit as 1 which removes all useful information for
+those who prefer detailed breakdowns and analytics. Solution?
+
+- Price: `[Total Price] / [Quantity] = [Unit Price]`
+
+A quick nifty Unit Calculator right beside the price field can be used to
+calculate the price per unit. Type in the total quantity, total price and
+voila! You get the unit price which can then be applied.
+
+After entering the item, since all the price fields are filled, this same
+calculator can then be used to check all of the what If scenarios of different
+quantities, and this UI will show the running total of the scenario along with
+discount breakdowns if any.
 
 ### 🚀 User Onboarding
 
