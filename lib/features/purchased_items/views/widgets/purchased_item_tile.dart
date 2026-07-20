@@ -212,7 +212,13 @@ class PurchasedItemTile extends StatelessWidget {
             child: Text(
               pItem.isWeight
                   ? pItem.quantity!.toWeightString(weightUnit)
-                  : pItem.quantity!.toWeightString(''),
+                  : pItem.quantity! > 1.0
+                  ? pItem.quantity!.toWeightString('')
+                  : pItem.quantity! == 0.25
+                  ? 'Qtr'
+                  : pItem.quantity! == 0.5
+                  ? '1/2'
+                  : pItem.quantity!.toString(),
               style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
             ),
           ),
