@@ -64,6 +64,9 @@ features.
 
 ## Re-Inventing a better wheel
 
+- All drop-down list must have icons for each entry. Pattern recognition is
+  much faster than reading. Text simply makes it even better.
+
 ### 📱 Main Screen
 
 Dynamically shows Purchases/Groups list based on intent and behavior.
@@ -269,7 +272,7 @@ User onboarding is plain simple naturally following the principle of
 4. You can go to settings and enable groups feature to enable purchase groups
    only if you want.
 
-## 🥚 Easter Egg
+### 🥚 Easter Egg
 
 Enable `Purchase Groups` feature while no purchases or groups have been made.
 Take the correct choice to go into a specialized Home Screen UI for Groups.

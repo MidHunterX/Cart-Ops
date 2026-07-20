@@ -247,10 +247,24 @@ class _PurchasedItemsScreenState extends State<PurchasedItemsScreen> {
               }
             },
             itemBuilder: (context) => [
-              const PopupMenuItem(value: 'budget', child: Text('Set Budget')),
+              const PopupMenuItem(
+                value: 'budget',
+                child: Row(
+                  spacing: 8,
+                  children: [Icon(Icons.savings_outlined), Text('Set Budget')],
+                ),
+              ),
               PopupMenuItem(
                 value: 'toggle_checklist',
-                child: Text(_currentPurchase.isChecklistMode ? 'Hide Checklist' : 'Show Checklist'),
+                child: Row(
+                  spacing: 8,
+                  children: [
+                    Icon(Icons.list_outlined),
+                    _currentPurchase.isChecklistMode
+                        ? Text('Hide Checklist')
+                        : Text('Show Checklist'),
+                  ],
+                ),
               ),
             ],
           ),

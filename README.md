@@ -29,6 +29,14 @@ financial resource management via technological assistance.
   ```bash
   dart run flutter_launcher_icons
   ```
+- Check if source code is fine:
+  ```bash
+  flutter analyze
+  ```
+- Check if logic is working correctly:
+  ```bash
+  flutter test
+  ```
 - Build release APK:
   ```bash
   flutter build apk --release --target-platform android-arm64
@@ -45,7 +53,7 @@ financial resource management via technological assistance.
 - [x] Globally Set Currency Symbol
 - [x] Globally Set Theme Colors
 - [x] Globally Set Weight Unit (Metric, Imperial or Both)
-- [ ] Globally Set Tax Rate (0-100) for countries that display prices without tax
+- [ ] Globally Set Tax Rate (0-100) for countries/stores that display prices without tax
 
 #### Core Operations
 
