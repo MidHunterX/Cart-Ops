@@ -14,9 +14,14 @@ import 'package:shopping_assist/features/purchases/repositories/purchases_reposi
 import 'package:shopping_assist/features/settings/providers/settings_provider.dart';
 // import 'package:drift/drift.dart';
 // import 'package:shopping_assist/dev/generate_seeds.dart';
+import 'package:flutter_native_splash/flutter_native_splash.dart';
 
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
+  WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
+
+  // Preserve splash screen while loading async deps
+  FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
+
   final prefs = await SharedPreferences.getInstance();
 
   // ======================= UNCOMMENT TO SEED DATABASE =======================
@@ -74,4 +79,6 @@ void main() async {
       child: const ShoppingApp(),
     ),
   );
+
+  FlutterNativeSplash.remove();
 }

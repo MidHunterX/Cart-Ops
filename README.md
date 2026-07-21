@@ -29,6 +29,10 @@ financial resource management via technological assistance.
   ```bash
   dart run flutter_launcher_icons
   ```
+- Generate splash screen:
+  ```bash
+  dart run flutter_native_splash:create
+  ```
 - Check if source code is fine:
   ```bash
   flutter analyze
