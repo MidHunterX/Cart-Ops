@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:shopping_assist/core/database/database.dart';
@@ -350,6 +351,8 @@ class PurchasedItemFormState extends State<PurchasedItemForm> {
   }
 
   void _handleUnitPriceCalulatorTap(String currencySymbol, String weightUnit) async {
+    HapticFeedback.lightImpact();
+
     final result = await UnitPriceCalculatorDialog.show(
       context: context,
       currentQuantity: _qtyStr,
@@ -361,6 +364,8 @@ class PurchasedItemFormState extends State<PurchasedItemForm> {
     );
 
     if (result != null && result.price.isNotEmpty && result.quantity.isNotEmpty && mounted) {
+      HapticFeedback.selectionClick();
+
       setState(() {
         _priceStr = result.price;
         _priceController.text = result.price;
