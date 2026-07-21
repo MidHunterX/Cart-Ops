@@ -307,7 +307,7 @@ class PurchasedItemFormState extends State<PurchasedItemForm> {
                 final displayHistory = snapshot.data?.take(maxDataPoints).toList();
 
                 return Padding(
-                  padding: const EdgeInsets.only(bottom: 8.0, left: 12, right: 12),
+                  padding: const EdgeInsets.only(bottom: 8, left: 8, right: 8),
                   child: ItemPriceHistoryChart(history: displayHistory ?? [], isMinimal: true),
                 );
               }
@@ -315,7 +315,10 @@ class PurchasedItemFormState extends State<PurchasedItemForm> {
             },
           ),
 
-        _buildFieldsRow(context.weightUnit, context.currencySymbol),
+        Padding(
+          padding: const EdgeInsets.only(left: 8, right: 8),
+          child: _buildFieldsRow(context.weightUnit, context.currencySymbol),
+        ),
 
         const SizedBox(height: 16),
 
@@ -369,14 +372,14 @@ class PurchasedItemFormState extends State<PurchasedItemForm> {
 
   Widget _buildFieldsRow(String weightUnit, String currencySymbol) {
     return Row(
+      spacing: 8,
       children: [
         Expanded(
           flex: 5,
           child: _isWeight
               ? InputFieldBox(
-                  label: _isWeight ? 'Weight ($weightUnit)' : 'Quantity',
-                  suffixText: _isWeight ? weightUnit : null,
-                  // placeholder: _isWeight ? 'e.g. 2.3$weightUnit' : 'e.g. 2',
+                  label: 'Weight ($weightUnit)',
+                  suffixText: weightUnit,
                   value: _qtyStr,
                   isActive: _activeField == ActiveField.quantity,
                   onTap: () {
@@ -400,36 +403,26 @@ class PurchasedItemFormState extends State<PurchasedItemForm> {
         ),
         Expanded(
           flex: 8,
-          child: Stack(
-            alignment: Alignment.centerRight,
-            children: [
-              InputFieldBox(
-                label: _isWeight
-                    ? '$currencySymbol Listing Price (per $weightUnit)'
-                    : '$currencySymbol Listing Price (per item)',
-                prefixText: '$currencySymbol  ',
-                // Overlaps with unit price calculator
-                // suffixText: _isWeight ? '/$weightUnit' : '',
-                value: _priceStr,
-                isActive: _activeField == ActiveField.price,
-                onTap: () {
-                  setState(() => _activeField = ActiveField.price);
-                  _priceFocusNode.requestFocus();
-                },
-                controller: _priceController,
-                focusNode: _priceFocusNode,
-              ),
-              Positioned(
-                right: 8,
-                child: IconButton(
-                  icon: const Icon(Icons.calculate_outlined),
-                  onPressed: () => _handleUnitPriceCalulatorTap(currencySymbol, weightUnit),
-                  tooltip: 'Calculate unit price',
-                  visualDensity: VisualDensity.compact,
-                  color: Theme.of(context).colorScheme.primary,
-                ),
-              ),
-            ],
+          child: InputFieldBox(
+            label: _isWeight
+                ? '$currencySymbol Listing Price (per $weightUnit)'
+                : '$currencySymbol Listing Price (per item)',
+            prefixText: '$currencySymbol ',
+            value: _priceStr,
+            isActive: _activeField == ActiveField.price,
+            onTap: () {
+              setState(() => _activeField = ActiveField.price);
+              _priceFocusNode.requestFocus();
+            },
+            controller: _priceController,
+            focusNode: _priceFocusNode,
+            // suffixText: _isWeight ? '/$weightUnit' : '',
+            suffixIcon: IconButton(
+              icon: const Icon(Icons.calculate_outlined),
+              onPressed: () => _handleUnitPriceCalulatorTap(currencySymbol, weightUnit),
+              tooltip: 'Calculate unit price',
+              color: Theme.of(context).colorScheme.primary,
+            ),
           ),
         ),
       ],

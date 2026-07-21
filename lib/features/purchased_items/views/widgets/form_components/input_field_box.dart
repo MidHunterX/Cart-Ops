@@ -12,6 +12,9 @@ class InputFieldBox extends StatelessWidget {
   final String? placeholder;
   final String? prefixText;
   final String? suffixText;
+  final Widget? prefixIcon;
+  final Widget? suffixIcon;
+  final TextAlign textAlign;
 
   const InputFieldBox({
     super.key,
@@ -24,6 +27,9 @@ class InputFieldBox extends StatelessWidget {
     this.placeholder,
     this.prefixText,
     this.suffixText,
+    this.prefixIcon,
+    this.suffixIcon,
+    this.textAlign = TextAlign.start,
   });
 
   @override
@@ -31,52 +37,47 @@ class InputFieldBox extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 4.0),
-      child: GestureDetector(
-        onTap: onTap,
-        child: TextFormField(
-          controller: controller,
-          focusNode: focusNode,
-          readOnly: true,
-          showCursor: true,
-          style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold, fontSize: 18),
-          decoration: InputDecoration(
-            labelText: label,
-            hintText: placeholder,
-            labelStyle: textTheme.bodySmall?.copyWith(
-              color: isActive ? colorScheme.primary : colorScheme.onSurfaceVariant,
-            ),
-            hintStyle: textTheme.bodySmall?.copyWith(
-              color: colorScheme.onSurfaceVariant,
-              fontStyle: FontStyle.italic,
-            ),
-            border: UnderlineInputBorder(
-              borderSide: BorderSide(
-                color: isActive ? colorScheme.primary : colorScheme.outline,
-                width: isActive ? 2 : 1,
-              ),
-            ),
-            enabledBorder: UnderlineInputBorder(
-              borderSide: BorderSide(
-                color: isActive ? colorScheme.primary : colorScheme.outline,
-                width: isActive ? 2 : 1,
-              ),
-            ),
-            focusedBorder: UnderlineInputBorder(
-              borderSide: BorderSide(color: colorScheme.primary, width: 2),
-            ),
-            filled: true,
-            fillColor: isActive ? colorScheme.primaryContainer : Colors.transparent,
-            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            prefixText: prefixText,
-            suffixText: suffixText,
-            prefixStyle: textTheme.bodySmall?.copyWith(fontSize: 16),
-            suffixStyle: textTheme.bodySmall?.copyWith(fontSize: 16),
-            // floatingLabelBehavior: FloatingLabelBehavior.always,
+    return GestureDetector(
+      onTap: onTap,
+      child: TextFormField(
+        controller: controller,
+        focusNode: focusNode,
+        readOnly: true,
+        showCursor: true,
+        textAlign: textAlign,
+        style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold, fontSize: 18),
+        decoration: InputDecoration(
+          labelText: label,
+          hintText: placeholder,
+          labelStyle: textTheme.bodySmall?.copyWith(
+            color: isActive ? colorScheme.primary : colorScheme.onSurfaceVariant,
           ),
-          onTap: onTap,
+          prefixIcon: prefixIcon,
+          suffixIcon: suffixIcon,
+          border: UnderlineInputBorder(
+            borderSide: BorderSide(
+              color: isActive ? colorScheme.primary : colorScheme.outline,
+              width: isActive ? 2 : 1,
+            ),
+          ),
+          enabledBorder: UnderlineInputBorder(
+            borderSide: BorderSide(
+              color: isActive ? colorScheme.primary : colorScheme.outline,
+              width: isActive ? 2 : 1,
+            ),
+          ),
+          focusedBorder: UnderlineInputBorder(
+            borderSide: BorderSide(color: colorScheme.primary, width: 2),
+          ),
+          filled: true,
+          fillColor: isActive ? colorScheme.primaryContainer : Colors.transparent,
+          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          prefixText: prefixText,
+          suffixText: suffixText,
+          prefixStyle: textTheme.bodySmall?.copyWith(fontSize: 16),
+          suffixStyle: textTheme.bodySmall?.copyWith(fontSize: 16),
         ),
+        onTap: onTap,
       ),
     );
   }
