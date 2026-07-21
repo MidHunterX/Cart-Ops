@@ -1,11 +1,22 @@
+# build_runner generated files
+*.g.dart
+
 # Flutter Launcher Icons generated files
 /android/app/src/main/res/mipmap-*/launcher_icon*.png
 /android/app/src/main/res/mipmap-*/launcher_icon*.xml
 /android/app/src/main/res/drawable-*/ic_launcher*.png
 /ios/Runner/Assets.xcassets/AppIcon.appiconset/Contents.json
 
-# build_runner generated files
-*.g.dart
+# flutter_native_splash generated files
+android/app/src/main/res/drawable/background.png
+android/app/src/main/res/**/*splash.png
+android/app/src/main/res/**/*branding.png
+android/app/src/main/res/**/*background.png
+android/app/src/main/res/**/*background.xml
+web/splash/
+ios/Runner/Assets.xcassets/LaunchImage.imageset/
+ios/Runner/Assets.xcassets/LaunchBackground.imageset/
+android/app/src/main/res/**/styles.xml
 
 # Miscellaneous
 *.class
