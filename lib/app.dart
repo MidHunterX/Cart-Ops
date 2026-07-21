@@ -11,6 +11,7 @@ class ShoppingApp extends StatelessWidget {
       title: 'Cart Ops',
       theme: ThemeData(
         useMaterial3: true,
+        appBarTheme: const AppBarTheme(shape: RoundedRectangleBorder()),
         colorScheme: ColorScheme.fromSeed(
           seedColor: context.seedColor,
           brightness: Brightness.light,
@@ -18,6 +19,7 @@ class ShoppingApp extends StatelessWidget {
       ),
       darkTheme: ThemeData(
         useMaterial3: true,
+        appBarTheme: const AppBarTheme(shape: RoundedRectangleBorder()),
         colorScheme: ColorScheme.fromSeed(
           seedColor: context.seedColor,
           brightness: Brightness.dark,

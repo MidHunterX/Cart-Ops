@@ -121,3 +121,26 @@ Autocompletion takes "last created" item details and not necessarily the "last
 purchased". So, if a purchase's purchase date is manually modified, the
 autocompletion will use it the next time. Just re-enter the price, after that
 it will be fine again until purchase date is manually overridden.
+
+## Flutter M3?
+
+In Flutter's Material3 implementation, surfaceTintColor overlay is meant to
+animate when elevation changes but, since default shape and borderRadius is
+null, the Material widget optimizes out this animation from the AppBar.
+
+This animated elevation color change is meant to be aesthetically similar to a
+heavy Gaussian blur BG and not having a smooth transition defeats that purpose.
+
+This can be solved by adding a shape:
+
+```dart
+MaterialApp(
+  theme: ThemeData(
+    appBarTheme: const AppBarTheme(
+      shape: RoundedRectangleBorder(),
+    ),
+  ),
+)
+```
+
+> No more abrupt coloring on elevation changes.
