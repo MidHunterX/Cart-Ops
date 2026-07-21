@@ -185,15 +185,16 @@ class _DiscountCalculatorDialogState extends State<DiscountCalculatorDialog> {
           mainAxisSize: MainAxisSize.min,
           children: [
             TextField(
-              readOnly: true,
+              // This field should not be read-only. In main form, listing
+              // price can also mean price per unit weight which might be
+              // calculated by unit calculator. Here listing price can be
+              // either total listing price or price per unit weight.
               controller: _listingPriceCtrl,
               keyboardType: const TextInputType.numberWithOptions(decimal: true),
               decoration: InputDecoration(
                 labelText: 'Listing Price',
                 border: OutlineInputBorder(),
                 prefixText: context.currencySymbol,
-                filled: true,
-                fillColor: Theme.of(context).colorScheme.secondaryContainer,
               ),
               onChanged: _onListingPriceChanged,
             ),
@@ -231,6 +232,7 @@ class _DiscountCalculatorDialogState extends State<DiscountCalculatorDialog> {
             TextField(
               controller: _sellingPriceCtrl,
               keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              autofocus: true, // Initial Focus
               decoration: InputDecoration(
                 labelText: 'Selling Price',
                 prefixText: context.currencySymbol,
