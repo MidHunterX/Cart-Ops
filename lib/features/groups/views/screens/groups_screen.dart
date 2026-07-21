@@ -65,19 +65,20 @@ class _GroupsScreenState extends State<GroupsScreen> {
     final textTheme = Theme.of(context).textTheme;
     final purchasesRepo = context.read<PurchasesRepository>();
 
-    bool hasPurchases = _ungroupedPurchasesCount > 0;
-    bool hasGroups = _groups.isNotEmpty;
+    final bool hasPurchases = _ungroupedPurchasesCount > 0;
+    final bool hasGroups = _groups.isNotEmpty;
 
     // LOGIC FOR COMBINATIONS
-    bool onlyGroups = (!hasPurchases && hasGroups);
-    bool showGroups = (hasGroups || context.isGroupEnabled) || onlyGroups;
+    final bool isGroupEnabled = context.isGroupEnabled;
+    final bool onlyGroups = (!hasPurchases && hasGroups);
+    final bool showGroups = (hasGroups || isGroupEnabled) || onlyGroups;
     // If purchases and groups disabled, show purchases
-    bool onlyPurchases = (!context.isGroupEnabled && !hasGroups);
-    bool showPurchases = hasPurchases || onlyPurchases;
+    final bool onlyPurchases = (!isGroupEnabled && !hasGroups);
+    final bool showPurchases = hasPurchases || onlyPurchases;
     // If both enabled, show titles
-    bool showTitles = showGroups && showPurchases;
+    final bool showTitles = showGroups && showPurchases;
     // Complete Void (Full Empty Screen)
-    bool completeVoid = !hasPurchases && !hasGroups && !_isLoadingGroups;
+    final bool completeVoid = !hasPurchases && !hasGroups && !_isLoadingGroups;
 
     const double groupTileHeight = 160;
 
@@ -124,50 +125,111 @@ class _GroupsScreenState extends State<GroupsScreen> {
         physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
         slivers: [
           if (completeVoid)
-            _buildEmptyStateSliver(context, colorScheme, textTheme, context.isGroupEnabled)
+            _buildEmptyStateSliver(context, colorScheme, textTheme, isGroupEnabled)
           else ...[
-            if (showTitles)
-              SliverPadding(
-                padding: const EdgeInsets.fromLTRB(20, 16, 20, 12),
-                sliver: SliverToBoxAdapter(
-                  child: Text(
-                    'Groups',
-                    style: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+            if (showTitles) _SliverHeader(title: 'Groups', textTheme: textTheme),
+
+            if (onlyGroups)
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 32.0, bottom: 24.0),
+                  child: Column(
+                    children: [
+                      const SizedBox(height: 16),
+                      Container(
+                        padding: const EdgeInsets.all(24),
+                        decoration: BoxDecoration(
+                          color: colorScheme.primaryContainer,
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          Icons.storefront,
+                          size: 56,
+                          color: colorScheme.onPrimaryContainer,
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                      Text(
+                        'Your Groups',
+                        style: textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'All your purchases are organized in groups',
+                        textAlign: TextAlign.center,
+                        style: textTheme.bodyMedium?.copyWith(color: colorScheme.onSurfaceVariant),
+                      ),
+                      const SizedBox(height: 32),
+                    ],
                   ),
                 ),
               ),
 
-            if (showGroups) ...[
-              if (_isLoadingGroups)
-                const SliverToBoxAdapter(
-                  child: SizedBox(
-                    height: groupTileHeight,
-                    child: Center(child: CircularProgressIndicator()),
-                  ),
-                )
-              else if (onlyGroups)
-                ..._buildGroupsOnlySlivers(context, colorScheme, textTheme)
-              else
-                SliverToBoxAdapter(child: _buildGroupsView(context, colorScheme, groupTileHeight)),
-            ],
+            if (showGroups)
+              _isLoadingGroups
+                  ? const SliverToBoxAdapter(
+                      child: SizedBox(
+                        height: groupTileHeight,
+                        child: Center(child: CircularProgressIndicator()),
+                      ),
+                    )
+                  : onlyGroups
+                  ? SliverPadding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      sliver: _buildGroupsGrid(colorScheme),
+                    )
+                  : SliverToBoxAdapter(
+                      child: RepaintBoundary(
+                        child: _buildGroupsHorizontalList(colorScheme, groupTileHeight),
+                      ),
+                    ),
 
-            if (showTitles)
-              SliverPadding(
-                padding: const EdgeInsets.fromLTRB(20, 24, 20, 12),
-                sliver: SliverToBoxAdapter(
-                  child: Text(
-                    'Purchases',
-                    style: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
-                  ),
-                ),
-              ),
+            if (showTitles) _SliverHeader(title: 'Purchases', textTheme: textTheme),
 
             if (showPurchases) PurchasesList(stream: purchasesRepo.watchPurchases(), group: null),
           ],
-
-          // bottom padding for FAB
           const SliverPadding(padding: EdgeInsets.only(bottom: 100)),
         ],
+      ),
+    );
+  }
+
+  Widget _buildGroupsGrid(ColorScheme colorScheme) {
+    return SliverGrid(
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        crossAxisSpacing: 16,
+        mainAxisSpacing: 16,
+        childAspectRatio: 1,
+      ),
+      delegate: SliverChildBuilderDelegate((context, index) {
+        if (index == _groups.length) return _buildAddGroupTile(context, colorScheme);
+        return _buildGroupTile(context, _groups[index], colorScheme);
+      }, childCount: _groups.length + 1),
+    );
+  }
+
+  Widget _buildGroupsHorizontalList(ColorScheme colorScheme, double height) {
+    return SizedBox(
+      height: height,
+      child: ListView.builder(
+        // Builder is more efficient than separated for small lists
+        scrollDirection: Axis.horizontal,
+        physics: const BouncingScrollPhysics(),
+        padding: const EdgeInsets.symmetric(horizontal: 20),
+        itemCount: _groups.length + 1,
+        itemBuilder: (context, index) {
+          final isLast = index == _groups.length;
+          return Padding(
+            padding: EdgeInsets.only(right: isLast ? 0 : 16),
+            child: SizedBox(
+              width: height,
+              child: isLast
+                  ? _buildAddGroupTile(context, colorScheme)
+                  : _buildGroupTile(context, _groups[index], colorScheme),
+            ),
+          );
+        },
       ),
     );
   }
@@ -232,88 +294,6 @@ class _GroupsScreenState extends State<GroupsScreen> {
         ),
       ),
     );
-  }
-
-  Widget _buildGroupsView(BuildContext context, ColorScheme colorScheme, double groupTileHeight) {
-    return SizedBox(
-      height: groupTileHeight,
-      child: ListView.separated(
-        physics: const BouncingScrollPhysics(),
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 20),
-        itemCount: _groups.length + 1,
-        separatorBuilder: (context, index) => const SizedBox(width: 16),
-        itemBuilder: (context, index) {
-          if (index == _groups.length) {
-            return SizedBox(
-              width: groupTileHeight,
-              child: _buildAddGroupTile(context, colorScheme),
-            );
-          }
-          return SizedBox(
-            width: groupTileHeight,
-            child: _buildGroupTile(context, _groups[index], colorScheme),
-          );
-        },
-      ),
-    );
-  }
-
-  List<Widget> _buildGroupsOnlySlivers(
-    BuildContext context,
-    ColorScheme colorScheme,
-    TextTheme textTheme,
-  ) {
-    return [
-      SliverToBoxAdapter(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const SizedBox(height: 16),
-              Container(
-                padding: const EdgeInsets.all(24),
-                decoration: BoxDecoration(
-                  color: colorScheme.primaryContainer,
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(Icons.storefront, size: 56, color: colorScheme.onPrimaryContainer),
-              ),
-              const SizedBox(height: 24),
-              Text(
-                'Your Groups',
-                style: textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'All your purchases are organized in groups',
-                textAlign: TextAlign.center,
-                style: textTheme.bodyMedium?.copyWith(color: colorScheme.onSurfaceVariant),
-              ),
-              const SizedBox(height: 32),
-            ],
-          ),
-        ),
-      ),
-      SliverPadding(
-        padding: const EdgeInsets.symmetric(horizontal: 20),
-        sliver: SliverGrid(
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
-            crossAxisSpacing: 16,
-            mainAxisSpacing: 16,
-            childAspectRatio: 1,
-          ),
-          delegate: SliverChildBuilderDelegate((context, index) {
-            if (index == _groups.length) {
-              return _buildAddGroupTile(context, colorScheme);
-            }
-            return _buildGroupTile(context, _groups[index], colorScheme);
-          }, childCount: _groups.length + 1),
-        ),
-      ),
-    ];
   }
 
   Widget _buildAddGroupTile(BuildContext context, ColorScheme colorScheme) {
@@ -468,6 +448,22 @@ class _GroupsScreenState extends State<GroupsScreen> {
       message:
           'Are you sure you want to delete "${group.name}"? This will also remove all its purchase history.',
       onDelete: () => context.read<GroupsRepository>().deleteGroup(group.id),
+    );
+  }
+}
+
+class _SliverHeader extends StatelessWidget {
+  final String title;
+  final TextTheme textTheme;
+  const _SliverHeader({required this.title, required this.textTheme});
+
+  @override
+  Widget build(BuildContext context) {
+    return SliverPadding(
+      padding: const EdgeInsets.fromLTRB(20, 16, 20, 12),
+      sliver: SliverToBoxAdapter(
+        child: Text(title, style: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
+      ),
     );
   }
 }

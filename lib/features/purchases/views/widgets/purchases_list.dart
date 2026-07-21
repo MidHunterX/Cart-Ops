@@ -162,16 +162,17 @@ class _PurchasesListState extends State<PurchasesList> {
   Widget build(BuildContext context) {
     if (_isLoading) {
       return const SliverToBoxAdapter(
-        child: Padding(
-          padding: EdgeInsets.all(32.0),
+        child: SizedBox(
+          height: 200,
           child: Center(child: CircularProgressIndicator()),
         ),
       );
-    } else if (_items.isEmpty) {
+    }
+
+    if (_items.isEmpty) {
       return const SliverFillRemaining(
         hasScrollBody: false,
         child: Center(
-          key: ValueKey('empty_purchases'),
           child: EmptyState(
             icon: Icons.shopping_bag_outlined,
             title: 'No Purchases Yet',
@@ -179,21 +180,21 @@ class _PurchasesListState extends State<PurchasesList> {
           ),
         ),
       );
-    } else {
-      return SliverPadding(
-        padding: const EdgeInsets.only(bottom: 80), // Space for FAB
-        sliver: SliverAnimatedList(
-          key: _listKey,
-          initialItemCount: _items.length,
-          itemBuilder: (context, index, animation) {
-            final item = _items[index];
-            final isLast = index == _items.length - 1;
-            final isNextHeader = !isLast && _items[index + 1] is MonthHeaderItem;
-            return _buildItem(item, animation, showDivider: !(isLast || isNextHeader));
-          },
-        ),
-      );
     }
+
+    return SliverPadding(
+      padding: const EdgeInsets.only(bottom: 80),
+      sliver: SliverAnimatedList(
+        key: _listKey,
+        initialItemCount: _items.length,
+        itemBuilder: (context, index, animation) {
+          final item = _items[index];
+          final isLast = index == _items.length - 1;
+          final isNextHeader = !isLast && _items[index + 1] is MonthHeaderItem;
+          return _buildItem(item, animation, showDivider: !(isLast || isNextHeader));
+        },
+      ),
+    );
   }
 }
 
