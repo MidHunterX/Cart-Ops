@@ -360,10 +360,14 @@ class PurchasedItemFormState extends State<PurchasedItemForm> {
       weightUnit: weightUnit,
     );
 
-    if (result != null && result.isNotEmpty && mounted) {
+    if (result != null && result.price.isNotEmpty && result.quantity.isNotEmpty && mounted) {
       setState(() {
-        _priceStr = result;
-        _priceController.text = result;
+        _priceStr = result.price;
+        _priceController.text = result.price;
+
+        _qtyStr = result.quantity;
+        _qtyController.text = result.quantity;
+
         _activeField = ActiveField.quantity;
         _focusActiveField();
       });

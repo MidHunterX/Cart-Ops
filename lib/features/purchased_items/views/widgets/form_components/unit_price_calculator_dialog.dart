@@ -20,7 +20,7 @@ class UnitPriceCalculatorDialog extends StatefulWidget {
     this.weightUnit,
   });
 
-  static Future<String?> show({
+  static Future<({String price, String quantity})?> show({
     required BuildContext context,
     required String currentQuantity,
     required String currentListingPrice,
@@ -29,7 +29,7 @@ class UnitPriceCalculatorDialog extends StatefulWidget {
     String? currencySymbol,
     String? weightUnit,
   }) async {
-    return showDialog<String>(
+    return showDialog<({String price, String quantity})>(
       context: context,
       builder: (context) => UnitPriceCalculatorDialog(
         initialQuantity: currentQuantity,
@@ -143,7 +143,12 @@ class _UnitPriceCalculatorDialogState extends State<UnitPriceCalculatorDialog> {
       actions: [
         TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
         FilledButton(
-          onPressed: () => Navigator.pop(context, _resultCtrl.text),
+          onPressed: () {
+            Navigator.pop(context, (
+              price: _resultCtrl.text,
+              quantity: _quantityCtrl.text,
+            ));
+          },
           child: const Text('Apply'),
         ),
       ],
