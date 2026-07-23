@@ -4,7 +4,7 @@ screenshots showing groups and purchases lists, item entry keypad with
 real-time totals and price graph, item details with price history trend, and
 tracked purchased food items. Center overlay displays purple shopping cart logo
 with 'CART_OPS Advanced Commerce Operator Toolset' text.
-](./.assets/cartops_banner2.jpg)
+](./.assets/cartops_banner.jpg)
 
 # Cart Ops
 

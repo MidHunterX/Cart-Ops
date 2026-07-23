@@ -6,6 +6,7 @@
 /android/app/src/main/res/mipmap-*/launcher_icon*.xml
 /android/app/src/main/res/drawable-*/ic_launcher*.png
 /ios/Runner/Assets.xcassets/AppIcon.appiconset/Contents.json
+/ios/Runner/Assets.xcassets/LaunchImage.imageset/LaunchImage*.png
 
 # flutter_native_splash generated files
 android/app/src/main/res/drawable/background.png
