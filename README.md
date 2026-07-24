@@ -103,7 +103,7 @@ Create schema snapshot of current database for testing migrations:
 
 ```
 dart run drift_dev schema dump lib/core/database/database.dart drift_schemas/
-dart run drift_dev schema generate drift_schemas/ test/generated_migrations/
+dart run drift_dev schema generate drift_schemas/ test/core/database/generated_migrations/
 ```
 
 ## 🚨 Known Operational Defects
