@@ -52,6 +52,13 @@ class _GroupsScreenState extends State<GroupsScreen> {
     });
   }
 
+  void _showEditGroupDialog(BuildContext context, Group group) {
+    showDialog(
+      context: context,
+      builder: (_) => AddGroupDialog(group: group),
+    );
+  }
+
   @override
   void dispose() {
     _groupsSub?.cancel();
@@ -235,6 +242,8 @@ class _GroupsScreenState extends State<GroupsScreen> {
   }
 
   Widget _buildGroupTile(BuildContext context, Group group, ColorScheme colorScheme) {
+    final iconData = getGroupIcon(group.iconKey);
+
     return Card.filled(
       clipBehavior: Clip.antiAlias,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -243,16 +252,17 @@ class _GroupsScreenState extends State<GroupsScreen> {
           context,
           MaterialPageRoute(builder: (_) => PurchasesScreen(group: group)),
         ),
+        onLongPress: () => _showEditGroupDialog(context, group),
         child: Stack(
           children: [
             Center(
               child: Padding(
-                padding: const EdgeInsets.all(12.0),
+                padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.storefront, size: 36, color: colorScheme.primary),
-                    const SizedBox(height: 12),
+                    Icon(iconData, size: 36, color: colorScheme.primary),
+                    const SizedBox(height: 8),
                     Text(
                       group.name,
                       textAlign: TextAlign.center,
@@ -260,9 +270,21 @@ class _GroupsScreenState extends State<GroupsScreen> {
                         color: colorScheme.onSurface,
                         fontWeight: FontWeight.w600,
                       ),
-                      maxLines: 2,
+                      maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
+                    if (group.description != null && group.description!.isNotEmpty) ...[
+                      const SizedBox(height: 4),
+                      Text(
+                        group.description!,
+                        textAlign: TextAlign.center,
+                        style: Theme.of(
+                          context,
+                        ).textTheme.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
                   ],
                 ),
               ),
@@ -275,8 +297,19 @@ class _GroupsScreenState extends State<GroupsScreen> {
                 tooltip: 'Group Options',
                 onSelected: (value) {
                   if (value == 'delete') _confirmDeleteGroup(context, group);
+                  if (value == 'edit') _showEditGroupDialog(context, group);
                 },
                 itemBuilder: (context) => [
+                  PopupMenuItem(
+                    value: 'edit',
+                    child: Row(
+                      children: [
+                        Icon(Icons.edit_outlined, color: colorScheme.primary, size: 20),
+                        const SizedBox(width: 12),
+                        const Text('Edit Group'),
+                      ],
+                    ),
+                  ),
                   PopupMenuItem(
                     value: 'delete',
                     child: Row(
