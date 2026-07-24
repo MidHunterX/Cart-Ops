@@ -168,6 +168,14 @@ void main() {
         expect((-0.0).toCurrencyString('\$'), '\$0.00');
       });
 
+      test('handles negative numbers with preferWhole', () {
+        expect((-1.0).toCurrencyString('\$', preferWhole: true), '-\$1');
+        expect((-5.0).toCurrencyString('€', preferWhole: true), '-€5');
+        expect((-10.0).toCurrencyString('₹', preferWhole: true), '-₹10');
+        expect((-100.0).toCurrencyString('£', preferWhole: true), '-£100');
+        expect((-0.0).toCurrencyString('\$', preferWhole: true), '\$0');
+      });
+
       test('handles multi-character currency symbols', () {
         expect(1.0.toCurrencyString('USD'), 'USD1.00');
         expect(1.23.toCurrencyString('EUR'), 'EUR1.23');
@@ -179,12 +187,18 @@ void main() {
         expect(0.001.toCurrencyString('\$'), '\$0.00');
         expect(0.009.toCurrencyString('\$'), '\$0.01');
         expect(0.0001.toCurrencyString('\$'), '\$0.00');
+        // Test boundary conditions
+        expect(0.004.toCurrencyString('\$'), '\$0.00');
+        expect(0.005.toCurrencyString('\$'), '\$0.01');
       });
 
       test('handles large numbers correctly', () {
-        expect(1000000.0.toCurrencyString('\$'), '\$1000000.00');
-        expect(1234567.89.toCurrencyString('€'), '€1234567.89');
-        expect(999999.999.toCurrencyString('₹'), '₹1000000.00');
+        expect(1000000.0.toCurrencyString('\$'), '\$1,000,000.00');
+        expect(1234567.89.toCurrencyString('€'), '€1,234,567.89');
+        expect(999999.999.toCurrencyString('₹'), '₹1,000,000.00');
+        // Test even larger numbers
+        expect(9999999.0.toCurrencyString('\$'), '\$9,999,999.00');
+        expect(9876543.21.toCurrencyString('€'), '€9,876,543.21');
       });
 
       test('handles numbers with trailing zeros correctly', () {
@@ -192,18 +206,61 @@ void main() {
         expect(2.00.toCurrencyString('\$'), '\$2.00');
         expect(0.00.toCurrencyString('\$'), '\$0.00');
         expect(10.10.toCurrencyString('\$'), '\$10.10');
+        expect(100.000.toCurrencyString('\$'), '\$100.00');
       });
 
       test('handles currency symbols with spaces', () {
         expect(1.0.toCurrencyString('\$ '), '\$ 1.00');
         expect(1.23.toCurrencyString(' \$'), ' \$1.23');
         expect(5.50.toCurrencyString(' € '), ' € 5.50');
+        // Test with preferWhole
+        expect(5.0.toCurrencyString('\$ ', preferWhole: true), '\$ 5');
+        expect(10.0.toCurrencyString(' € ', preferWhole: true), ' € 10');
       });
 
       test('handles empty currency symbol', () {
         expect(1.0.toCurrencyString(''), '1.00');
         expect(1.23.toCurrencyString(''), '1.23');
         expect(0.0.toCurrencyString(''), '0.00');
+        expect(5.0.toCurrencyString('', preferWhole: true), '5');
+        expect(0.0.toCurrencyString('', preferWhole: true), '0');
+      });
+
+      test('supports different locales', () {
+        expect(1234.56.toCurrencyString('\$', locale: 'en_US'), '\$1,234.56');
+        expect(1234.56.toCurrencyString('€', locale: 'de_DE'), '€1.234,56');
+        expect(1234.56.toCurrencyString('£', locale: 'en_GB'), '£1,234.56');
+      });
+
+      test('handles precision with preferWhole for near-integers', () {
+        expect(1.0000001.toCurrencyString('\$', preferWhole: true), '\$1.00');
+        expect(0.9999999.toCurrencyString('\$', preferWhole: true), '\$1.00');
+        expect(1.0000000.toCurrencyString('\$', preferWhole: true), '\$1');
+        expect(0.0000000.toCurrencyString('\$', preferWhole: true), '\$0');
+      });
+
+      test('handles very small decimal values', () {
+        expect(0.000001.toCurrencyString('\$'), '\$0.00');
+        expect(0.0001.toCurrencyString('\$'), '\$0.00');
+        expect(0.0005.toCurrencyString('\$'), '\$0.00');
+        expect(0.0009.toCurrencyString('\$'), '\$0.00');
+      });
+
+      test('formats with different currency symbol positions', () {
+        expect(1.23.toCurrencyString('\$'), '\$1.23');
+        expect(1.23.toCurrencyString('USD '), 'USD 1.23');
+        expect(1.23.toCurrencyString(' €'), ' €1.23');
+      });
+
+      test('handles custom locale with decimal grouping', () {
+        expect(1000000.0.toCurrencyString('\$', locale: 'en_US'), '\$1,000,000.00');
+        expect(1000000.0.toCurrencyString('€', locale: 'de_DE'), '€1.000.000,00');
+      });
+
+      test('handles invalid locale gracefully', () {
+        // Should fallback to default behavior
+        expect(1.23.toCurrencyString('\$', locale: 'invalid_locale'), '\$1.23');
+        expect(1000.0.toCurrencyString('\$', locale: 'invalid_locale'), '\$1,000.00');
       });
     });
 
