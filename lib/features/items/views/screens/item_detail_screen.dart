@@ -95,7 +95,7 @@ class ItemDetailScreen extends StatelessWidget {
                         ),
                         title: Text(dateStr, style: const TextStyle(fontWeight: FontWeight.bold)),
                         subtitle: Text(
-                          'Quantity: ${p.quantity?.toWeightString(p.isWeight ? weightUnit : '')}',
+                          'Quantity: ${p.quantity?.toQuantityString(p.isWeight ? weightUnit : '')}',
                         ),
                         trailing: Column(
                           crossAxisAlignment: CrossAxisAlignment.end,

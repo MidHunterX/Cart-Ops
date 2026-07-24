@@ -3,126 +3,126 @@ import 'package:shopping_assist/core/utils/number_formatter.dart';
 
 void main() {
   group('NumberFormatting Extension', () {
-    group('toPriceString', () {
+    group('toInputString', () {
       test('formats whole numbers as integers', () {
-        expect(0.0.toPriceString(), '0');
-        expect(1.0.toPriceString(), '1');
-        expect(5.0.toPriceString(), '5');
-        expect(10.0.toPriceString(), '10');
-        expect(100.0.toPriceString(), '100');
+        expect(0.0.toInputString(), '0');
+        expect(1.0.toInputString(), '1');
+        expect(5.0.toInputString(), '5');
+        expect(10.0.toInputString(), '10');
+        expect(100.0.toInputString(), '100');
       });
 
       test('formats decimal numbers with two decimal places', () {
-        expect(1.23.toPriceString(), '1.23');
-        expect(5.50.toPriceString(), '5.50');
-        expect(0.99.toPriceString(), '0.99');
-        expect(99.99.toPriceString(), '99.99');
-        expect(0.01.toPriceString(), '0.01');
+        expect(1.23.toInputString(), '1.23');
+        expect(5.50.toInputString(), '5.50');
+        expect(0.99.toInputString(), '0.99');
+        expect(99.99.toInputString(), '99.99');
+        expect(0.01.toInputString(), '0.01');
       });
 
       test('formats numbers with more than two decimal places correctly', () {
-        expect(1.2345.toPriceString(), '1.23');
-        expect(5.6789.toPriceString(), '5.68');
-        expect(0.1234.toPriceString(), '0.12');
-        expect(123.456.toPriceString(), '123.46');
-        expect(1.999.toPriceString(), '2.00');
+        expect(1.2345.toInputString(), '1.23');
+        expect(5.6789.toInputString(), '5.68');
+        expect(0.1234.toInputString(), '0.12');
+        expect(123.456.toInputString(), '123.46');
+        expect(1.999.toInputString(), '2.00');
       });
 
       test('handles negative numbers correctly', () {
-        expect((-1.0).toPriceString(), '-1');
-        expect((-5.50).toPriceString(), '-5.50');
-        expect((-3.14159).toPriceString(), '-3.14');
-        expect((-0.99).toPriceString(), '-0.99');
-        expect((-0.01).toPriceString(), '-0.01');
-        expect((-0.0).toPriceString(), '0');
+        expect((-1.0).toInputString(), '-1');
+        expect((-5.50).toInputString(), '-5.50');
+        expect((-3.14159).toInputString(), '-3.14');
+        expect((-0.99).toInputString(), '-0.99');
+        expect((-0.01).toInputString(), '-0.01');
+        expect((-0.0).toInputString(), '0');
       });
 
       test('handles numbers near zero correctly', () {
-        expect(0.001.toPriceString(), '0.00');
-        expect(0.009.toPriceString(), '0.01');
-        expect(0.0001.toPriceString(), '0.00');
+        expect(0.001.toInputString(), '0.00');
+        expect(0.009.toInputString(), '0.01');
+        expect(0.0001.toInputString(), '0.00');
       });
 
       test('handles large numbers correctly', () {
-        expect(1000000.0.toPriceString(), '1000000');
-        expect(1234567.89.toPriceString(), '1234567.89');
-        expect(999999.999.toPriceString(), '1000000.00');
+        expect(1000000.0.toInputString(), '1000000');
+        expect(1234567.89.toInputString(), '1234567.89');
+        expect(999999.999.toInputString(), '1000000.00');
       });
 
       test('handles numbers with trailing zeros correctly', () {
-        expect(1.50.toPriceString(), '1.50');
-        expect(2.00.toPriceString(), '2');
-        expect(0.00.toPriceString(), '0');
-        expect(10.10.toPriceString(), '10.10');
+        expect(1.50.toInputString(), '1.50');
+        expect(2.00.toInputString(), '2');
+        expect(0.00.toInputString(), '0');
+        expect(10.10.toInputString(), '10.10');
       });
     });
 
-    group('toWeightString', () {
+    group('toQuantityString', () {
       test('formats whole numbers without unit', () {
-        expect(0.0.toWeightString(null), '0');
-        expect(1.0.toWeightString(null), '1');
-        expect(5.0.toWeightString(null), '5');
-        expect(10.0.toWeightString(null), '10');
-        expect(100.0.toWeightString(null), '100');
+        expect(0.0.toQuantityString(null), '0');
+        expect(1.0.toQuantityString(null), '1');
+        expect(5.0.toQuantityString(null), '5');
+        expect(10.0.toQuantityString(null), '10');
+        expect(100.0.toQuantityString(null), '100');
       });
 
       test('formats whole numbers with unit', () {
-        expect(0.0.toWeightString('kg'), '0kg');
-        expect(1.0.toWeightString('kg'), '1kg');
-        expect(5.0.toWeightString('g'), '5g');
-        expect(10.0.toWeightString('lbs'), '10lbs');
-        expect(100.0.toWeightString('oz'), '100oz');
+        expect(0.0.toQuantityString('kg'), '0kg');
+        expect(1.0.toQuantityString('kg'), '1kg');
+        expect(5.0.toQuantityString('g'), '5g');
+        expect(10.0.toQuantityString('lbs'), '10lbs');
+        expect(100.0.toQuantityString('oz'), '100oz');
       });
 
       test('formats decimal numbers without unit', () {
-        expect(1.25.toWeightString(null), '1.25');
-        expect(5.50.toWeightString(null), '5.5');
-        expect(0.5.toWeightString(null), '0.5');
-        expect(99.99.toWeightString(null), '99.99');
-        expect(3.14159.toWeightString(null), '3.14159');
+        expect(1.25.toQuantityString(null), '1.25');
+        expect(5.50.toQuantityString(null), '5.5');
+        expect(0.5.toQuantityString(null), '0.5');
+        expect(99.99.toQuantityString(null), '99.99');
+        expect(3.14159.toQuantityString(null), '3.14159');
       });
 
       test('formats decimal numbers with unit', () {
-        expect(1.25.toWeightString('kg'), '1.25kg');
-        expect(5.50.toWeightString('g'), '5.5g');
-        expect(0.5.toWeightString('lbs'), '0.5lbs');
-        expect(99.99.toWeightString('oz'), '99.99oz');
-        expect(3.14159.toWeightString('kg'), '3.14159kg');
+        expect(1.25.toQuantityString('kg'), '1.25kg');
+        expect(5.50.toQuantityString('g'), '5.5g');
+        expect(0.5.toQuantityString('lbs'), '0.5lbs');
+        expect(99.99.toQuantityString('oz'), '99.99oz');
+        expect(3.14159.toQuantityString('kg'), '3.14159kg');
       });
 
       test('formats numbers with trailing zeros correctly', () {
-        expect(1.0.toWeightString('kg'), '1kg');
-        expect(1.0.toWeightString('g'), '1g');
-        expect(0.0.toWeightString('kg'), '0kg');
-        expect(1.30.toWeightString('kg'), '1.3kg');
-        expect(1.00.toWeightString('kg'), '1kg');
+        expect(1.0.toQuantityString('kg'), '1kg');
+        expect(1.0.toQuantityString('g'), '1g');
+        expect(0.0.toQuantityString('kg'), '0kg');
+        expect(1.30.toQuantityString('kg'), '1.3kg');
+        expect(1.00.toQuantityString('kg'), '1kg');
       });
 
       test('handles negative numbers correctly', () {
-        expect((-1.0).toWeightString('kg'), '-1kg');
-        expect((-5.50).toWeightString('g'), '-5.5g');
-        expect((-0.5).toWeightString('lbs'), '-0.5lbs');
-        expect((-3.14159).toWeightString('kg'), '-3.14159kg');
-        expect((-0.0).toWeightString('kg'), '0kg');
+        expect((-1.0).toQuantityString('kg'), '-1kg');
+        expect((-5.50).toQuantityString('g'), '-5.5g');
+        expect((-0.5).toQuantityString('lbs'), '-0.5lbs');
+        expect((-3.14159).toQuantityString('kg'), '-3.14159kg');
+        expect((-0.0).toQuantityString('kg'), '0kg');
       });
 
       test('handles large numbers correctly', () {
-        expect(1000000.0.toWeightString('kg'), '1000000kg');
-        expect(1234567.89.toWeightString('g'), '1234567.89g');
-        expect(999999.999.toWeightString('kg'), '999999.999kg');
+        expect(1000000.0.toQuantityString('kg'), '1000000kg');
+        expect(1234567.89.toQuantityString('g'), '1234567.89g');
+        expect(999999.999.toQuantityString('kg'), '999999.999kg');
       });
 
       test('handles empty string unit', () {
-        expect(1.0.toWeightString(''), '1');
-        expect(1.25.toWeightString(''), '1.25');
-        expect(0.0.toWeightString(''), '0');
+        expect(1.0.toQuantityString(''), '1');
+        expect(1.25.toQuantityString(''), '1.25');
+        expect(0.0.toQuantityString(''), '0');
       });
 
       test('handles unit with spaces', () {
-        expect(1.0.toWeightString(' kg'), '1 kg');
-        expect(1.25.toWeightString(' kg'), '1.25 kg');
-        expect(1.0.toWeightString('g '), '1g ');
-        expect(1.0.toWeightString(' kg '), '1 kg ');
+        expect(1.0.toQuantityString(' kg'), '1 kg');
+        expect(1.25.toQuantityString(' kg'), '1.25 kg');
+        expect(1.0.toQuantityString('g '), '1g ');
+        expect(1.0.toQuantityString(' kg '), '1 kg ');
       });
     });
 
@@ -294,12 +294,12 @@ void main() {
         final min = double.minPositive;
 
         // Just verify they don't throw exceptions
-        expect(() => max.toPriceString(), returnsNormally);
-        expect(() => max.toWeightString('kg'), returnsNormally);
+        expect(() => max.toInputString(), returnsNormally);
+        expect(() => max.toQuantityString('kg'), returnsNormally);
         expect(() => max.toCurrencyString('\$'), returnsNormally);
 
-        expect(() => min.toPriceString(), returnsNormally);
-        expect(() => min.toWeightString('kg'), returnsNormally);
+        expect(() => min.toInputString(), returnsNormally);
+        expect(() => min.toQuantityString('kg'), returnsNormally);
         expect(() => min.toCurrencyString('\$'), returnsNormally);
       });
     });

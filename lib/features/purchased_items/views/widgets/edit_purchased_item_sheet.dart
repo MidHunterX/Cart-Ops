@@ -76,7 +76,7 @@ class _EditPurchasedItemSheetState extends State<EditPurchasedItemSheet> {
 
       if (lastPurchase != null && mounted) {
         _formKey.currentState?.updateValues(
-          price: lastPurchase.price?.toPriceString() ?? '',
+          price: lastPurchase.price?.toInputString() ?? '',
           qty: lastPurchase.isWeight ? '' : '1',
           isWeight: lastPurchase.isWeight,
           discount: lastPurchase.discount > 0 ? lastPurchase.discount.toString() : '',
@@ -161,8 +161,8 @@ class _EditPurchasedItemSheetState extends State<EditPurchasedItemSheet> {
       itemId: _itemId,
       title: 'Edit Item',
       itemName: _name,
-      initialPrice: widget.purchasedItem.price?.toPriceString() ?? '',
-      initialQty: widget.purchasedItem.quantity?.toPriceString() ?? '',
+      initialPrice: widget.purchasedItem.price?.toInputString() ?? '',
+      initialQty: widget.purchasedItem.quantity?.toInputString() ?? '',
       initialDiscount: discount > 0 ? discount.toString() : '',
       initialIsWeight: widget.purchasedItem.isWeight,
       initialActiveField: widget.initialField,

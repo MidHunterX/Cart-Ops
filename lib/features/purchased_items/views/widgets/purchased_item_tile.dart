@@ -211,9 +211,9 @@ class PurchasedItemTile extends StatelessWidget {
             fit: BoxFit.scaleDown,
             child: Text(
               pItem.isWeight
-                  ? pItem.quantity!.toWeightString(weightUnit)
-                  : pItem.quantity! > 1.0
-                  ? pItem.quantity!.toWeightString('')
+                  ? pItem.quantity!.toQuantityString(weightUnit)
+                  : pItem.quantity! >= 1.0
+                  ? pItem.quantity!.toQuantityString('')
                   : pItem.quantity! == 0.25
                   ? 'Qtr'
                   : pItem.quantity! == 0.5

@@ -59,7 +59,7 @@ class _UnitPriceCalculatorDialogState extends State<UnitPriceCalculatorDialog> {
 
     String totalPrice;
     if (unitPrice > 0 && quantity > 0) {
-      totalPrice = (unitPrice * quantity).toPriceString();
+      totalPrice = (unitPrice * quantity).toInputString();
     } else {
       totalPrice = widget.initialListingPrice;
     }
@@ -72,14 +72,14 @@ class _UnitPriceCalculatorDialogState extends State<UnitPriceCalculatorDialog> {
   void _onQtyOrUnitChanged() {
     final qty = double.tryParse(_quantityCtrl.text) ?? 0.0;
     final unitPrice = double.tryParse(_unitPriceCtrl.text) ?? 0.0;
-    if (qty > 0 && unitPrice > 0) _totalAmountCtrl.text = (qty * unitPrice).toPriceString();
+    if (qty > 0 && unitPrice > 0) _totalAmountCtrl.text = (qty * unitPrice).toInputString();
     setState(() {}); // Update discount preview
   }
 
   void _onTotalChanged() {
     final total = double.tryParse(_totalAmountCtrl.text) ?? 0.0;
     final qty = double.tryParse(_quantityCtrl.text) ?? 0.0;
-    if (total > 0 && qty > 0) _unitPriceCtrl.text = (total / qty).toPriceString();
+    if (total > 0 && qty > 0) _unitPriceCtrl.text = (total / qty).toInputString();
     setState(() {}); // Update discount preview
   }
 
@@ -202,7 +202,7 @@ class _UnitPriceCalculatorDialogState extends State<UnitPriceCalculatorDialog> {
         Row(
           children: [
             Text(
-              '$symbol${original.toPriceString()}',
+              '$symbol${original.toInputString()}',
               style: TextStyle(
                 decoration: TextDecoration.lineThrough,
                 fontSize: 12,
@@ -211,7 +211,7 @@ class _UnitPriceCalculatorDialogState extends State<UnitPriceCalculatorDialog> {
             ),
             const SizedBox(width: 8),
             Text(
-              '$symbol${discounted.toPriceString()}',
+              '$symbol${discounted.toInputString()}',
               style: TextStyle(fontWeight: FontWeight.bold, color: colorscheme.primary),
             ),
           ],

@@ -7,7 +7,7 @@ extension NumberFormatting on double {
   /// 1.2345 -> "1.23"
   /// 1.001 -> "1.00"
   /// 1.0 -> "1"
-  String toPriceString() {
+  String toInputString() {
     if (this == truncateToDouble()) return truncate().toString();
     return toStringAsFixed(2);
   }
@@ -18,7 +18,7 @@ extension NumberFormatting on double {
   /// 1.2345 -> "1.2345kg"
   /// 1.30 -> "1.3kg"
   /// 1.0 -> "1kg"
-  String toWeightString(String? unit) {
+  String toQuantityString(String? unit) {
     String unitStr = unit ?? '';
     if (this % 1 == 0) return '${toInt()}$unitStr';
     String value = toString();

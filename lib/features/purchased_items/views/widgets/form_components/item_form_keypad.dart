@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:shopping_assist/core/utils/image_picker_util.dart';
+import 'package:shopping_assist/core/utils/number_formatter.dart';
 import 'package:shopping_assist/core/widgets/delete_loading_overlay.dart';
 import 'package:shopping_assist/core/widgets/item_image_view.dart';
 
@@ -293,7 +294,7 @@ class _ItemFormKeypadState extends State<ItemFormKeypad> {
             ),
             _buildActionBtn(
               text: hasDiscount
-                  ? '${double.parse(widget.discountStr).toStringAsFixed(2)}%'
+                  ? '${double.parse(widget.discountStr).toInputString()}%'
                   : 'Discount',
               backgroundColor: hasDiscount ? inputActiveBg : inputInactiveBg,
               foregroundColor: hasDiscount ? inputActiveFg : inputInactiveFg,
