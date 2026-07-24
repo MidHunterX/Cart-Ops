@@ -25,11 +25,37 @@ extension NumberFormatting on double {
     return '$value$unitStr';
   }
 
-  String toCurrencyString(String currencySymbol, {bool preferWhole = false}) {
+  /// Converts a double to a formatted currency string with commas
+  ///
+  /// Example:
+  /// 1234.56 -> "$1,234.56"
+  /// 1234.0 -> "$1,234" (when preferWhole is true)
+  /// -1234.56 -> "-$1,234.56"
+  String toCurrencyString(
+    String currencySymbol, {
+    bool preferWhole = false,
+    String locale = 'en_US',
+  }) {
     final isNegative = this < 0;
     final absValue = abs();
     final sign = isNegative ? '-' : '';
-    if (preferWhole && absValue % 1 == 0) return '$sign$currencySymbol${absValue.toInt()}';
-    return '$sign$currencySymbol${absValue.toStringAsFixed(2)}';
+    NumberFormat formatter;
+    try {
+      formatter = NumberFormat.currency(
+        locale: locale,
+        symbol: currencySymbol,
+        decimalDigits: preferWhole && absValue % 1 == 0 ? 0 : 2,
+      );
+    } catch (e) {
+      formatter = NumberFormat.currency(
+        locale: 'en_US',
+        symbol: currencySymbol,
+        decimalDigits: preferWhole && absValue % 1 == 0 ? 0 : 2,
+      );
+    }
+    String formatted = formatter.format(absValue);
+    String numberPart = formatted.replaceAll(currencySymbol, '').trim();
+    if (isNegative) return '$sign$currencySymbol$numberPart';
+    return '$currencySymbol$numberPart';
   }
 }
