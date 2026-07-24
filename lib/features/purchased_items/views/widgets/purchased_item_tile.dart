@@ -499,7 +499,7 @@ class PurchasedItemTile extends StatelessWidget {
       context: context,
       isScrollControlled: true, // Must resize on graph UI
       useSafeArea: false, // Must be behind keyboard
-      // enableDrag: false, // Disable dismiss gestures for messy fast typing
+      enableDrag: false, // Disable dismiss gestures for messy fast typing
       showDragHandle: true, // but, can be dismissed with the handle
       builder: (context) => EditPurchasedItemSheet(
         purchasedItem: details.purchasedItem,

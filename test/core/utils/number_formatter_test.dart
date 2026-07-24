@@ -3,51 +3,6 @@ import 'package:shopping_assist/core/utils/number_formatter.dart';
 
 void main() {
   group('NumberFormatting Extension', () {
-    group('toWholeNumberString', () {
-      test('formats whole numbers correctly', () {
-        expect(0.0.toWholeNumberString(), '0');
-        expect(1.0.toWholeNumberString(), '1');
-        expect(5.0.toWholeNumberString(), '5');
-        expect(10.0.toWholeNumberString(), '10');
-        expect(100.0.toWholeNumberString(), '100');
-      });
-
-      test('formats decimal numbers with two decimal places', () {
-        expect(1.5.toWholeNumberString(), '1.50');
-        expect(5.5.toWholeNumberString(), '5.50');
-        expect(3.14.toWholeNumberString(), '3.14');
-        expect(0.5.toWholeNumberString(), '0.50');
-        expect(99.99.toWholeNumberString(), '99.99');
-      });
-
-      test('formats numbers with many decimal places correctly', () {
-        expect(1.2345.toWholeNumberString(), '1.23');
-        expect(5.6789.toWholeNumberString(), '5.68');
-        expect(0.1234.toWholeNumberString(), '0.12');
-        expect(123.456.toWholeNumberString(), '123.46');
-      });
-
-      test('handles negative numbers correctly', () {
-        expect((-1.0).toWholeNumberString(), '-1');
-        expect((-5.5).toWholeNumberString(), '-5.50');
-        expect((-3.14159).toWholeNumberString(), '-3.14');
-        expect((-0.5).toWholeNumberString(), '-0.50');
-        expect((-0.0).toWholeNumberString(), '0');
-      });
-
-      test('handles large numbers correctly', () {
-        expect(1000000.0.toWholeNumberString(), '1000000');
-        expect(1234567.89.toWholeNumberString(), '1234567.89');
-        expect(999999.999.toWholeNumberString(), '1000000.00');
-      });
-
-      test('handles very small numbers correctly', () {
-        expect(0.001.toWholeNumberString(), '0.00');
-        expect(0.009.toWholeNumberString(), '0.01');
-        expect(0.0001.toWholeNumberString(), '0.00');
-      });
-    });
-
     group('toPriceString', () {
       test('formats whole numbers as integers', () {
         expect(0.0.toPriceString(), '0');
@@ -282,12 +237,10 @@ void main() {
         final min = double.minPositive;
 
         // Just verify they don't throw exceptions
-        expect(() => max.toWholeNumberString(), returnsNormally);
         expect(() => max.toPriceString(), returnsNormally);
         expect(() => max.toWeightString('kg'), returnsNormally);
         expect(() => max.toCurrencyString('\$'), returnsNormally);
 
-        expect(() => min.toWholeNumberString(), returnsNormally);
         expect(() => min.toPriceString(), returnsNormally);
         expect(() => min.toWeightString('kg'), returnsNormally);
         expect(() => min.toCurrencyString('\$'), returnsNormally);

@@ -1,15 +1,6 @@
-extension NumberFormatting on double {
-  /// Converts a double to a whole number string
-  ///
-  /// Example:
-  /// 1.2345 -> "1.2345"
-  /// 1.0 -> "1"
-  String toWholeNumberString() {
-    if (this == 0) return '0';
-    if (this % 1 == 0) return toInt().toString();
-    return toStringAsFixed(2);
-  }
+import 'package:intl/intl.dart';
 
+extension NumberFormatting on double {
   /// Converts a double to a price string
   ///
   /// Example:
