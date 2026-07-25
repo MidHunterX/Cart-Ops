@@ -43,7 +43,11 @@ class SettingsScreen extends StatelessWidget {
 
           ListTile(
             title: const Text('Currency'),
-            subtitle: Text(context.currencyCode),
+            subtitle: Text(
+              context.settings.isCurrencyDefault
+                  ? 'Default (${context.currencyCode})'
+                  : context.currencyCode,
+            ),
             trailing: const Icon(Icons.arrow_drop_down),
             onTap: () => showModalBottomSheet(
               context: context,

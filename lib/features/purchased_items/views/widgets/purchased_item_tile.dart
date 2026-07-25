@@ -68,8 +68,6 @@ class PurchasedItemTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final pItem = details.purchasedItem;
     final item = details.item;
-    final currency = context.currencySymbol;
-    final weightUnit = context.weightUnit;
     final colorScheme = Theme.of(context).colorScheme;
 
     final pricePerUnit = pItem.price ?? 0.0;
@@ -120,7 +118,6 @@ class PurchasedItemTile extends StatelessWidget {
                                   pItem,
                                   hasQty,
                                   isSmallScreen,
-                                  weightUnit,
                                   colorScheme,
                                 ),
                               ),
@@ -143,8 +140,6 @@ class PurchasedItemTile extends StatelessWidget {
                                         item,
                                         pItem,
                                         colorScheme,
-                                        currency,
-                                        weightUnit,
                                         hasPrice,
                                         discountApplied,
                                         pricePerUnit,
@@ -158,8 +153,6 @@ class PurchasedItemTile extends StatelessWidget {
                                         context,
                                         pItem,
                                         colorScheme,
-                                        currency,
-                                        weightUnit,
                                         hasPrice,
                                         hasQty,
                                         discountApplied,
@@ -200,7 +193,6 @@ class PurchasedItemTile extends StatelessWidget {
     PurchasedItem pItem,
     bool hasQty,
     bool isSmallScreen,
-    String weightUnit,
     ColorScheme colorScheme,
   ) {
     if (hasQty) {
@@ -211,7 +203,7 @@ class PurchasedItemTile extends StatelessWidget {
             fit: BoxFit.scaleDown,
             child: Text(
               pItem.isWeight
-                  ? pItem.quantity!.toQuantityString(weightUnit)
+                  ? pItem.quantity!.toQuantityString(context.weightUnit)
                   : pItem.quantity! >= 1.0
                   ? pItem.quantity!.toQuantityString('')
                   : pItem.quantity! == 0.25
@@ -239,7 +231,10 @@ class PurchasedItemTile extends StatelessWidget {
             padding: EdgeInsets.symmetric(horizontal: isSmallScreen ? 4 : 8),
           ),
           onPressed: () => _showEditSheet(context, initialField: ActiveField.quantity),
-          label: Text(pItem.isWeight ? weightUnit : 'Qty', style: const TextStyle(fontSize: 12)),
+          label: Text(
+            pItem.isWeight ? context.weightUnit : 'Qty',
+            style: const TextStyle(fontSize: 12),
+          ),
         ),
       ],
     );
@@ -260,8 +255,6 @@ class PurchasedItemTile extends StatelessWidget {
     Item item,
     PurchasedItem pItem,
     ColorScheme colorScheme,
-    String currency,
-    String weightUnit,
     bool hasPrice,
     bool discountApplied,
     double pricePerUnit,
@@ -278,17 +271,7 @@ class PurchasedItemTile extends StatelessWidget {
           ),
           const SizedBox(height: 4),
         ],
-        _buildPriceInfo(
-          context,
-          item,
-          pItem,
-          colorScheme,
-          currency,
-          weightUnit,
-          hasPrice,
-          discountApplied,
-          pricePerUnit,
-        ),
+        _buildPriceInfo(context, item, pItem, colorScheme, hasPrice, discountApplied, pricePerUnit),
       ],
     );
   }
@@ -298,8 +281,6 @@ class PurchasedItemTile extends StatelessWidget {
     Item item,
     PurchasedItem pItem,
     ColorScheme colorScheme,
-    String currency,
-    String weightUnit,
     bool hasPrice,
     bool discountApplied,
     double pricePerUnit,
@@ -311,14 +292,18 @@ class PurchasedItemTile extends StatelessWidget {
       );
     }
 
-    final ratePerItem = pricePerUnit.toCurrencyString(currency, preferWhole: true);
-    final unit = pItem.isWeight ? '/$weightUnit' : '';
+    final ratePerItem = pricePerUnit.toCurrencyString(
+      context.currencySymbol,
+      locale: context.currencyLocale,
+      preferWhole: true,
+    );
+    final unit = pItem.isWeight ? '/${context.weightUnit}' : '';
 
     if (discountApplied) {
       final ratePerDiscountedItem = _calcRateAfterDiscount(
         pricePerUnit,
         pItem.discount,
-      ).toCurrencyString(currency, preferWhole: true);
+      ).toCurrencyString(context.currencySymbol, locale: context.currencyLocale, preferWhole: true);
 
       return Wrap(
         spacing: 4,
@@ -364,8 +349,6 @@ class PurchasedItemTile extends StatelessWidget {
     BuildContext context,
     PurchasedItem pItem,
     ColorScheme colorScheme,
-    String currency,
-    String weightUnit,
     bool hasPrice,
     bool hasQty,
     bool discountApplied,
@@ -383,7 +366,9 @@ class PurchasedItemTile extends StatelessWidget {
             ),
             onPressed: () => _showEditSheet(context, initialField: ActiveField.price),
             label: Text(
-              pItem.isWeight ? '$currency/$weightUnit' : currency,
+              pItem.isWeight
+                  ? '${context.currencySymbol}/${context.weightUnit}'
+                  : context.currencySymbol,
               style: const TextStyle(fontSize: 12),
             ),
           ),
@@ -400,7 +385,7 @@ class PurchasedItemTile extends StatelessWidget {
           FittedBox(
             fit: BoxFit.scaleDown,
             child: Text(
-              totalPrice.toCurrencyString(currency),
+              totalPrice.toCurrencyString(context.currencySymbol, locale: context.currencyLocale),
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
                 color: colorScheme.primary,
                 fontWeight: FontWeight.bold,
@@ -410,7 +395,11 @@ class PurchasedItemTile extends StatelessWidget {
           FittedBox(
             fit: BoxFit.scaleDown,
             child: Text(
-              _calcTotalDiscount(pItem.price ?? 0, -pItem.discount, qty).toCurrencyString(currency),
+              _calcTotalDiscount(
+                pItem.price ?? 0,
+                -pItem.discount,
+                qty,
+              ).toCurrencyString(context.currencySymbol, locale: context.currencyLocale),
               style: Theme.of(context).textTheme.bodySmall?.copyWith(color: colorScheme.error),
             ),
           ),
@@ -424,7 +413,7 @@ class PurchasedItemTile extends StatelessWidget {
         FittedBox(
           fit: BoxFit.scaleDown,
           child: Text(
-            totalPrice.toCurrencyString(currency),
+            totalPrice.toCurrencyString(context.currencySymbol, locale: context.currencyLocale),
             style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
           ),
         ),

@@ -15,8 +15,6 @@ class ItemDetailScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final repo = context.watch<ItemsRepository>();
-    final currency = context.currencySymbol;
-    final weightUnit = context.weightUnit;
     final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
@@ -33,7 +31,7 @@ class ItemDetailScreen extends StatelessWidget {
           final int maxDataPoints = calculateMaxDataPoints(
             context,
             history,
-            extraLetters: currency.length + 1, // currency + space
+            extraLetters: context.currencySymbol.length + 1, // currency + space
           );
           final displayHistory = history.take(maxDataPoints).toList();
 
@@ -95,13 +93,16 @@ class ItemDetailScreen extends StatelessWidget {
                         ),
                         title: Text(dateStr, style: const TextStyle(fontWeight: FontWeight.bold)),
                         subtitle: Text(
-                          'Quantity: ${p.quantity?.toQuantityString(p.isWeight ? weightUnit : '')}',
+                          'Quantity: ${p.quantity?.toQuantityString(p.isWeight ? context.weightUnit : '')}',
                         ),
                         trailing: Column(
                           crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
                             Text(
-                              p.price!.toCurrencyString(currency),
+                              p.price!.toCurrencyString(
+                                context.currencySymbol,
+                                locale: context.currencyLocale,
+                              ),
                               style: Theme.of(context).textTheme.titleLarge?.copyWith(
                                 color: colorScheme.primary,
                                 fontWeight: FontWeight.bold,
@@ -109,7 +110,7 @@ class ItemDetailScreen extends StatelessWidget {
                             ),
                             if (p.discount > 0)
                               Text(
-                                'Discount: ${p.discount.toCurrencyString(currency)}',
+                                'Discount: ${p.discount.toCurrencyString(context.currencySymbol, locale: context.currencyLocale)}',
                                 style: Theme.of(context).textTheme.labelLarge?.copyWith(
                                   color: colorScheme.secondary,
                                   fontWeight: FontWeight.bold,

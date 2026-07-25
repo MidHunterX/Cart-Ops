@@ -124,10 +124,32 @@ class SettingsProvider extends ChangeNotifier {
   String _currencyCode = 'USD';
   String get currencyCode => _currencyCode;
   String get currencySymbol => currencies.firstWhere((c) => c.code == currencyCode).symbol;
+  String get currencyLocale {
+    final currency = currencies.firstWhere(
+      (c) => c.code == currencyCode,
+      orElse: () => currencies.first,
+    );
+    if (currency.code == 'EUR') return 'de_DE';
+    if (currency.code == 'BRL') return 'pt_BR';
+    if (currency.code == 'RUB') return 'ru_RU';
+    if (currency.code == 'IDR') return 'id_ID';
+    if (currency.code == 'TRY') return 'tr_TR';
+    if (currency.code == 'VND') return 'vi_VN';
+    if (currency.countryCode != null) return 'en_${currency.countryCode}';
+    return 'en_US';
+  }
+  bool get isCurrencyDefault => _prefs.getString(_currencyKey) == null;
+
   void setCurrency(String code) async {
     _currencyCode = code;
     notifyListeners();
     _prefs.setString(_currencyKey, code);
+  }
+
+  void clearCurrency() async {
+    await _prefs.remove(_currencyKey);
+    _loadCurrencySettings();
+    notifyListeners();
   }
 
   // Groups Feture
@@ -167,6 +189,7 @@ extension SettingsContext on BuildContext {
   SettingsProvider get settingsRead => read<SettingsProvider>();
 
   String get currencySymbol => settings.currencySymbol;
+  String get currencyLocale => settings.currencyLocale;
   String get weightUnit => settings.weightUnit;
   String get currencyCode => settings.currencyCode;
   bool get isCompactItemList => settings.compactItemList;

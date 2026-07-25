@@ -56,11 +56,29 @@ class _CurrencyPickerState extends State<CurrencyPicker> {
         ),
         Expanded(
           child: ListView.builder(
-            itemCount: _filteredCurrencies.length,
+            itemCount: _filteredCurrencies.length + (_searchQuery.isEmpty ? 1 : 0),
             itemBuilder: (context, index) {
-              final currency = _filteredCurrencies[index];
+              if (_searchQuery.isEmpty && index == 0) {
+                final isDefault = context.settingsRead.isCurrencyDefault;
+                return ListTile(
+                  selected: isDefault,
+                  leading: const Padding(
+                    padding: EdgeInsets.only(left: 4.0),
+                    child: Icon(Icons.language, size: 24),
+                  ),
+                  title: const Text('Default (Device Locale)'),
+                  onTap: () {
+                    context.settingsRead.clearCurrency();
+                    Navigator.pop(context);
+                  },
+                );
+              }
+
+              final currency = _filteredCurrencies[_searchQuery.isEmpty ? index - 1 : index];
               return ListTile(
-                selected: currency.code == context.currencyCode,
+                selected:
+                    currency.code == context.currencyCode &&
+                    !context.settingsRead.isCurrencyDefault,
                 leading: Text(currency.flag, style: const TextStyle(fontSize: 24)),
                 title: Text(currency.code),
                 trailing: Text(

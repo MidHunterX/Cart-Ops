@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shopping_assist/core/utils/number_formatter.dart';
 import 'package:shopping_assist/features/settings/providers/settings_provider.dart';
-import 'package:provider/provider.dart';
 
 class PurchaseSummaryCard extends StatelessWidget {
   final int itemCount;
@@ -29,8 +28,6 @@ class PurchaseSummaryCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final currency = context.watch<SettingsProvider>().currencySymbol;
-
     final hasBudget = budget != null && budget! > 0;
 
     return Material(
@@ -45,13 +42,10 @@ class PurchaseSummaryCard extends StatelessWidget {
               children: [
                 _buildItemsCount(context, colorScheme),
                 Container(width: 1, height: 40, color: colorScheme.onPrimaryContainer),
-                _buildTotal(context, colorScheme, currency),
+                _buildTotal(context, colorScheme),
               ],
             ),
-            if (hasBudget) ...[
-              const SizedBox(height: 16),
-              _buildBudget(context, colorScheme, currency),
-            ],
+            if (hasBudget) ...[const SizedBox(height: 16), _buildBudget(context, colorScheme)],
           ],
         ),
       ),
@@ -101,7 +95,7 @@ class PurchaseSummaryCard extends StatelessWidget {
     );
   }
 
-  Widget _buildTotal(BuildContext context, ColorScheme colorScheme, String currency) {
+  Widget _buildTotal(BuildContext context, ColorScheme colorScheme) {
     return Row(
       children: [
         Icon(
@@ -114,7 +108,7 @@ class PurchaseSummaryCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              total.toCurrencyString(currency),
+              total.toCurrencyString(context.currencySymbol, locale: context.currencyLocale),
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                 fontWeight: FontWeight.bold,
                 color: colorScheme.onPrimaryContainer,
@@ -132,7 +126,7 @@ class PurchaseSummaryCard extends StatelessWidget {
     );
   }
 
-  Widget _buildBudget(BuildContext context, ColorScheme colorScheme, String currency) {
+  Widget _buildBudget(BuildContext context, ColorScheme colorScheme) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24),
       child: Column(
@@ -142,13 +136,13 @@ class PurchaseSummaryCard extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Budget: ${budget!.toCurrencyString(currency)}',
+                'Budget: ${budget!.toCurrencyString(context.currencySymbol, locale: context.currencyLocale)}',
                 style: Theme.of(
                   context,
                 ).textTheme.bodyMedium?.copyWith(color: colorScheme.onPrimaryContainer),
               ),
               Text(
-                'Remaining: ${(budget! - total).toCurrencyString(currency)}',
+                'Remaining: ${(budget! - total).toCurrencyString(context.currencySymbol, locale: context.currencyLocale)}',
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   color: colorScheme.onPrimaryContainer,
                   fontWeight: FontWeight.bold,

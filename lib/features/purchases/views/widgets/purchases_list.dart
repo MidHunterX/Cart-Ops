@@ -162,10 +162,7 @@ class _PurchasesListState extends State<PurchasesList> {
   Widget build(BuildContext context) {
     if (_isLoading) {
       return const SliverToBoxAdapter(
-        child: SizedBox(
-          height: 200,
-          child: Center(child: CircularProgressIndicator()),
-        ),
+        child: SizedBox(height: 200, child: Center(child: CircularProgressIndicator())),
       );
     }
 
@@ -246,7 +243,7 @@ class _MonthHeaderTile extends StatelessWidget {
               ),
             ),
             Text(
-              header.total.toCurrencyString(context.currencySymbol),
+              header.total.toCurrencyString(context.currencySymbol, locale: context.currencyLocale),
               style: Theme.of(context).textTheme.titleSmall?.copyWith(color: colorScheme.secondary),
             ),
           ],
@@ -309,7 +306,11 @@ class _PurchaseTileState extends State<_PurchaseTile> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  purchase.totalPrice?.toCurrencyString(context.currencySymbol) ?? '0.00',
+                  purchase.totalPrice?.toCurrencyString(
+                        context.currencySymbol,
+                        locale: context.currencyLocale,
+                      ) ??
+                      0.00.toCurrencyString(context.currencySymbol, locale: context.currencyLocale),
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                     color: Theme.of(context).colorScheme.primary,
