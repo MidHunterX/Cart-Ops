@@ -12,7 +12,7 @@ class SettingsSectionHeader extends StatelessWidget {
     final textTheme = Theme.of(context).textTheme;
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 24, 16, 8),
+      padding: const EdgeInsets.fromLTRB(8, 24, 16, 8),
       child: Row(
         children: [
           if (icon != null) ...[
