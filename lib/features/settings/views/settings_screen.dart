@@ -84,6 +84,15 @@ class SettingsScreen extends StatelessWidget {
             onChanged: settings.setGroupFeatureStatus,
           ),
 
+          SwitchListTile(
+            title: const Text('Compact Price Input'),
+            subtitle: Text(
+              context.isCompactPriceInput ? 'Enabled (Popup Calculator)' : 'Disabled (Inline Total Field)',
+            ),
+            value: context.isCompactPriceInput,
+            onChanged: settings.setCompactPriceInput,
+          ),
+
           const Divider(),
 
           const SettingsSectionHeader(title: 'Accessibility', icon: Icons.accessibility_new),

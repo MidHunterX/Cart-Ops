@@ -254,6 +254,8 @@ those who prefer detailed breakdowns and analytics. Solution?
 
 - Price: `[Total Price] / [Quantity] = [Unit Price]`
 
+#### Modal Calculator UI (Default)
+
 A quick nifty Unit Calculator right beside the price field can be used to
 calculate the price per unit. Type in the total quantity, total price and
 voila! You get the unit price which can then be applied.
@@ -262,6 +264,15 @@ After entering the item, since all the price fields are filled, this same
 calculator can then be used to check all of the what If scenarios of different
 quantities, and this UI will show the running total of the scenario along with
 discount breakdowns if any.
+
+#### Inline UI
+
+If you constantly use the calculator, going back and forth introduces a bit
+extra cognitive friction. In this case, you'll want this feature to be
+alongside input fields. Turn Off `Compact Price Input` in settings to get the
+total price directly in the input field. Making this calculation always on the
+go. Disadvantage: Since this introduces UI verbosity, detailed price breakdowns
+like the Modal Calculator will not be available in this workflow.
 
 ### 🚀 User Onboarding
 
@@ -295,3 +306,25 @@ User onboarding is plain simple naturally following the principle of
 
 Enable `Purchase Groups` feature while no purchases or groups have been made.
 Take the correct choice to go into a specialized Home Screen UI for Groups.
+
+### 🏦 Tax Rates
+
+This is where almost every single app fails in implementation except for MLZ
+and other professional budgeting software. Many apps straight up uses global
+tax setting to calculate price directly which will work just fine only if you
+are confined to a specific location where taxes never change. Real world don't
+work like that, taxes changes over time and differs from geography.
+
+> Price settings for Taxes and Discounts should always be attached to purchase events.
+
+- Global settings should be used as merely a suggestion for which tax
+  rates to use while attaching to purchase events.
+- Ability to create and choose between multiple tax rates is essential.
+
+Multiple tax rates can be created because in many countries, the exact tax rate
+applied depends on the classification of the goods. For e.g.:
+
+- 0% (Exempt): Unprocessed food staples, certain life-saving medicines, and educational materials.
+- 5%: Daily household essentials, dairy products, packaged foods, and agricultural equipment.
+- 18%: Standard rate for most items, including electronics, appliances, and consumer goods.
+- 40% (Luxury): High-end vehicles, tobacco, aerated beverages, and betting.

@@ -97,15 +97,6 @@ financial resource management via technological assistance.
 - [x] Keypad Haptics
 - [x] Checklist Mode
 
-## 🔫 Developer Operations
-
-Create schema snapshot of current database for testing migrations:
-
-```
-dart run drift_dev schema dump lib/core/database/database.dart drift_schemas/
-dart run drift_dev schema generate drift_schemas/ test/core/database/generated_migrations/
-```
-
 ## 🚨 Known Operational Defects
 
 ### Errors hidden behind Keypad
@@ -128,9 +119,6 @@ In Flutter's Material3 implementation, surfaceTintColor overlay is meant to
 animate when elevation changes but, since default shape and borderRadius is
 null, the Material widget optimizes out this animation from the AppBar.
 
-This animated elevation color change is meant to be aesthetically similar to a
-heavy Gaussian blur BG and not having a smooth transition defeats that purpose.
-
 This can be solved by adding a shape:
 
 ```dart
@@ -144,3 +132,12 @@ MaterialApp(
 ```
 
 > No more abrupt coloring on elevation changes.
+
+## 🔫 Developer Operations
+
+Create schema snapshot of current database for testing migrations:
+
+```
+dart run drift_dev schema dump lib/core/database/database.dart drift_schemas/
+dart run drift_dev schema generate drift_schemas/ test/core/database/generated_migrations/
+```

@@ -52,6 +52,22 @@ class SettingsProvider extends ChangeNotifier {
     _prefs.setBool(_compactItemListKey, isCompact);
   }
 
+  // Compact Price Input
+
+  void _loadCompactPriceInput() {
+    final compactPriceInput = _prefs.getBool(_compactPriceInputKey);
+    if (compactPriceInput != null) _compactPriceInput = compactPriceInput;
+  }
+
+  static const String _compactPriceInputKey = 'compact_price_input';
+  bool _compactPriceInput = true;
+  bool get compactPriceInput => _compactPriceInput;
+  void setCompactPriceInput(bool isCompact) async {
+    _compactPriceInput = isCompact;
+    notifyListeners();
+    _prefs.setBool(_compactPriceInputKey, isCompact);
+  }
+
   // Dominant Hand
 
   void _loadDominantHandSettings() {
@@ -152,7 +168,7 @@ class SettingsProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  // Groups Feture
+  // Groups Feature
 
   void _loadGroupSettings() {
     final isGroup = _prefs.getBool(_groupEnabledKey);
@@ -178,6 +194,7 @@ class SettingsProvider extends ChangeNotifier {
     _loadWeightSettings();
     _loadCurrencySettings();
     _loadCompactItemList();
+    _loadCompactPriceInput();
     _loadDominantHandSettings();
     _loadTelephoneSettings();
     _loadGroupSettings();
@@ -193,6 +210,7 @@ extension SettingsContext on BuildContext {
   String get weightUnit => settings.weightUnit;
   String get currencyCode => settings.currencyCode;
   bool get isCompactItemList => settings.compactItemList;
+  bool get isCompactPriceInput => settings.compactPriceInput;
   ThemeMode get themeMode => settings.themeMode;
   Color get seedColor => settings.seedColor;
   String get dominantHand => settings.dominantHand;

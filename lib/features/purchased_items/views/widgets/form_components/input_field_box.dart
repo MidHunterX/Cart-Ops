@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-enum ActiveField { quantity, price }
+enum ActiveField { quantity, price, total }
 
 class InputFieldBox extends StatelessWidget {
   final String? label;
