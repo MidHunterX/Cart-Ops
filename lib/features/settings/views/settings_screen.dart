@@ -165,6 +165,13 @@ class SettingsScreen extends StatelessWidget {
 
 // ========================================================================= //
 
+const double _quantity = 69.0;
+const double _unitPrice = 420.0;
+const double _unitPriceAfterDiscount = 419.0;
+const double _totalPrice = 28980.0;
+const double _totalPriceAfterDiscount = 28911.03;
+const double _discountedPrice = -68.97;
+
 class _CompactPriceInputWireframe extends StatelessWidget {
   final bool isCompact;
   final String currencySymbol;
@@ -177,7 +184,12 @@ class _CompactPriceInputWireframe extends StatelessWidget {
             children: [
               Expanded(
                 flex: 5,
-                child: _buildInputField(context, label: 'Quantity', value: '2', isActive: false),
+                child: _buildInputField(
+                  context,
+                  label: 'Quantity',
+                  value: _quantity.toInputString(),
+                  isActive: false,
+                ),
               ),
               const SizedBox(width: 8),
               Expanded(
@@ -185,7 +197,7 @@ class _CompactPriceInputWireframe extends StatelessWidget {
                 child: _buildInputField(
                   context,
                   label: 'Listing Price',
-                  value: '$currencySymbol 12.00',
+                  value: _unitPrice.toInputString(),
                   isActive: true,
                   suffixIcon: Icons.calculate_outlined,
                 ),
@@ -196,7 +208,12 @@ class _CompactPriceInputWireframe extends StatelessWidget {
             children: [
               Expanded(
                 flex: 3,
-                child: _buildInputField(context, label: 'Quantity', value: '2', isActive: false),
+                child: _buildInputField(
+                  context,
+                  label: 'Quantity',
+                  value: _quantity.toInputString(),
+                  isActive: false,
+                ),
               ),
               const SizedBox(width: 6),
               Expanded(
@@ -204,7 +221,7 @@ class _CompactPriceInputWireframe extends StatelessWidget {
                 child: _buildInputField(
                   context,
                   label: 'Unit Price',
-                  value: '$currencySymbol 12.00',
+                  value: _unitPrice.toInputString(),
                   isActive: true,
                 ),
               ),
@@ -214,7 +231,7 @@ class _CompactPriceInputWireframe extends StatelessWidget {
                 child: _buildInputField(
                   context,
                   label: 'Total',
-                  value: '$currencySymbol 24.00',
+                  value: _totalPrice.toInputString(),
                   isActive: false,
                 ),
               ),
@@ -319,7 +336,7 @@ class _DynamicItemListWireframe extends StatelessWidget {
                             FittedBox(
                               fit: BoxFit.scaleDown,
                               child: Text(
-                                '2',
+                                _quantity.toQuantityString(null),
                                 style: Theme.of(
                                   context,
                                 ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
@@ -339,7 +356,7 @@ class _DynamicItemListWireframe extends StatelessWidget {
                             FittedBox(
                               fit: BoxFit.scaleDown,
                               child: Text(
-                                '2',
+                                _quantity.toQuantityString(null),
                                 style: Theme.of(
                                   context,
                                 ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
@@ -393,7 +410,7 @@ class _DynamicItemListWireframe extends StatelessWidget {
                         crossAxisAlignment: WrapCrossAlignment.center,
                         children: [
                           Text(
-                            12.00.toCurrencyString(currencySymbol, preferWhole: true),
+                            _unitPrice.toCurrencyString(currencySymbol, preferWhole: true),
                             style: !isCompact
                                 ? Theme.of(context).textTheme.bodySmall?.copyWith(
                                     decoration: TextDecoration.lineThrough,
@@ -405,7 +422,10 @@ class _DynamicItemListWireframe extends StatelessWidget {
                                   ),
                           ),
                           Text(
-                            10.00.toCurrencyString(currencySymbol),
+                            _unitPriceAfterDiscount.toCurrencyString(
+                              currencySymbol,
+                              locale: context.currencyLocale,
+                            ),
                             style: !isCompact
                                 ? Theme.of(context).textTheme.bodySmall?.copyWith(
                                     fontWeight: FontWeight.bold,
@@ -431,7 +451,10 @@ class _DynamicItemListWireframe extends StatelessWidget {
                       FittedBox(
                         fit: BoxFit.scaleDown,
                         child: Text(
-                          20.00.toCurrencyString(currencySymbol),
+                          _totalPriceAfterDiscount.toCurrencyString(
+                            currencySymbol,
+                            locale: context.currencyLocale,
+                          ),
                           style: Theme.of(context).textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.bold,
                             color: colorScheme.primary,
@@ -441,7 +464,10 @@ class _DynamicItemListWireframe extends StatelessWidget {
                       FittedBox(
                         fit: BoxFit.scaleDown,
                         child: Text(
-                          (-4.00).toCurrencyString(currencySymbol),
+                          _discountedPrice.toCurrencyString(
+                            currencySymbol,
+                            locale: context.currencyLocale,
+                          ),
                           style: Theme.of(
                             context,
                           ).textTheme.bodySmall?.copyWith(color: colorScheme.error),
