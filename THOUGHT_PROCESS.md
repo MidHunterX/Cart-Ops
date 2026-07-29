@@ -302,6 +302,24 @@ User onboarding is plain simple naturally following the principle of
 4. You can go to settings and enable groups feature to enable purchase groups
    only if you want.
 
+### The Friction of Finding Your Workflow (Settings)
+
+Having to pick and choose between different workflow and UI features introduces
+a different kind of friction. This can be solved with proper sane defaults.
+
+But the problem comes back when you are the kind of person who explores
+options. Toggling on a setting, going back and hunting down what changed, going
+to settings again, trying the next setting, going back and forth again and
+again. Even giving detailed descriptions has a limit on what you can express.
+
+So, the best way is to let the user experience the changes themselves right in
+the settings itself. Settings UI is designed in a way where you can toggle
+features and see the changes in an interactive wireframe mockup for every
+UI/Workflow Setting.
+
+The downside of this approach is that settings can become very visually
+verbose. So, use it in very important scenarios like accessibility only.
+
 ### 🥚 Easter Egg
 
 Enable `Purchase Groups` feature while no purchases or groups have been made.
