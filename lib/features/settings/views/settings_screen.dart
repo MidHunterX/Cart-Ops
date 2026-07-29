@@ -42,7 +42,6 @@ class SettingsScreen extends StatelessWidget {
             ),
           ),
 
-          const SizedBox(height: 16),
           const SettingsSectionHeader(title: 'Localization', icon: Icons.language),
 
           SettingCard(
@@ -57,7 +56,6 @@ class SettingsScreen extends StatelessWidget {
               showDragHandle: true,
               builder: (_) => const CurrencyPicker(),
             ),
-            wireframe: _CurrencyWireframe(currencySymbol: context.currencySymbol),
           ),
 
           SettingCard(
@@ -68,10 +66,8 @@ class SettingsScreen extends StatelessWidget {
               showDragHandle: true,
               builder: (_) => const WeightUnitPicker(),
             ),
-            wireframe: _WeightUnitWireframe(unit: context.weightUnit),
           ),
 
-          const SizedBox(height: 16),
           const SettingsSectionHeader(title: 'Features', icon: Icons.widgets),
 
           SettingCard(
@@ -85,7 +81,6 @@ class SettingsScreen extends StatelessWidget {
             ),
           ),
 
-          const SizedBox(height: 16),
           const SettingsSectionHeader(
             title: 'Accessibility & Layout',
             icon: Icons.accessibility_new,
@@ -170,80 +165,6 @@ class SettingsScreen extends StatelessWidget {
 
 // ========================================================================= //
 
-class _CurrencyWireframe extends StatelessWidget {
-  final String currencySymbol;
-  const _CurrencyWireframe({required this.currencySymbol});
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Row(
-            children: [
-              Icon(Icons.receipt_long_outlined, size: 13, color: colorScheme.primary),
-              const SizedBox(width: 8),
-              Text(
-                'Sample Total:',
-                style: TextStyle(fontSize: 13, color: colorScheme.onSurfaceVariant),
-              ),
-            ],
-          ),
-          Text(
-            1245678.69.toCurrencyString(currencySymbol),
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 13,
-              color: colorScheme.onSurfaceVariant,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _WeightUnitWireframe extends StatelessWidget {
-  final String unit;
-  const _WeightUnitWireframe({required this.unit});
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Row(
-            children: [
-              Icon(Icons.scale_outlined, size: 13, color: colorScheme.primary),
-              const SizedBox(width: 8),
-              Text(
-                'Item Weight:',
-                style: TextStyle(fontSize: 13, color: colorScheme.onSurfaceVariant),
-              ),
-            ],
-          ),
-          Text(
-            '2.50 $unit',
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 13,
-              color: colorScheme.onSurfaceVariant,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 class _CompactPriceInputWireframe extends StatelessWidget {
   final bool isCompact;
   final String currencySymbol;
@@ -256,7 +177,7 @@ class _CompactPriceInputWireframe extends StatelessWidget {
             children: [
               Expanded(
                 flex: 5,
-                child: _buildInputField(context, label: 'Qty', value: '1', isActive: false),
+                child: _buildInputField(context, label: 'Quantity', value: '2', isActive: false),
               ),
               const SizedBox(width: 8),
               Expanded(
@@ -275,7 +196,7 @@ class _CompactPriceInputWireframe extends StatelessWidget {
             children: [
               Expanded(
                 flex: 3,
-                child: _buildInputField(context, label: 'Qty', value: '1', isActive: false),
+                child: _buildInputField(context, label: 'Quantity', value: '2', isActive: false),
               ),
               const SizedBox(width: 6),
               Expanded(
@@ -293,7 +214,7 @@ class _CompactPriceInputWireframe extends StatelessWidget {
                 child: _buildInputField(
                   context,
                   label: 'Total',
-                  value: '$currencySymbol 12.00',
+                  value: '$currencySymbol 24.00',
                   isActive: false,
                 ),
               ),
