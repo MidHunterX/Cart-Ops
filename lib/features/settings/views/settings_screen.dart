@@ -94,8 +94,8 @@ class SettingsScreen extends StatelessWidget {
           SettingCard(
             title: 'Dynamic Item List',
             subtitle: context.isCompactItemList
-                ? 'Enabled (Compact rows, hide missing image box)'
-                : 'Disabled (Structured rows, explicit image box)',
+                ? 'Enabled (Compact rows)'
+                : 'Disabled (Structured rows)',
             control: Switch(
               value: context.isCompactItemList,
               onChanged: settings.setCompactItemList,
@@ -109,8 +109,8 @@ class SettingsScreen extends StatelessWidget {
           SettingCard(
             title: 'Compact Price Input',
             subtitle: context.isCompactPriceInput
-                ? 'Enabled (2-Field layout with calculator)'
-                : 'Disabled (3-Field inline total layout)',
+                ? 'Enabled (Modal Calculator)'
+                : 'Disabled (Inline Total Field)',
             control: Switch(
               value: context.isCompactPriceInput,
               onChanged: settings.setCompactPriceInput,
@@ -379,88 +379,164 @@ class _DynamicItemListWireframe extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
 
-    return Container(
-      padding: const EdgeInsets.all(8),
-      child: isCompact
-          ? Row(
+    return Material(
+      color: Colors.transparent,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Expanded(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                  decoration: BoxDecoration(
-                    color: colorScheme.secondaryContainer,
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                  child: Text(
-                    '2x',
-                    style: TextStyle(
-                      fontSize: 10,
-                      fontWeight: FontWeight.bold,
-                      color: colorScheme.onSecondaryContainer,
-                    ),
-                  ),
+                // QUANTITY SECTION
+                SizedBox(
+                  width: 60,
+                  child: isCompact
+                      ? Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            FittedBox(
+                              fit: BoxFit.scaleDown,
+                              child: Text(
+                                '2',
+                                style: Theme.of(
+                                  context,
+                                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                            Text(
+                              'Units',
+                              style: Theme.of(
+                                context,
+                              ).textTheme.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant),
+                            ),
+                          ],
+                        )
+                      : Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            FittedBox(
+                              fit: BoxFit.scaleDown,
+                              child: Text(
+                                '2',
+                                style: Theme.of(
+                                  context,
+                                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                            Text(
+                              'Units',
+                              style: Theme.of(
+                                context,
+                              ).textTheme.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant),
+                            ),
+                          ],
+                        ),
                 ),
                 const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    'Wireless Mouse',
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      color: colorScheme.onSurface,
-                    ),
-                  ),
-                ),
-                Text(
-                  '$currencySymbol 25.00',
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
-                    color: colorScheme.primary,
-                  ),
-                ),
-              ],
-            )
-          : Row(
-              children: [
-                Container(
-                  width: 32,
-                  height: 32,
-                  decoration: BoxDecoration(
-                    color: colorScheme.surfaceContainerHighest,
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                  child: Icon(Icons.image, size: 16, color: colorScheme.onSurfaceVariant),
-                ),
+
+                // IMAGE SECTION
+                !isCompact
+                    ? Container(
+                        width: 50,
+                        height: 50,
+                        decoration: BoxDecoration(
+                          color: colorScheme.surfaceContainer,
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Icon(
+                          Icons.shopping_bag_outlined,
+                          size: 30,
+                          color: colorScheme.onSurfaceVariant,
+                        ),
+                      )
+                    : const SizedBox.shrink(),
+
                 const SizedBox(width: 8),
+
+                // ITEM DETAILS SECTION
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        'Wireless Mouse',
-                        style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.bold,
-                          color: colorScheme.onSurface,
-                        ),
-                      ),
-                      Text(
-                        'Qty: 2  •  Unit: $currencySymbol 12.50',
-                        style: TextStyle(fontSize: 9, color: colorScheme.onSurfaceVariant),
+                      !isCompact
+                          ? Text(
+                              '--',
+                              style: Theme.of(context).textTheme.titleMedium,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            )
+                          : const SizedBox.shrink(),
+                      Wrap(
+                        spacing: 4,
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        children: [
+                          Text(
+                            12.00.toCurrencyString(currencySymbol, preferWhole: true),
+                            style: !isCompact
+                                ? Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    decoration: TextDecoration.lineThrough,
+                                    color: colorScheme.onSurfaceVariant,
+                                  )
+                                : Theme.of(context).textTheme.titleMedium?.copyWith(
+                                    decoration: TextDecoration.lineThrough,
+                                    color: colorScheme.onSurfaceVariant,
+                                  ),
+                          ),
+                          Text(
+                            10.00.toCurrencyString(currencySymbol),
+                            style: !isCompact
+                                ? Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                    color: colorScheme.primary,
+                                  )
+                                : Theme.of(context).textTheme.titleMedium?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                    color: colorScheme.primary,
+                                  ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
                 ),
-                Text(
-                  '$currencySymbol 25.00',
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
-                    color: colorScheme.primary,
+                const SizedBox(width: 8),
+
+                // TOTAL PRICE SECTION
+                SizedBox(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Text(
+                          20.00.toCurrencyString(currencySymbol),
+                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: colorScheme.primary,
+                          ),
+                        ),
+                      ),
+                      FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Text(
+                          (-4.00).toCurrencyString(currencySymbol),
+                          style: Theme.of(
+                            context,
+                          ).textTheme.bodySmall?.copyWith(color: colorScheme.error),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
+                const SizedBox(width: 8),
+
+                Icon(Icons.more_vert, size: 24, color: colorScheme.onSurfaceVariant),
               ],
             ),
+          ),
+        ],
+      ),
     );
   }
 }
