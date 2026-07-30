@@ -127,6 +127,9 @@ class PurchaseSummaryCard extends StatelessWidget {
   }
 
   Widget _buildBudget(BuildContext context, ColorScheme colorScheme) {
+    final double budgetVal = budget!;
+    final bool isOverBudget = total > budgetVal;
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24),
       child: Column(
@@ -136,15 +139,15 @@ class PurchaseSummaryCard extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Budget: ${budget!.toCurrencyString(context.currencySymbol, locale: context.currencyLocale)}',
+                'Budget: ${budgetVal.toCurrencyString(context.currencySymbol, locale: context.currencyLocale)}',
                 style: Theme.of(
                   context,
                 ).textTheme.bodyMedium?.copyWith(color: colorScheme.onPrimaryContainer),
               ),
               Text(
-                'Remaining: ${(budget! - total).toCurrencyString(context.currencySymbol, locale: context.currencyLocale)}',
+                'Remaining: ${(budgetVal - total).toCurrencyString(context.currencySymbol, locale: context.currencyLocale)}',
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: colorScheme.onPrimaryContainer,
+                  color: isOverBudget ? colorScheme.error : colorScheme.onPrimaryContainer,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -152,9 +155,9 @@ class PurchaseSummaryCard extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           LinearProgressIndicator(
-            value: (total / budget!).clamp(0.0, 1.0),
+            value: (total / budgetVal).clamp(0.0, 1.0),
             backgroundColor: colorScheme.onPrimaryContainer.withValues(alpha: 0.2),
-            color: total > budget! ? colorScheme.error : colorScheme.primary,
+            color: isOverBudget ? colorScheme.error : colorScheme.primary,
             minHeight: 8,
             borderRadius: BorderRadius.circular(4),
           ),
