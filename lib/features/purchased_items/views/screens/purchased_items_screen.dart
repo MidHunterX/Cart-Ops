@@ -36,6 +36,7 @@ class _PurchasedItemsScreenState extends State<PurchasedItemsScreen> {
 
   bool _isLoading = true;
   bool _isListEmpty = false;
+  bool _showAsBudgetPercentage = false;
 
   @override
   void initState() {
@@ -49,6 +50,9 @@ class _PurchasedItemsScreenState extends State<PurchasedItemsScreen> {
       if (!mounted) return;
       setState(() {
         _currentPurchase = purchase;
+        if (_currentPurchase.budget == null || _currentPurchase.budget! <= 0) {
+          _showAsBudgetPercentage = false;
+        }
       });
     });
 
@@ -153,6 +157,9 @@ class _PurchasedItemsScreenState extends State<PurchasedItemsScreen> {
                 _currentPurchase.id,
                 budget == 0 ? null : budget,
               );
+              if (budget == null || budget <= 0) {
+                setState(() => _showAsBudgetPercentage = false);
+              }
               Navigator.pop(context);
             },
             child: const Text('Save'),
@@ -176,6 +183,8 @@ class _PurchasedItemsScreenState extends State<PurchasedItemsScreen> {
         totalItems: totalItemsListLength,
         isSelected: _selectedItemId == details.purchasedItem.id,
         isChecklistMode: _currentPurchase.isChecklistMode,
+        showAsBudgetPercentage: _showAsBudgetPercentage,
+        budget: _currentPurchase.budget,
         onToggleCheck: (val) {
           context.read<PurchasedItemsRepository>().toggleItemCheck(
             details.purchasedItem.id,
@@ -194,6 +203,8 @@ class _PurchasedItemsScreenState extends State<PurchasedItemsScreen> {
     final totalItemsListLength = _purchasedItems.length;
     int displayTotalItems = totalItemsListLength;
     double displayTotalPrice = _currentPurchase.totalPrice ?? 0.0;
+
+    final hasBudget = _currentPurchase.budget != null && _currentPurchase.budget! > 0;
 
     bool? allCheckedState;
     if (_currentPurchase.isChecklistMode && totalItemsListLength > 0) {
@@ -244,6 +255,10 @@ class _PurchasedItemsScreenState extends State<PurchasedItemsScreen> {
                   _currentPurchase.id,
                   !_currentPurchase.isChecklistMode,
                 );
+              } else if (value == 'toggle_budget_percent') {
+                setState(() {
+                  _showAsBudgetPercentage = !_showAsBudgetPercentage;
+                });
               }
             },
             itemBuilder: (context) => [
@@ -254,15 +269,28 @@ class _PurchasedItemsScreenState extends State<PurchasedItemsScreen> {
                   children: [Icon(Icons.savings_outlined), Text('Set Budget')],
                 ),
               ),
+              if (hasBudget)
+                PopupMenuItem(
+                  value: 'toggle_budget_percent',
+                  child: Row(
+                    spacing: 8,
+                    children: [
+                      const Icon(Icons.percent_outlined),
+                      _showAsBudgetPercentage
+                          ? const Text('Hide Percentage')
+                          : const Text('Show Percentage'),
+                    ],
+                  ),
+                ),
               PopupMenuItem(
                 value: 'toggle_checklist',
                 child: Row(
                   spacing: 8,
                   children: [
-                    Icon(Icons.list_outlined),
                     _currentPurchase.isChecklistMode
-                        ? Text('Hide Checklist')
-                        : Text('Show Checklist'),
+                        ? const Icon(Icons.check_box)
+                        : const Icon(Icons.check_box_outline_blank),
+                    const Text('Checklist Mode'),
                   ],
                 ),
               ),
@@ -307,12 +335,12 @@ class _PurchasedItemsScreenState extends State<PurchasedItemsScreen> {
                     child: CustomScrollView(
                       slivers: [
                         if (_isListEmpty)
-                          const SliverFillRemaining(
+                          SliverFillRemaining(
                             hasScrollBody: false,
                             child: EmptyState(
                               icon: Icons.shopping_cart_outlined,
                               title: 'Your Cart is Ready',
-                              message: 'Add items to your purchase to see the running total.',
+                              message: 'Add some items to see the running total.',
                             ),
                           ),
                         if (_isListEmpty == false)

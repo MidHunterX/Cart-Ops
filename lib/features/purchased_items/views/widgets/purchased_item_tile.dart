@@ -48,6 +48,8 @@ class PurchasedItemTile extends StatelessWidget {
 
   final bool isSelected;
   final bool isChecklistMode;
+  final bool showAsBudgetPercentage;
+  final double? budget;
   final ValueChanged<bool?>? onToggleCheck;
   final VoidCallback onMenuOpened;
   final VoidCallback onMenuClosed;
@@ -59,10 +61,24 @@ class PurchasedItemTile extends StatelessWidget {
     required this.totalItems,
     this.isSelected = false,
     this.isChecklistMode = false,
+    this.showAsBudgetPercentage = false,
+    this.budget,
     this.onToggleCheck,
     required this.onMenuOpened,
     required this.onMenuClosed,
   });
+
+  String _formatPriceValue(BuildContext context, double amount, {bool whole = true}) {
+    if (showAsBudgetPercentage && budget != null && budget! > 0) {
+      final percentage = (amount / budget!) * 100;
+      return '${percentage.toStringAsFixed(1)}%';
+    }
+    return amount.toCurrencyString(
+      context.currencySymbol,
+      locale: context.currencyLocale,
+      preferWhole: whole,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -87,7 +103,7 @@ class PurchasedItemTile extends StatelessWidget {
         final isSmallScreen = availableWidth < 360;
 
         final double qtyWidth = (availableWidth * 0.18).clamp(65.0, 85.0);
-        final double totalAreaWidth = (availableWidth * 0.25).clamp(80.0, 115.0);
+        final double totalAreaWidth = (availableWidth * 0.28).clamp(85.0, 125.0);
         final double imgSize = isSmallScreen ? 40.0 : 50.0;
         final double spacing = isSmallScreen ? 8.0 : 12.0;
 
@@ -292,18 +308,12 @@ class PurchasedItemTile extends StatelessWidget {
       );
     }
 
-    final ratePerItem = pricePerUnit.toCurrencyString(
-      context.currencySymbol,
-      locale: context.currencyLocale,
-      preferWhole: true,
-    );
+    final ratePerItem = _formatPriceValue(context, pricePerUnit);
     final unit = pItem.isWeight ? '/${context.weightUnit}' : '';
 
     if (discountApplied) {
-      final ratePerDiscountedItem = _calcRateAfterDiscount(
-        pricePerUnit,
-        pItem.discount,
-      ).toCurrencyString(context.currencySymbol, locale: context.currencyLocale, preferWhole: true);
+      final discountedRate = _calcRateAfterDiscount(pricePerUnit, pItem.discount);
+      final ratePerDiscountedItem = _formatPriceValue(context, discountedRate);
 
       return Wrap(
         spacing: 4,
@@ -378,14 +388,21 @@ class PurchasedItemTile extends StatelessWidget {
 
     if (!hasQty) return const SizedBox.shrink();
 
+    final formattedTotal = _formatPriceValue(context, totalPrice, whole: false);
+
     if (discountApplied) {
+      final discountValue = _calcTotalDiscount(pItem.price ?? 0, -pItem.discount, qty);
+      final formattedDiscount = showAsBudgetPercentage && budget != null && budget! > 0
+          ? '${((discountValue / budget!) * 100).toStringAsFixed(1)}%'
+          : discountValue.toCurrencyString(context.currencySymbol, locale: context.currencyLocale);
+
       return Column(
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           FittedBox(
             fit: BoxFit.scaleDown,
             child: Text(
-              totalPrice.toCurrencyString(context.currencySymbol, locale: context.currencyLocale),
+              formattedTotal,
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
                 color: colorScheme.primary,
                 fontWeight: FontWeight.bold,
@@ -395,11 +412,7 @@ class PurchasedItemTile extends StatelessWidget {
           FittedBox(
             fit: BoxFit.scaleDown,
             child: Text(
-              _calcTotalDiscount(
-                pItem.price ?? 0,
-                -pItem.discount,
-                qty,
-              ).toCurrencyString(context.currencySymbol, locale: context.currencyLocale),
+              formattedDiscount,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(color: colorScheme.error),
             ),
           ),
@@ -413,7 +426,7 @@ class PurchasedItemTile extends StatelessWidget {
         FittedBox(
           fit: BoxFit.scaleDown,
           child: Text(
-            totalPrice.toCurrencyString(context.currencySymbol, locale: context.currencyLocale),
+            formattedTotal,
             style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
           ),
         ),
