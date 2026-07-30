@@ -103,7 +103,9 @@ class PurchasedItemTile extends StatelessWidget {
         final isSmallScreen = availableWidth < 360;
 
         final double qtyWidth = (availableWidth * 0.18).clamp(65.0, 85.0);
-        final double totalAreaWidth = (availableWidth * 0.28).clamp(85.0, 125.0);
+        final double? totalAreaWidth = context.isCompactItemList
+            ? null
+            : (availableWidth * 0.24).clamp(85.0, 125.0);
         final double imgSize = isSmallScreen ? 40.0 : 50.0;
         final double spacing = isSmallScreen ? 8.0 : 12.0;
 
