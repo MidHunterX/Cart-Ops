@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shopping_assist/core/database/database.dart';
 import 'package:shopping_assist/core/utils/datetime_formatter.dart';
+import 'package:shopping_assist/core/utils/number_formatter.dart';
 import 'package:shopping_assist/features/purchased_items/views/widgets/add_purchased_item_sheet.dart';
 import 'package:shopping_assist/core/widgets/empty_state.dart';
 import 'package:shopping_assist/core/widgets/dextrous_fab.dart';
@@ -37,6 +38,11 @@ class _PurchasedItemsScreenState extends State<PurchasedItemsScreen> {
   bool _isLoading = true;
   bool _isListEmpty = false;
   bool _showAsBudgetPercentage = false;
+
+  // Search feature
+  bool _isSearching = false;
+  String _searchQuery = '';
+  final TextEditingController _searchController = TextEditingController();
 
   @override
   void initState() {
@@ -73,14 +79,25 @@ class _PurchasedItemsScreenState extends State<PurchasedItemsScreen> {
 
   @override
   void dispose() {
+    _searchController.dispose();
     _itemsSubscription?.cancel();
     _purchaseSubscription?.cancel();
     super.dispose();
   }
 
+  List<PurchasedItemWithDetails> get _filteredItems {
+    if (_searchQuery.trim().isEmpty) return _purchasedItems;
+    final query = _searchQuery.trim().toLowerCase();
+    return _purchasedItems.where((item) {
+      final name = item.item.name.toLowerCase();
+      final pName = (item.purchasedItem.name ?? '').toLowerCase();
+      return name.contains(query) || pName.contains(query);
+    }).toList();
+  }
+
   void _updateItems(List<PurchasedItemWithDetails> newItems) {
     final currentState = _listKey.currentState;
-    if (currentState == null) {
+    if (currentState == null || _isSearching) {
       setState(() {
         _purchasedItems = List.from(newItems);
         _isListEmpty = _purchasedItems.isEmpty;
@@ -200,10 +217,13 @@ class _PurchasedItemsScreenState extends State<PurchasedItemsScreen> {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final displayItemsList = _filteredItems;
     final totalItemsListLength = _purchasedItems.length;
     int displayTotalItems = totalItemsListLength;
     double displayTotalPrice = _currentPurchase.totalPrice ?? 0.0;
 
+    final currencySymbol = context.currencySymbol;
+    final currencyLocale = context.currencyLocale;
     final hasBudget = _currentPurchase.budget != null && _currentPurchase.budget! > 0;
 
     bool? allCheckedState;
@@ -233,19 +253,45 @@ class _PurchasedItemsScreenState extends State<PurchasedItemsScreen> {
     return Scaffold(
       resizeToAvoidBottomInset: false, // perf: nothing to resize here on keyboard
       appBar: AppBar(
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(_currentPurchase.name),
-            Text(
-              '${_currentPurchase.purchaseDate.toLongDate} at ${_currentPurchase.purchaseDate.toShortTime}',
-              style: Theme.of(context).textTheme.bodySmall,
-            ),
-          ],
-        ),
+        title: _isSearching
+            ? TextField(
+                controller: _searchController,
+                autofocus: true,
+                decoration: InputDecoration(
+                  hintText: 'Search items...',
+                  border: InputBorder.none,
+                  hintStyle: TextStyle(color: colorScheme.onSurfaceVariant),
+                ),
+                style: TextStyle(color: colorScheme.onSurface),
+                onChanged: (val) => setState(() => _searchQuery = val),
+              )
+            : Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(_currentPurchase.name),
+                  Text(
+                    '${_currentPurchase.purchaseDate.toLongDate} at ${_currentPurchase.purchaseDate.toShortTime}',
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                ],
+              ),
         surfaceTintColor: colorScheme.primaryContainer,
         backgroundColor: colorScheme.primaryContainer,
         actions: [
+          IconButton(
+            icon: Icon(_isSearching ? Icons.close : Icons.search),
+            onPressed: () {
+              setState(() {
+                if (_isSearching) {
+                  _isSearching = false;
+                  _searchQuery = '';
+                  _searchController.clear();
+                } else {
+                  _isSearching = true;
+                }
+              });
+            },
+          ),
           PopupMenuButton<String>(
             onSelected: (value) {
               if (value == 'budget') {
@@ -262,36 +308,52 @@ class _PurchasedItemsScreenState extends State<PurchasedItemsScreen> {
               }
             },
             itemBuilder: (context) => [
-              const PopupMenuItem(
-                value: 'budget',
-                child: Row(
-                  spacing: 8,
-                  children: [Icon(Icons.savings_outlined), Text('Set Budget')],
-                ),
-              ),
+              // GROUP 1: VIEW OPTIONS
               if (hasBudget)
                 PopupMenuItem(
                   value: 'toggle_budget_percent',
                   child: Row(
                     spacing: 8,
                     children: [
-                      const Icon(Icons.percent_outlined),
-                      _showAsBudgetPercentage
-                          ? const Text('Hide Percentage')
-                          : const Text('Show Percentage'),
+                      Icon(
+                        _showAsBudgetPercentage
+                            ? Icons.visibility_off_outlined
+                            : Icons.visibility_outlined,
+                      ),
+                      Text(_showAsBudgetPercentage ? 'Hide Percentages' : 'Show Percentages'),
                     ],
                   ),
                 ),
+
+              // GROUP 2: SETTINGS (MODIFY BEHAVIOR)
               PopupMenuItem(
                 value: 'toggle_checklist',
                 child: Row(
                   spacing: 8,
                   children: [
-                    _currentPurchase.isChecklistMode
-                        ? const Icon(Icons.check_box)
-                        : const Icon(Icons.check_box_outline_blank),
+                    Icon(
+                      _currentPurchase.isChecklistMode
+                          ? Icons.checklist_rtl
+                          : Icons.checklist_outlined,
+                    ),
                     const Text('Checklist Mode'),
+                    if (_currentPurchase.isChecklistMode) const Icon(Icons.check_circle, size: 16),
                   ],
+                ),
+              ),
+
+              // GROUP 3: ACTIONS (OPEN DIALOGS)
+              const PopupMenuDivider(),
+              PopupMenuItem(
+                value: 'budget',
+                child: ListTile(
+                  leading: const Icon(Icons.account_balance_wallet_outlined),
+                  title: Text(hasBudget ? 'Edit Budget' : 'Set Budget'),
+                  subtitle: hasBudget
+                      ? Text(
+                          'Current: ${_currentPurchase.budget?.toCurrencyString(currencySymbol, locale: currencyLocale)}',
+                        )
+                      : null,
                 ),
               ),
             ],
@@ -334,30 +396,62 @@ class _PurchasedItemsScreenState extends State<PurchasedItemsScreen> {
                   Expanded(
                     child: CustomScrollView(
                       slivers: [
-                        if (_isListEmpty)
+                        if (_isListEmpty || displayItemsList.isEmpty)
                           SliverFillRemaining(
                             hasScrollBody: false,
                             child: EmptyState(
-                              icon: Icons.shopping_cart_outlined,
-                              title: 'Your Cart is Ready',
-                              message: 'Add some items to see the running total.',
+                              icon: _isSearching
+                                  ? Icons.search_off_outlined
+                                  : Icons.shopping_cart_outlined,
+                              title: _isSearching ? 'No Matching Items' : 'Your Cart is Ready',
+                              message: _isSearching
+                                  ? 'Try entering a different item name.'
+                                  : 'Add some items to see the running total.',
                             ),
                           ),
-                        if (_isListEmpty == false)
+                        if (!_isListEmpty && displayItemsList.isNotEmpty)
                           SliverPadding(
                             padding: const EdgeInsets.only(bottom: 80),
-                            sliver: SliverAnimatedList(
-                              key: _listKey,
-                              initialItemCount: _purchasedItems.length,
-                              itemBuilder: (context, index, animation) {
-                                return _buildItemTile(
-                                  _purchasedItems[index],
-                                  index,
-                                  totalItemsListLength,
-                                  animation,
-                                );
-                              },
-                            ),
+                            sliver: _isSearching
+                                ? SliverList(
+                                    delegate: SliverChildBuilderDelegate(
+                                      (context, index) => PurchasedItemTile(
+                                        details: displayItemsList[index],
+                                        index: index,
+                                        totalItems: displayItemsList.length,
+                                        isSelected:
+                                            _selectedItemId ==
+                                            displayItemsList[index].purchasedItem.id,
+                                        isChecklistMode: _currentPurchase.isChecklistMode,
+                                        showAsBudgetPercentage: _showAsBudgetPercentage,
+                                        budget: _currentPurchase.budget,
+                                        onToggleCheck: (val) {
+                                          context.read<PurchasedItemsRepository>().toggleItemCheck(
+                                            displayItemsList[index].purchasedItem.id,
+                                            val ?? false,
+                                          );
+                                        },
+                                        onMenuOpened: () => setState(
+                                          () => _selectedItemId =
+                                              displayItemsList[index].purchasedItem.id,
+                                        ),
+                                        onMenuClosed: () => setState(() => _selectedItemId = null),
+                                      ),
+                                      childCount: displayItemsList.length,
+                                    ),
+                                  )
+                                : SliverAnimatedList(
+                                    key: _listKey,
+                                    initialItemCount: _purchasedItems.length,
+                                    itemBuilder: (context, index, animation) {
+                                      return _buildItemTile(
+                                        _purchasedItems[index],
+                                        index,
+                                        totalItemsListLength,
+                                        animation,
+                                      );
+                                    },
+                                  ),
                           ),
                       ],
                     ),
