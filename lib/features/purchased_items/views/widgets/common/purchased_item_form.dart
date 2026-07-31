@@ -521,8 +521,8 @@ class PurchasedItemFormState extends State<PurchasedItemForm> {
             flex: 8,
             child: InputFieldBox(
               label: _isWeight
-                  ? '$currencySymbol Listing Price (per $weightUnit)'
-                  : '$currencySymbol Listing Price (per item)',
+                  ? '$currencySymbol Unit Price (per $weightUnit)'
+                  : '$currencySymbol Unit Price (per item)',
               prefixText: '$currencySymbol ',
               value: _priceStr,
               isActive: _activeField == ActiveField.price,
@@ -532,6 +532,7 @@ class PurchasedItemFormState extends State<PurchasedItemForm> {
               },
               controller: _priceController,
               focusNode: _priceFocusNode,
+              suffixText: _isWeight ? '/$weightUnit' : '',
               suffixIcon: IconButton(
                 icon: const Icon(Icons.calculate_outlined),
                 onPressed: () => _handleUnitPriceCalulatorTap(currencySymbol, weightUnit),
