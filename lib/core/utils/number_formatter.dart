@@ -1,15 +1,15 @@
 import 'package:intl/intl.dart';
 
 extension NumberFormatting on double {
-  /// Converts a double to a price string
+  /// Converts a double to string used in input fields
   ///
   /// Example:
-  /// 1.2345 -> "1.23"
-  /// 1.001 -> "1.00"
+  /// 1.2345 -> "1.2345"
   /// 1.0 -> "1"
   String toInputString() {
     if (this == truncateToDouble()) return truncate().toString();
-    return toStringAsFixed(2);
+    // if there's any decimal, this should not interfere
+    return toString();
   }
 
   /// Converts a double to a weight string

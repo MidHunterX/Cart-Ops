@@ -223,7 +223,7 @@ class _UnitPriceCalculatorDialogState extends State<UnitPriceCalculatorDialog> {
         Row(
           children: [
             Text(
-              '$symbol${original.toInputString()}',
+              original.toCurrencyString(symbol, preferWhole: true),
               style: TextStyle(
                 decoration: TextDecoration.lineThrough,
                 fontSize: 12,
@@ -232,7 +232,7 @@ class _UnitPriceCalculatorDialogState extends State<UnitPriceCalculatorDialog> {
             ),
             const SizedBox(width: 8),
             Text(
-              '$symbol${discounted.toInputString()}',
+              discounted.toCurrencyString(symbol),
               style: TextStyle(fontWeight: FontWeight.bold, color: colorscheme.primary),
             ),
           ],
