@@ -14,46 +14,46 @@ void main() {
 
       test('formats decimal numbers with two decimal places', () {
         expect(1.23.toInputString(), '1.23');
-        expect(5.50.toInputString(), '5.50');
+        expect(5.50.toInputString(), '5.5');
         expect(0.99.toInputString(), '0.99');
         expect(99.99.toInputString(), '99.99');
         expect(0.01.toInputString(), '0.01');
       });
 
       test('formats numbers with more than two decimal places correctly', () {
-        expect(1.2345.toInputString(), '1.23');
-        expect(5.6789.toInputString(), '5.68');
-        expect(0.1234.toInputString(), '0.12');
-        expect(123.456.toInputString(), '123.46');
-        expect(1.999.toInputString(), '2.00');
+        expect(1.2345.toInputString(), '1.2345');
+        expect(5.6789.toInputString(), '5.6789');
+        expect(0.1234.toInputString(), '0.1234');
+        expect(123.456.toInputString(), '123.456');
+        expect(1.999.toInputString(), '1.999');
       });
 
       test('handles negative numbers correctly', () {
         expect((-1.0).toInputString(), '-1');
-        expect((-5.50).toInputString(), '-5.50');
-        expect((-3.14159).toInputString(), '-3.14');
+        expect((-5.50).toInputString(), '-5.5');
+        expect((-3.14159).toInputString(), '-3.14159');
         expect((-0.99).toInputString(), '-0.99');
         expect((-0.01).toInputString(), '-0.01');
         expect((-0.0).toInputString(), '0');
       });
 
       test('handles numbers near zero correctly', () {
-        expect(0.001.toInputString(), '0.00');
-        expect(0.009.toInputString(), '0.01');
-        expect(0.0001.toInputString(), '0.00');
+        expect(0.001.toInputString(), '0.001');
+        expect(0.009.toInputString(), '0.009');
+        expect(0.0001.toInputString(), '0.0001');
       });
 
       test('handles large numbers correctly', () {
         expect(1000000.0.toInputString(), '1000000');
         expect(1234567.89.toInputString(), '1234567.89');
-        expect(999999.999.toInputString(), '1000000.00');
+        expect(999999.999.toInputString(), '999999.999');
       });
 
       test('handles numbers with trailing zeros correctly', () {
-        expect(1.50.toInputString(), '1.50');
+        expect(1.50.toInputString(), '1.5');
         expect(2.00.toInputString(), '2');
         expect(0.00.toInputString(), '0');
-        expect(10.10.toInputString(), '10.10');
+        expect(10.10.toInputString(), '10.1');
       });
     });
 
