@@ -40,6 +40,7 @@ class _DiscountCalculatorDialogState extends State<DiscountCalculatorDialog> {
   /// To prevent round-tripping issues (where both 200 and 200.1 are 13% of 230)
   /// More decimal precision is needed for more percentage resolution
   /// 4 is good for typical retail calculations
+  /// Precision: 4 = gram, 5 = milligram, 6 = microgram
   int retailPrecision = 4;
 
   bool _isUpdating = false;

@@ -1,3 +1,4 @@
+import 'package:decimal/decimal.dart';
 import 'package:flutter/material.dart';
 import 'package:shopping_assist/core/utils/number_formatter.dart';
 import 'package:shopping_assist/features/purchased_items/views/widgets/form_components/calculator_title.dart';
@@ -46,20 +47,32 @@ class UnitPriceCalculatorDialog extends StatefulWidget {
   State<UnitPriceCalculatorDialog> createState() => _UnitPriceCalculatorDialogState();
 }
 
+String _format(Decimal value, {int precision = 2}) {
+  if (value == Decimal.zero) return '';
+  String str = value.toDouble().toStringAsFixed(precision);
+  if (str.contains('.')) {
+    str = str.replaceAll(RegExp(r'0+$'), '');
+    str = str.replaceAll(RegExp(r'\.$'), '');
+  }
+  return str;
+}
+
 class _UnitPriceCalculatorDialogState extends State<UnitPriceCalculatorDialog> {
   late TextEditingController _totalAmountCtrl;
   late TextEditingController _quantityCtrl;
   late TextEditingController _unitPriceCtrl;
 
+  int retailPrecision = 4;
+
   @override
   void initState() {
     super.initState();
-    final unitPrice = double.tryParse(widget.initialListingPrice) ?? 0.0;
-    final quantity = double.tryParse(widget.initialQuantity) ?? 0.0;
+    Decimal unitPrice = Decimal.tryParse(widget.initialListingPrice) ?? Decimal.zero;
+    Decimal quantity = Decimal.tryParse(widget.initialQuantity) ?? Decimal.zero;
 
     String totalPrice;
-    if (unitPrice > 0 && quantity > 0) {
-      totalPrice = (unitPrice * quantity).toInputString();
+    if (unitPrice > Decimal.zero && quantity > Decimal.zero) {
+      totalPrice = _format(unitPrice * quantity);
     } else {
       totalPrice = widget.initialListingPrice;
     }
@@ -70,16 +83,24 @@ class _UnitPriceCalculatorDialogState extends State<UnitPriceCalculatorDialog> {
   }
 
   void _onQtyOrUnitChanged() {
-    final qty = double.tryParse(_quantityCtrl.text) ?? 0.0;
-    final unitPrice = double.tryParse(_unitPriceCtrl.text) ?? 0.0;
-    if (qty > 0 && unitPrice > 0) _totalAmountCtrl.text = (qty * unitPrice).toInputString();
+    final qty = Decimal.tryParse(_quantityCtrl.text) ?? Decimal.zero;
+    final unitPrice = Decimal.tryParse(_unitPriceCtrl.text) ?? Decimal.zero;
+    if (qty > Decimal.zero && unitPrice > Decimal.zero) {
+      _totalAmountCtrl.text = _format(qty * unitPrice);
+    }
     setState(() {}); // Update discount preview
   }
 
   void _onTotalChanged() {
-    final total = double.tryParse(_totalAmountCtrl.text) ?? 0.0;
-    final qty = double.tryParse(_quantityCtrl.text) ?? 0.0;
-    if (total > 0 && qty > 0) _unitPriceCtrl.text = (total / qty).toInputString();
+    final total = Decimal.tryParse(_totalAmountCtrl.text) ?? Decimal.zero;
+    final qty = Decimal.tryParse(_quantityCtrl.text) ?? Decimal.zero;
+    if (total > Decimal.zero && qty > Decimal.zero) {
+      final totalRat = (total / qty);
+      _unitPriceCtrl.text = _format(
+        totalRat.toDecimal(scaleOnInfinitePrecision: retailPrecision),
+        precision: retailPrecision,
+      );
+    }
     setState(() {}); // Update discount preview
   }
 
