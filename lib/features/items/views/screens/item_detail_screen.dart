@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shopping_assist/core/database/database.dart';
-import 'package:shopping_assist/core/utils/graph_utils.dart';
 import 'package:shopping_assist/core/utils/number_formatter.dart';
 import 'package:shopping_assist/core/widgets/item_image_view.dart';
 import 'package:shopping_assist/features/settings/providers/settings_provider.dart';
@@ -27,13 +26,6 @@ class ItemDetailScreen extends StatelessWidget {
           }
           final history = snapshot.data ?? [];
           final count = history.length;
-
-          final int maxDataPoints = calculateMaxDataPoints(
-            context,
-            history,
-            extraLetters: context.currencySymbol.length + 1, // currency + space
-          );
-          final displayHistory = history.take(maxDataPoints).toList();
 
           return SingleChildScrollView(
             padding: const EdgeInsets.all(16),
@@ -62,7 +54,7 @@ class ItemDetailScreen extends StatelessWidget {
                 if (history.length >= 2) ...[
                   Text('Price Trend', style: Theme.of(context).textTheme.titleMedium),
                   const SizedBox(height: 16),
-                  ItemPriceHistoryChart(history: displayHistory),
+                  ItemPriceHistoryChart(history: history),
                   const SizedBox(height: 24),
                 ],
 

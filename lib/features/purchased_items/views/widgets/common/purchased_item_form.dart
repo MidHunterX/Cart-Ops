@@ -395,18 +395,9 @@ class PurchasedItemFormState extends State<PurchasedItemForm> {
             future: _historyFuture,
             builder: (context, snapshot) {
               if (snapshot.hasData && snapshot.data!.length >= 2) {
-                const double bottomSheetWidth = 640;
-                final int maxDataPoints = calculateMaxDataPoints(
-                  context,
-                  snapshot.data!,
-                  maxWidth: bottomSheetWidth,
-                  extraLetters: context.currencySymbol.length + 1,
-                );
-                final displayHistory = snapshot.data?.take(maxDataPoints).toList();
-
                 return Padding(
                   padding: const EdgeInsets.only(bottom: 8, left: 8, right: 8),
-                  child: ItemPriceHistoryChart(history: displayHistory ?? [], isMinimal: true),
+                  child: ItemPriceHistoryChart(history: snapshot.data!, isMinimal: true),
                 );
               }
               return const SizedBox.shrink();
