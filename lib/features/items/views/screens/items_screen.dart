@@ -48,18 +48,53 @@ class ItemsScreen extends StatelessWidget {
             );
           }
 
-          return GridView.builder(
-            padding: const EdgeInsets.only(bottom: 80, left: 16, right: 16),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              crossAxisSpacing: 16,
-              mainAxisSpacing: 16,
-              childAspectRatio: 0.85,
-            ),
-            itemCount: items.length,
-            itemBuilder: (context, index) {
-              final item = items[index];
-              return _buildItemCard(context, item, repo);
+          final zeroPurchaseItems = <Item>[];
+          final multiplePurchaseItems = <Item>[];
+          final singlePurchaseItems = <Item>[];
+
+          return FutureBuilder<Map<int, int>>(
+            future: _fetchPurchaseCounts(repo, items),
+            builder: (context, countSnapshot) {
+              if (countSnapshot.connectionState == ConnectionState.waiting) {
+                return const Center(child: CircularProgressIndicator());
+              }
+
+              final purchaseCounts = countSnapshot.data ?? {};
+
+              for (final item in items) {
+                final count = purchaseCounts[item.id] ?? 0;
+                if (count == 0) {
+                  zeroPurchaseItems.add(item);
+                } else if (count == 1) {
+                  singlePurchaseItems.add(item);
+                } else {
+                  multiplePurchaseItems.add(item);
+                }
+              }
+
+              return CustomScrollView(
+                slivers: [
+                  if (multiplePurchaseItems.isNotEmpty)
+                    SliverPadding(
+                      padding: const EdgeInsets.only(bottom: 16, left: 16, right: 16),
+                      sliver: _buildGridItems(multiplePurchaseItems, repo),
+                    ),
+
+                  if (singlePurchaseItems.isNotEmpty)
+                    SliverPadding(
+                      padding: const EdgeInsets.only(bottom: 16, left: 16, right: 16),
+                      sliver: _buildCompactList(singlePurchaseItems, repo),
+                    ),
+
+                  if (zeroPurchaseItems.isNotEmpty)
+                    SliverPadding(
+                      padding: const EdgeInsets.only(left: 16, right: 16),
+                      sliver: _buildZeroPurchasePanel(context, zeroPurchaseItems, repo),
+                    ),
+
+                  const SliverToBoxAdapter(child: SizedBox(height: 80)), // FAB Accomodation
+                ],
+              );
             },
           );
         },
@@ -78,6 +113,134 @@ class ItemsScreen extends StatelessWidget {
           : context.dominantHand == DominantHand.left
           ? FloatingActionButtonLocation.startFloat
           : FloatingActionButtonLocation.centerFloat,
+    );
+  }
+
+  Future<Map<int, int>> _fetchPurchaseCounts(ItemsRepository repo, List<Item> items) async {
+    final Map<int, int> counts = {};
+    for (final item in items) {
+      final count = await repo.countPurchasesForItem(item.id);
+      counts[item.id] = count;
+    }
+    return counts;
+  }
+
+  Widget _buildZeroPurchasePanel(BuildContext context, List<Item> items, ItemsRepository repo) {
+    return SliverList(
+      delegate: SliverChildBuilderDelegate((context, index) {
+        final item = items[index];
+        return _buildCompactItemTile(context, item, repo, hasNoPurchases: true);
+      }, childCount: items.length),
+    );
+  }
+
+  Widget _buildGridItems(List<Item> items, ItemsRepository repo) {
+    return SliverGrid(
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        crossAxisSpacing: 16,
+        mainAxisSpacing: 16,
+        childAspectRatio: 0.85,
+      ),
+      delegate: SliverChildBuilderDelegate((context, index) {
+        final item = items[index];
+        return _buildItemCard(context, item, repo);
+      }, childCount: items.length),
+    );
+  }
+
+  Widget _buildCompactList(List<Item> items, ItemsRepository repo) {
+    return SliverList(
+      delegate: SliverChildBuilderDelegate((context, index) {
+        final item = items[index];
+        return _buildCompactItemTile(context, item, repo);
+      }, childCount: items.length),
+    );
+  }
+
+  Widget _buildCompactItemTile(
+    BuildContext context,
+    Item item,
+    ItemsRepository repo, {
+    bool hasNoPurchases = false,
+  }) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return FutureBuilder<int>(
+      future: repo.countPurchasesForItem(item.id),
+      builder: (context, snap) {
+        final purchaseCount = snap.data ?? 0;
+
+        return Card(
+          color: hasNoPurchases ? colorScheme.errorContainer : null,
+          margin: const EdgeInsets.symmetric(vertical: 4),
+          child: ListTile(
+            contentPadding: const EdgeInsets.symmetric(horizontal: 8),
+            leading: SizedBox(
+              width: 48,
+              height: 48,
+              child: ItemImageView(
+                imagePath: item.imagePath,
+                width: 48,
+                height: 48,
+                borderRadius: BorderRadius.circular(8),
+                placeholderIcon: hasNoPurchases ? Icons.broken_image : Icons.inventory_2_rounded,
+                placeholderIconColor: hasNoPurchases ? colorScheme.onError : null,
+                placeholderIconBackgroundColor: hasNoPurchases ? colorScheme.error : null,
+                placeholderIconSize: 24,
+              ),
+            ),
+            title: Text(
+              item.name,
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium!.copyWith(color: hasNoPurchases ? colorScheme.error : null),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+            subtitle: Text(
+              'Bought $purchaseCount time${purchaseCount == 1 ? '' : 's'}',
+              style: Theme.of(
+                context,
+              ).textTheme.bodySmall!.copyWith(color: hasNoPurchases ? colorScheme.error : null),
+            ),
+            trailing: PopupMenuButton<String>(
+              icon: const Icon(Icons.more_vert, size: 20),
+              iconColor: hasNoPurchases ? colorScheme.error : null,
+              onSelected: (value) {
+                if (value == 'edit') {
+                  _showEditDialog(context, item);
+                } else if (value == 'delete') {
+                  _confirmDelete(context, repo, item);
+                }
+              },
+              itemBuilder: (ctx) => [
+                const PopupMenuItem(
+                  value: 'edit',
+                  child: Row(
+                    children: [Icon(Icons.edit, size: 20), SizedBox(width: 8), Text('Edit')],
+                  ),
+                ),
+                PopupMenuItem(
+                  value: 'delete',
+                  child: Row(
+                    children: [
+                      Icon(Icons.delete, size: 20, color: colorScheme.error),
+                      const SizedBox(width: 8),
+                      Text('Delete', style: TextStyle(color: colorScheme.error)),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => ItemDetailScreen(item: item)),
+            ),
+            onLongPress: () => _showEditDialog(context, item),
+          ),
+        );
+      },
     );
   }
 
