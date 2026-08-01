@@ -323,10 +323,12 @@ class _ItemsScreenState extends State<ItemsScreen> {
             ),
           ],
         ),
-        onTap: () => Navigator.push(
-          context,
-          MaterialPageRoute(builder: (_) => ItemDetailScreen(item: item)),
-        ),
+        onTap: hasNoPurchases
+            ? null
+            : () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => ItemDetailScreen(item: item)),
+              ),
         onLongPress: () => _showEditDialog(context, item),
       ),
     );
