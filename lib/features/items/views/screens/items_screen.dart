@@ -12,39 +12,91 @@ import 'package:shopping_assist/features/items/views/screens/item_detail_screen.
 import 'package:shopping_assist/features/settings/providers/settings_provider.dart';
 import 'package:shopping_assist/features/settings/data/settings_data.dart';
 
-class ItemsScreen extends StatelessWidget {
+class ItemsScreen extends StatefulWidget {
   final Group? group;
 
   const ItemsScreen({super.key, this.group});
 
   @override
+  State<ItemsScreen> createState() => _ItemsScreenState();
+}
+
+class _ItemsScreenState extends State<ItemsScreen> {
+  // Search feature
+  bool _isSearching = false;
+  String _searchQuery = '';
+  final TextEditingController _searchController = TextEditingController();
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final repo = context.watch<ItemsRepository>();
+    final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
       appBar: AppBar(
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text('Tracked Items'),
-            if (group != null) Text(group!.name, style: Theme.of(context).textTheme.bodySmall),
-          ],
-        ),
+        title: _isSearching
+            ? TextField(
+                controller: _searchController,
+                autofocus: true,
+                decoration: InputDecoration(
+                  hintText: 'Search items...',
+                  border: InputBorder.none,
+                  hintStyle: TextStyle(color: colorScheme.onSurfaceVariant),
+                ),
+                style: TextStyle(color: colorScheme.onSurface),
+                onChanged: (val) => setState(() => _searchQuery = val),
+              )
+            : Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text('Tracked Items'),
+                  if (widget.group != null)
+                    Text(widget.group!.name, style: Theme.of(context).textTheme.bodySmall),
+                ],
+              ),
+        actions: [
+          IconButton(
+            icon: Icon(_isSearching ? Icons.close : Icons.search),
+            onPressed: () {
+              setState(() {
+                if (_isSearching) {
+                  _isSearching = false;
+                  _searchQuery = '';
+                  _searchController.clear();
+                } else {
+                  _isSearching = true;
+                }
+              });
+            },
+          ),
+        ],
       ),
       body: StreamBuilder<List<Item>>(
-        stream: group == null ? repo.watchItemsWithoutGroup() : repo.watchItemsInGroup(group!.id),
+        stream: widget.group == null
+            ? repo.watchItemsWithoutGroup()
+            : repo.watchItemsInGroup(widget.group!.id),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           }
 
-          final items = snapshot.data ?? [];
+          final allItems = snapshot.data ?? [];
+
+          final items = _filterItems(allItems);
 
           if (items.isEmpty) {
-            return const EmptyState(
-              icon: Icons.inventory_2_outlined,
-              title: 'No Items Yet',
-              message: 'Start by adding a new item to this list.',
+            return EmptyState(
+              icon: _isSearching ? Icons.search_off_outlined : Icons.inventory_2_outlined,
+              title: _isSearching ? 'No Matching Items' : 'No Items Yet',
+              message: _isSearching
+                  ? 'Try entering a different item name.'
+                  : 'Start by adding a new item to this list.',
             );
           }
 
@@ -76,19 +128,19 @@ class ItemsScreen extends StatelessWidget {
                 slivers: [
                   if (multiplePurchaseItems.isNotEmpty)
                     SliverPadding(
-                      padding: const EdgeInsets.only(bottom: 16, left: 16, right: 16),
+                      padding: const EdgeInsets.only(bottom: 16, left: 8, right: 8),
                       sliver: _buildGridItems(multiplePurchaseItems, repo),
                     ),
 
                   if (singlePurchaseItems.isNotEmpty)
                     SliverPadding(
-                      padding: const EdgeInsets.only(bottom: 16, left: 16, right: 16),
+                      padding: const EdgeInsets.only(bottom: 16, left: 8, right: 8),
                       sliver: _buildCompactList(singlePurchaseItems, repo),
                     ),
 
                   if (zeroPurchaseItems.isNotEmpty)
                     SliverPadding(
-                      padding: const EdgeInsets.only(left: 16, right: 16),
+                      padding: const EdgeInsets.only(left: 8, right: 8),
                       sliver: _buildZeroPurchasePanel(context, zeroPurchaseItems, repo),
                     ),
 
@@ -105,7 +157,7 @@ class ItemsScreen extends StatelessWidget {
         label: 'Add Item',
         onPressed: () => showDialog(
           context: context,
-          builder: (_) => AddItemDialog(groupId: group?.id),
+          builder: (_) => AddItemDialog(groupId: widget.group?.id),
         ),
       ),
       floatingActionButtonLocation: context.dominantHand == DominantHand.right
@@ -114,6 +166,14 @@ class ItemsScreen extends StatelessWidget {
           ? FloatingActionButtonLocation.startFloat
           : FloatingActionButtonLocation.centerFloat,
     );
+  }
+
+  List<Item> _filterItems(List<Item> items) {
+    if (_searchQuery.trim().isEmpty) return items;
+    final query = _searchQuery.trim().toLowerCase();
+    return items.where((item) {
+      return item.name.toLowerCase().contains(query);
+    }).toList();
   }
 
   Future<Map<int, int>> _fetchPurchaseCounts(ItemsRepository repo, List<Item> items) async {
@@ -138,8 +198,8 @@ class ItemsScreen extends StatelessWidget {
     return SliverGrid(
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
-        crossAxisSpacing: 16,
-        mainAxisSpacing: 16,
+        crossAxisSpacing: 8,
+        mainAxisSpacing: 8,
         childAspectRatio: 0.85,
       ),
       delegate: SliverChildBuilderDelegate((context, index) {
