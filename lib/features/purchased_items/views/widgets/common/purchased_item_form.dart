@@ -3,7 +3,6 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:shopping_assist/core/database/database.dart';
-import 'package:shopping_assist/core/utils/graph_utils.dart';
 import 'package:shopping_assist/core/utils/number_formatter.dart';
 import 'package:shopping_assist/features/items/repositories/items_repository.dart';
 import 'package:shopping_assist/features/items/views/widgets/item_price_history_chart.dart';

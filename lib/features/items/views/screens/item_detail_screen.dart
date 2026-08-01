@@ -72,6 +72,9 @@ class ItemDetailScreen extends StatelessWidget {
                       final itemWithPurchase = history[index];
                       final p = itemWithPurchase.purchasedItem;
                       final purchase = itemWithPurchase.purchase;
+                      final discountPercentage = p.discount;
+                      final originalPrice = p.price!;
+                      final discountedPrice = originalPrice * (1 - discountPercentage / 100);
                       final dateStr =
                           "${purchase.purchaseDate.year}"
                           "-${purchase.purchaseDate.month.toString().padLeft(2, '0')}"
@@ -85,27 +88,34 @@ class ItemDetailScreen extends StatelessWidget {
                         ),
                         title: Text(dateStr, style: const TextStyle(fontWeight: FontWeight.bold)),
                         subtitle: Text(
-                          'Quantity: ${p.quantity?.toQuantityString(p.isWeight ? context.weightUnit : '')}',
+                          p.isWeight
+                              ? 'Bought ${p.quantity?.toQuantityString(context.weightUnit)}'
+                              : 'Bought ${p.quantity?.toQuantityString('')} units',
                         ),
                         trailing: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
                           crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
                             Text(
-                              p.price!.toCurrencyString(
+                              discountedPrice.toCurrencyString(
                                 context.currencySymbol,
                                 locale: context.currencyLocale,
                               ),
-                              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                              style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                                fontSize: 18,
                                 color: colorScheme.primary,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
                             if (p.discount > 0)
                               Text(
-                                'Discount: ${p.discount.toCurrencyString(context.currencySymbol, locale: context.currencyLocale)}',
+                                originalPrice.toCurrencyString(
+                                  context.currencySymbol,
+                                  locale: context.currencyLocale,
+                                ),
                                 style: Theme.of(context).textTheme.labelLarge?.copyWith(
                                   color: colorScheme.secondary,
-                                  fontWeight: FontWeight.bold,
+                                  decoration: TextDecoration.lineThrough,
                                 ),
                               ),
                           ],

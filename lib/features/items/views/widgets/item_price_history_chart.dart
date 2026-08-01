@@ -54,8 +54,10 @@ class ItemPriceHistoryChart extends StatelessWidget {
         final spots = displayHistory.asMap().entries.map((entry) {
           final index = entry.key.toDouble();
           final h = entry.value;
-          final price = h.purchasedItem.price! - h.purchasedItem.discount;
-          return FlSpot(index, price);
+          final discountPercentage = h.purchasedItem.discount;
+          final originalPrice = h.purchasedItem.price!;
+          final discountedPrice = originalPrice * (1 - discountPercentage / 100);
+          return FlSpot(index, discountedPrice);
         }).toList();
 
         final rawMinX = spots.first.x;
