@@ -23,16 +23,21 @@ class ItemPriceHistoryChart extends StatelessWidget {
     // Deduplicate consecutive points with similar final price
     const double epsilon = 0.001;
     final deduped = <PurchasedItemWithPurchase>[];
-    for (var i = 0; i < chronological.length; i++) {
-      final current = chronological[i];
-      final currentPrice = current.purchasedItem.price! - current.purchasedItem.discount;
-      if (i == 0) {
-        deduped.add(current);
-      } else {
-        final previous = deduped.last;
-        final previousPrice = previous.purchasedItem.price! - previous.purchasedItem.discount;
-        if ((currentPrice - previousPrice).abs() > epsilon) {
+    if (chronological.length == 2) {
+      // Special case for two points
+      deduped.addAll(chronological);
+    } else {
+      for (var i = 0; i < chronological.length; i++) {
+        final current = chronological[i];
+        final currentPrice = current.purchasedItem.price! - current.purchasedItem.discount;
+        if (i == 0) {
           deduped.add(current);
+        } else {
+          final previous = deduped.last;
+          final previousPrice = previous.purchasedItem.price! - previous.purchasedItem.discount;
+          if ((currentPrice - previousPrice).abs() > epsilon) {
+            deduped.add(current);
+          }
         }
       }
     }
