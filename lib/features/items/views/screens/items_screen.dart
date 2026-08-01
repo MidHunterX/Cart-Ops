@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart'; // for listEquals
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shopping_assist/core/database/database.dart';
@@ -26,6 +27,10 @@ class _ItemsScreenState extends State<ItemsScreen> {
   bool _isSearching = false;
   String _searchQuery = '';
   final TextEditingController _searchController = TextEditingController();
+
+  // Cached purchase counts
+  List<int>? _previousItemIds;
+  Future<Map<int, int>>? _purchaseCountsFuture;
 
   @override
   void dispose() {
@@ -82,15 +87,18 @@ class _ItemsScreenState extends State<ItemsScreen> {
             ? repo.watchItemsWithoutGroup()
             : repo.watchItemsInGroup(widget.group!.id),
         builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
+          final allItems = snapshot.data ?? [];
+          final filteredItems = _filterItems(allItems);
+
+          // Update counts only when the underlying item list changes
+          final currentIds = allItems.map((i) => i.id).toList();
+          if (_previousItemIds == null || !listEquals(_previousItemIds, currentIds)) {
+            _previousItemIds = currentIds;
+            _purchaseCountsFuture = _fetchPurchaseCounts(repo, allItems);
           }
 
-          final allItems = snapshot.data ?? [];
-
-          final items = _filterItems(allItems);
-
-          if (items.isEmpty) {
+          // Empty state (including when search yields no results)
+          if (filteredItems.isEmpty) {
             return EmptyState(
               icon: _isSearching ? Icons.search_off_outlined : Icons.inventory_2_outlined,
               title: _isSearching ? 'No Matching Items' : 'No Items Yet',
@@ -100,20 +108,29 @@ class _ItemsScreenState extends State<ItemsScreen> {
             );
           }
 
-          final zeroPurchaseItems = <Item>[];
-          final multiplePurchaseItems = <Item>[];
-          final singlePurchaseItems = <Item>[];
+          // Show loading while counts are being fetched (only on initial load or item list change)
+          if (_purchaseCountsFuture == null) {
+            return const Center(child: CircularProgressIndicator());
+          }
 
           return FutureBuilder<Map<int, int>>(
-            future: _fetchPurchaseCounts(repo, items),
+            future: _purchaseCountsFuture,
             builder: (context, countSnapshot) {
               if (countSnapshot.connectionState == ConnectionState.waiting) {
                 return const Center(child: CircularProgressIndicator());
               }
 
+              if (countSnapshot.hasError) {
+                return Center(child: Text('Error loading purchase counts: ${countSnapshot.error}'));
+              }
+
               final purchaseCounts = countSnapshot.data ?? {};
 
-              for (final item in items) {
+              final zeroPurchaseItems = <Item>[];
+              final singlePurchaseItems = <Item>[];
+              final multiplePurchaseItems = <Item>[];
+
+              for (final item in filteredItems) {
                 final count = purchaseCounts[item.id] ?? 0;
                 if (count == 0) {
                   zeroPurchaseItems.add(item);
@@ -129,19 +146,24 @@ class _ItemsScreenState extends State<ItemsScreen> {
                   if (multiplePurchaseItems.isNotEmpty)
                     SliverPadding(
                       padding: const EdgeInsets.only(bottom: 16, left: 8, right: 8),
-                      sliver: _buildGridItems(multiplePurchaseItems, repo),
+                      sliver: _buildGridItems(context, multiplePurchaseItems, repo, purchaseCounts),
                     ),
 
                   if (singlePurchaseItems.isNotEmpty)
                     SliverPadding(
                       padding: const EdgeInsets.only(bottom: 16, left: 8, right: 8),
-                      sliver: _buildCompactList(singlePurchaseItems, repo),
+                      sliver: _buildCompactList(context, singlePurchaseItems, repo, purchaseCounts),
                     ),
 
                   if (zeroPurchaseItems.isNotEmpty)
                     SliverPadding(
                       padding: const EdgeInsets.only(left: 8, right: 8),
-                      sliver: _buildZeroPurchasePanel(context, zeroPurchaseItems, repo),
+                      sliver: _buildZeroPurchasePanel(
+                        context,
+                        zeroPurchaseItems,
+                        repo,
+                        purchaseCounts,
+                      ),
                     ),
 
                   const SliverToBoxAdapter(child: SizedBox(height: 80)), // FAB Accomodation
@@ -171,9 +193,7 @@ class _ItemsScreenState extends State<ItemsScreen> {
   List<Item> _filterItems(List<Item> items) {
     if (_searchQuery.trim().isEmpty) return items;
     final query = _searchQuery.trim().toLowerCase();
-    return items.where((item) {
-      return item.name.toLowerCase().contains(query);
-    }).toList();
+    return items.where((item) => item.name.toLowerCase().contains(query)).toList();
   }
 
   Future<Map<int, int>> _fetchPurchaseCounts(ItemsRepository repo, List<Item> items) async {
@@ -185,16 +205,26 @@ class _ItemsScreenState extends State<ItemsScreen> {
     return counts;
   }
 
-  Widget _buildZeroPurchasePanel(BuildContext context, List<Item> items, ItemsRepository repo) {
+  Widget _buildZeroPurchasePanel(
+    BuildContext context,
+    List<Item> items,
+    ItemsRepository repo,
+    Map<int, int> purchaseCounts,
+  ) {
     return SliverList(
       delegate: SliverChildBuilderDelegate((context, index) {
         final item = items[index];
-        return _buildCompactItemTile(context, item, repo, hasNoPurchases: true);
+        return _buildCompactItemTile(context, item, repo, purchaseCounts);
       }, childCount: items.length),
     );
   }
 
-  Widget _buildGridItems(List<Item> items, ItemsRepository repo) {
+  Widget _buildGridItems(
+    BuildContext context,
+    List<Item> items,
+    ItemsRepository repo,
+    Map<int, int> purchaseCounts,
+  ) {
     return SliverGrid(
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
@@ -204,16 +234,21 @@ class _ItemsScreenState extends State<ItemsScreen> {
       ),
       delegate: SliverChildBuilderDelegate((context, index) {
         final item = items[index];
-        return _buildItemCard(context, item, repo);
+        return _buildItemCard(context, item, repo, purchaseCounts);
       }, childCount: items.length),
     );
   }
 
-  Widget _buildCompactList(List<Item> items, ItemsRepository repo) {
+  Widget _buildCompactList(
+    BuildContext context,
+    List<Item> items,
+    ItemsRepository repo,
+    Map<int, int> purchaseCounts,
+  ) {
     return SliverList(
       delegate: SliverChildBuilderDelegate((context, index) {
         final item = items[index];
-        return _buildCompactItemTile(context, item, repo);
+        return _buildCompactItemTile(context, item, repo, purchaseCounts);
       }, childCount: items.length),
     );
   }
@@ -221,190 +256,179 @@ class _ItemsScreenState extends State<ItemsScreen> {
   Widget _buildCompactItemTile(
     BuildContext context,
     Item item,
-    ItemsRepository repo, {
-    bool hasNoPurchases = false,
-  }) {
+    ItemsRepository repo,
+    Map<int, int> purchaseCounts,
+  ) {
     final colorScheme = Theme.of(context).colorScheme;
+    final purchaseCount = purchaseCounts[item.id] ?? 0;
+    final hasNoPurchases = purchaseCount == 0;
 
-    return FutureBuilder<int>(
-      future: repo.countPurchasesForItem(item.id),
-      builder: (context, snap) {
-        final purchaseCount = snap.data ?? 0;
-
-        return Card(
-          color: hasNoPurchases ? colorScheme.errorContainer : null,
-          margin: const EdgeInsets.symmetric(vertical: 4),
-          child: ListTile(
-            contentPadding: const EdgeInsets.symmetric(horizontal: 8),
-            leading: SizedBox(
-              width: 48,
-              height: 48,
-              child: ItemImageView(
-                imagePath: item.imagePath,
-                width: 48,
-                height: 48,
-                borderRadius: BorderRadius.circular(8),
-                placeholderIcon: hasNoPurchases ? Icons.broken_image : Icons.inventory_2_rounded,
-                placeholderIconColor: hasNoPurchases ? colorScheme.onError : null,
-                placeholderIconBackgroundColor: hasNoPurchases ? colorScheme.error : null,
-                placeholderIconSize: 24,
+    return Card(
+      color: hasNoPurchases ? colorScheme.errorContainer : null,
+      margin: const EdgeInsets.symmetric(vertical: 4),
+      child: ListTile(
+        contentPadding: const EdgeInsets.symmetric(horizontal: 8),
+        leading: SizedBox(
+          width: 48,
+          height: 48,
+          child: ItemImageView(
+            imagePath: item.imagePath,
+            width: 48,
+            height: 48,
+            borderRadius: BorderRadius.circular(8),
+            placeholderIcon: hasNoPurchases ? Icons.broken_image : Icons.inventory_2_rounded,
+            placeholderIconColor: hasNoPurchases ? colorScheme.onError : null,
+            placeholderIconBackgroundColor: hasNoPurchases ? colorScheme.error : null,
+            placeholderIconSize: 24,
+          ),
+        ),
+        title: Text(
+          item.name,
+          style: Theme.of(
+            context,
+          ).textTheme.titleMedium!.copyWith(color: hasNoPurchases ? colorScheme.error : null),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+        subtitle: Text(
+          'Bought $purchaseCount time${purchaseCount == 1 ? '' : 's'}',
+          style: Theme.of(
+            context,
+          ).textTheme.bodySmall!.copyWith(color: hasNoPurchases ? colorScheme.error : null),
+        ),
+        trailing: PopupMenuButton<String>(
+          icon: const Icon(Icons.more_vert, size: 20),
+          iconColor: hasNoPurchases ? colorScheme.error : null,
+          onSelected: (value) {
+            if (value == 'edit') {
+              _showEditDialog(context, item);
+            } else if (value == 'delete') {
+              _confirmDelete(context, repo, item);
+            }
+          },
+          itemBuilder: (ctx) => [
+            const PopupMenuItem(
+              value: 'edit',
+              child: Row(children: [Icon(Icons.edit, size: 20), SizedBox(width: 8), Text('Edit')]),
+            ),
+            PopupMenuItem(
+              value: 'delete',
+              child: Row(
+                children: [
+                  Icon(Icons.delete, size: 20, color: colorScheme.error),
+                  const SizedBox(width: 8),
+                  Text('Delete', style: TextStyle(color: colorScheme.error)),
+                ],
               ),
             ),
-            title: Text(
-              item.name,
-              style: Theme.of(
-                context,
-              ).textTheme.titleMedium!.copyWith(color: hasNoPurchases ? colorScheme.error : null),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-            subtitle: Text(
-              'Bought $purchaseCount time${purchaseCount == 1 ? '' : 's'}',
-              style: Theme.of(
-                context,
-              ).textTheme.bodySmall!.copyWith(color: hasNoPurchases ? colorScheme.error : null),
-            ),
-            trailing: PopupMenuButton<String>(
-              icon: const Icon(Icons.more_vert, size: 20),
-              iconColor: hasNoPurchases ? colorScheme.error : null,
-              onSelected: (value) {
-                if (value == 'edit') {
-                  _showEditDialog(context, item);
-                } else if (value == 'delete') {
-                  _confirmDelete(context, repo, item);
-                }
-              },
-              itemBuilder: (ctx) => [
-                const PopupMenuItem(
-                  value: 'edit',
-                  child: Row(
-                    children: [Icon(Icons.edit, size: 20), SizedBox(width: 8), Text('Edit')],
-                  ),
-                ),
-                PopupMenuItem(
-                  value: 'delete',
-                  child: Row(
-                    children: [
-                      Icon(Icons.delete, size: 20, color: colorScheme.error),
-                      const SizedBox(width: 8),
-                      Text('Delete', style: TextStyle(color: colorScheme.error)),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            onTap: () => Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => ItemDetailScreen(item: item)),
-            ),
-            onLongPress: () => _showEditDialog(context, item),
-          ),
-        );
-      },
+          ],
+        ),
+        onTap: () => Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => ItemDetailScreen(item: item)),
+        ),
+        onLongPress: () => _showEditDialog(context, item),
+      ),
     );
   }
 
-  Widget _buildItemCard(BuildContext context, Item item, ItemsRepository repo) {
+  Widget _buildItemCard(
+    BuildContext context,
+    Item item,
+    ItemsRepository repo,
+    Map<int, int> purchaseCounts,
+  ) {
     final colorScheme = Theme.of(context).colorScheme;
+    final purchaseCount = purchaseCounts[item.id] ?? 0;
+    final hasNoPurchases = purchaseCount == 0;
 
-    return FutureBuilder<int>(
-      future: repo.countPurchasesForItem(item.id),
-      builder: (context, snap) {
-        final purchaseCount = snap.data;
-        final hasNoPurchases = purchaseCount == 0;
-
-        return Card.filled(
-          clipBehavior: Clip.antiAlias,
-          child: InkWell(
-            onTap: hasNoPurchases
-                ? null // Disable tap when no purchases
-                : () => Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => ItemDetailScreen(item: item)),
-                  ),
-            onLongPress: () => _showEditDialog(context, item),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Expanded(
-                  child: Stack(
-                    fit: StackFit.expand,
-                    children: [
-                      _buildItemImage(item.imagePath, colorScheme, hasNoPurchases: hasNoPurchases),
-                      Positioned(
-                        top: 4,
-                        right: 4,
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: colorScheme.surface,
-                            shape: BoxShape.circle,
+    return Card.filled(
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: hasNoPurchases
+            ? null
+            : () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => ItemDetailScreen(item: item)),
+              ),
+        onLongPress: () => _showEditDialog(context, item),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Expanded(
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  _buildItemImage(item.imagePath, colorScheme, hasNoPurchases: hasNoPurchases),
+                  Positioned(
+                    top: 4,
+                    right: 4,
+                    child: Container(
+                      decoration: BoxDecoration(color: colorScheme.surface, shape: BoxShape.circle),
+                      child: PopupMenuButton<String>(
+                        icon: const Icon(Icons.more_vert, size: 20),
+                        padding: EdgeInsets.zero,
+                        onSelected: (value) {
+                          if (value == 'edit') {
+                            _showEditDialog(context, item);
+                          } else if (value == 'delete') {
+                            _confirmDelete(context, repo, item);
+                          }
+                        },
+                        itemBuilder: (ctx) => [
+                          const PopupMenuItem(
+                            value: 'edit',
+                            child: Row(
+                              children: [
+                                Icon(Icons.edit, size: 20),
+                                SizedBox(width: 8),
+                                Text('Edit'),
+                              ],
+                            ),
                           ),
-                          child: PopupMenuButton<String>(
-                            icon: const Icon(Icons.more_vert, size: 20),
-                            padding: EdgeInsets.zero,
-                            onSelected: (value) {
-                              if (value == 'edit') {
-                                _showEditDialog(context, item);
-                              } else if (value == 'delete') {
-                                _confirmDelete(context, repo, item);
-                              }
-                            },
-                            itemBuilder: (ctx) => [
-                              const PopupMenuItem(
-                                value: 'edit',
-                                child: Row(
-                                  children: [
-                                    Icon(Icons.edit, size: 20),
-                                    SizedBox(width: 8),
-                                    Text('Edit'),
-                                  ],
-                                ),
-                              ),
-                              PopupMenuItem(
-                                value: 'delete',
-                                child: Row(
-                                  children: [
-                                    Icon(Icons.delete, size: 20, color: colorScheme.error),
-                                    const SizedBox(width: 8),
-                                    Text('Delete', style: TextStyle(color: colorScheme.error)),
-                                  ],
-                                ),
-                              ),
-                            ],
+                          PopupMenuItem(
+                            value: 'delete',
+                            child: Row(
+                              children: [
+                                Icon(Icons.delete, size: 20, color: colorScheme.error),
+                                const SizedBox(width: 8),
+                                Text('Delete', style: TextStyle(color: colorScheme.error)),
+                              ],
+                            ),
                           ),
-                        ),
+                        ],
                       ),
-                    ],
+                    ),
                   ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(12.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        item.name,
-                        style: Theme.of(
-                          context,
-                        ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        'Bought $purchaseCount time${purchaseCount == 1 ? '' : 's'}',
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: hasNoPurchases ? colorScheme.error : colorScheme.onSurfaceVariant,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-        );
-      },
+            Padding(
+              padding: const EdgeInsets.all(12.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    item.name,
+                    style: Theme.of(
+                      context,
+                    ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Bought $purchaseCount time${purchaseCount == 1 ? '' : 's'}',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: hasNoPurchases ? colorScheme.error : colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
