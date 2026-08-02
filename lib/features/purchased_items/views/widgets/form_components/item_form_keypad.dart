@@ -144,6 +144,107 @@ class _ItemFormKeypadState extends State<ItemFormKeypad> {
     );
   }
 
+  Widget _buildImageBtn({
+    bool hasImage = false,
+    Color backgroundColorActive = Colors.white,
+    Color foregroundColorActive = Colors.black,
+    Color backgroundColorInactive = Colors.black,
+    Color foregroundColorInactive = Colors.white,
+  }) {
+    return Expanded(
+      child: Padding(
+        padding: const EdgeInsets.all(4.0),
+        child: hasImage
+            ? GestureDetector(
+                onTap: _handleImageTap,
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    ElevatedButton(
+                      onPressed: _handleImageTap,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: backgroundColorActive,
+                        foregroundColor: foregroundColorActive,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                        padding: EdgeInsets.zero,
+                        elevation: 0,
+                      ),
+                      child: SizedBox(
+                        height: 56,
+                        width: double.infinity,
+                        child: ItemImageView(
+                          imagePath: widget.pendingImage?.path ?? widget.imagePath,
+                          width: double.infinity,
+                          height: double.infinity,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                    ),
+                    if (_showDeleteOverlay)
+                      Positioned.fill(
+                        child: DeleteLoadingOverlay(
+                          key: _overlayKey,
+                          duration: const Duration(seconds: 3),
+                          onComplete: () {
+                            if (mounted) {
+                              setState(() => _showDeleteOverlay = false);
+                            }
+                          },
+                          child: const SizedBox.shrink(),
+                        ),
+                      ),
+                  ],
+                ),
+              )
+            : Row(
+                children: [
+                  Expanded(
+                    flex: 1, // 1 ratio for Gallery
+                    child: ElevatedButton(
+                      onPressed: () => _handlePick(ImageSource.gallery),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: backgroundColorInactive,
+                        foregroundColor: foregroundColorInactive,
+                        shape: const RoundedRectangleBorder(
+                          borderRadius: BorderRadius.horizontal(left: Radius.circular(8)),
+                        ),
+                        padding: EdgeInsets.zero,
+                        elevation: 0,
+                        minimumSize: Size.zero,
+                      ),
+                      child: const SizedBox(
+                        height: 56,
+                        child: Center(child: Icon(Icons.photo_library, size: 20)),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 1), // Tiny separator
+                  Expanded(
+                    flex: 2, // 2 ratio for Camera
+                    child: ElevatedButton(
+                      onPressed: () => _handlePick(ImageSource.camera),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: backgroundColorInactive,
+                        foregroundColor: foregroundColorInactive,
+                        shape: const RoundedRectangleBorder(
+                          borderRadius: BorderRadius.horizontal(right: Radius.circular(8)),
+                        ),
+                        padding: EdgeInsets.zero,
+                        elevation: 0,
+                        minimumSize: Size.zero,
+                      ),
+                      child: const SizedBox(
+                        height: 56,
+                        child: Center(child: Icon(Icons.photo_camera, size: 24)),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+      ),
+    );
+  }
+
   Widget _buildNumBtn(BuildContext context, String text) {
     return Expanded(
       child: Padding(
@@ -198,99 +299,12 @@ class _ItemFormKeypadState extends State<ItemFormKeypad> {
               foregroundColor: hasText ? inputActiveFg : inputInactiveFg,
               onTap: widget.isLoading ? () {} : widget.onNameTap,
             ),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.all(4.0),
-                child: hasImage
-                    ? GestureDetector(
-                        onTap: _handleImageTap,
-                        child: Stack(
-                          alignment: Alignment.center,
-                          children: [
-                            ElevatedButton(
-                              onPressed: _handleImageTap,
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: inputActiveBg,
-                                foregroundColor: inputActiveFg,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                padding: EdgeInsets.zero,
-                                elevation: 0,
-                              ),
-                              child: SizedBox(
-                                height: 56,
-                                width: double.infinity,
-                                child: ItemImageView(
-                                  imagePath: widget.pendingImage?.path ?? widget.imagePath,
-                                  width: double.infinity,
-                                  height: double.infinity,
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                              ),
-                            ),
-                            if (_showDeleteOverlay)
-                              Positioned.fill(
-                                child: DeleteLoadingOverlay(
-                                  key: _overlayKey,
-                                  duration: const Duration(seconds: 3),
-                                  onComplete: () {
-                                    if (mounted) {
-                                      setState(() => _showDeleteOverlay = false);
-                                    }
-                                  },
-                                  child: const SizedBox.shrink(),
-                                ),
-                              ),
-                          ],
-                        ),
-                      )
-                    : Row(
-                        children: [
-                          Expanded(
-                            flex: 1, // 1 ratio for Gallery
-                            child: ElevatedButton(
-                              onPressed: () => _handlePick(ImageSource.gallery),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: inputInactiveBg,
-                                foregroundColor: inputInactiveFg,
-                                shape: const RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.horizontal(left: Radius.circular(8)),
-                                ),
-                                padding: EdgeInsets.zero,
-                                elevation: 0,
-                                minimumSize: Size.zero,
-                              ),
-                              child: const SizedBox(
-                                height: 56,
-                                child: Center(child: Icon(Icons.photo_library, size: 20)),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 1), // Tiny separator
-                          Expanded(
-                            flex: 2, // 2 ratio for Camera
-                            child: ElevatedButton(
-                              onPressed: () => _handlePick(ImageSource.camera),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: inputInactiveBg,
-                                foregroundColor: inputInactiveFg,
-                                shape: const RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.horizontal(right: Radius.circular(8)),
-                                ),
-                                padding: EdgeInsets.zero,
-                                elevation: 0,
-                                minimumSize: Size.zero,
-                              ),
-                              child: const SizedBox(
-                                height: 56,
-                                child: Center(child: Icon(Icons.photo_camera, size: 24)),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-              ),
+            _buildImageBtn(
+              hasImage: hasImage,
+              backgroundColorActive: inputActiveBg,
+              foregroundColorActive: inputActiveFg,
+              backgroundColorInactive: inputInactiveBg,
+              foregroundColorInactive: inputInactiveFg,
             ),
             _buildActionBtn(
               text: hasDiscount
