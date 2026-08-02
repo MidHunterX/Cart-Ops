@@ -83,6 +83,60 @@ class _ItemFormKeypadState extends State<ItemFormKeypad> {
     }
   }
 
+  Widget _buildStyledButton({
+    String? text,
+    IconData? icon,
+    required VoidCallback onTap,
+    VoidCallback? onLongPress,
+    Color? backgroundColor,
+    Color? foregroundColor,
+    bool isDestructive = false,
+    bool isTextBold = true,
+    MainAxisSize mainAxisSize = MainAxisSize.min,
+  }) {
+    return ElevatedButton(
+      onPressed: () {
+        isDestructive ? _triggerHeavyHaptic() : _triggerHaptic();
+        onTap();
+      },
+      onLongPress: onLongPress != null
+          ? () {
+              _triggerSelectionHaptic();
+              onLongPress();
+            }
+          : null,
+      style: ElevatedButton.styleFrom(
+        backgroundColor: backgroundColor,
+        foregroundColor: foregroundColor,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        padding: EdgeInsets.symmetric(horizontal: 8.0),
+        elevation: 0,
+        minimumSize: Size.zero,
+      ),
+      child: Row(
+        mainAxisSize: mainAxisSize,
+        children: [
+          if (icon != null) ...[
+            Icon(icon),
+            if (text != null && text.isNotEmpty) const SizedBox(width: 8),
+          ],
+          if (text != null && text.isNotEmpty)
+            Flexible(
+              child: Text(
+                text,
+                style: TextStyle(
+                  fontWeight: isTextBold ? FontWeight.bold : FontWeight.normal,
+                  fontSize: 16,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildActionBtn({
     String? text,
     IconData? icon,
@@ -95,49 +149,16 @@ class _ItemFormKeypadState extends State<ItemFormKeypad> {
     return Expanded(
       child: Padding(
         padding: const EdgeInsets.all(4.0),
-        child: ElevatedButton(
-          onPressed: () {
-            isDestructive ? _triggerHeavyHaptic() : _triggerHaptic();
-            onTap();
-          },
-          onLongPress: onLongPress != null
-              ? () {
-                  _triggerSelectionHaptic();
-                  onLongPress();
-                }
-              : null,
-          style: ElevatedButton.styleFrom(
+        child: SizedBox(
+          height: 56,
+          child: _buildStyledButton(
+            text: text,
+            icon: icon,
+            onTap: onTap,
+            onLongPress: onLongPress,
             backgroundColor: backgroundColor,
             foregroundColor: foregroundColor,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-            padding: EdgeInsets.zero,
-            elevation: 0,
-          ),
-          child: SizedBox(
-            height: 56,
-            child: Center(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    if (icon != null) ...[
-                      Icon(icon, size: 24),
-                      if (text != null && text.isNotEmpty) const SizedBox(width: 8),
-                    ],
-                    if (text != null && text.isNotEmpty)
-                      Flexible(
-                        child: Text(
-                          text,
-                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                  ],
-                ),
-              ),
-            ),
+            isDestructive: isDestructive,
           ),
         ),
       ),
@@ -199,7 +220,7 @@ class _ItemFormKeypadState extends State<ItemFormKeypad> {
             : Row(
                 children: [
                   Expanded(
-                    flex: 1, // 1 ratio for Gallery
+                    // flex: 1, // 1 ratio for Gallery
                     child: ElevatedButton(
                       onPressed: () => _handlePick(ImageSource.gallery),
                       style: ElevatedButton.styleFrom(
@@ -220,7 +241,7 @@ class _ItemFormKeypadState extends State<ItemFormKeypad> {
                   ),
                   const SizedBox(width: 1), // Tiny separator
                   Expanded(
-                    flex: 2, // 2 ratio for Camera
+                    // flex: 2, // 2 ratio for Camera
                     child: ElevatedButton(
                       onPressed: () => _handlePick(ImageSource.camera),
                       style: ElevatedButton.styleFrom(
@@ -293,12 +314,6 @@ class _ItemFormKeypadState extends State<ItemFormKeypad> {
       children: [
         Row(
           children: [
-            _buildActionBtn(
-              text: widget.isLoading ? 'Loading...' : (hasText ? widget.itemName : 'Name'),
-              backgroundColor: hasText ? inputActiveBg : inputInactiveBg,
-              foregroundColor: hasText ? inputActiveFg : inputInactiveFg,
-              onTap: widget.isLoading ? () {} : widget.onNameTap,
-            ),
             _buildImageBtn(
               hasImage: hasImage,
               backgroundColorActive: inputActiveBg,
@@ -306,13 +321,45 @@ class _ItemFormKeypadState extends State<ItemFormKeypad> {
               backgroundColorInactive: inputInactiveBg,
               foregroundColorInactive: inputInactiveFg,
             ),
-            _buildActionBtn(
-              text: hasDiscount
-                  ? '${double.parse(widget.discountStr).toInputString()}%'
-                  : 'Discount',
-              backgroundColor: hasDiscount ? inputActiveBg : inputInactiveBg,
-              foregroundColor: hasDiscount ? inputActiveFg : inputInactiveFg,
-              onTap: widget.onDiscountTap,
+            Expanded(
+              flex: 2,
+              child: SizedBox(
+                height: 56,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                  child: Column(
+                    children: [
+                      Expanded(
+                        child: _buildStyledButton(
+                          icon: hasText ? null : Icons.add,
+                          text: widget.isLoading
+                              ? 'Loading...'
+                              : (hasText ? widget.itemName : 'Name'),
+                          isTextBold: hasText,
+                          mainAxisSize: MainAxisSize.max,
+                          backgroundColor: hasText ? inputActiveBg : inputInactiveBg,
+                          foregroundColor: hasText ? inputActiveFg : inputInactiveFg,
+                          onTap: widget.isLoading ? () {} : widget.onNameTap,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Expanded(
+                        child: _buildStyledButton(
+                          icon: hasDiscount ? null : Icons.add,
+                          text: hasDiscount
+                              ? '${double.parse(widget.discountStr).toInputString()}%'
+                              : 'Discount',
+                          isTextBold: hasDiscount,
+                          mainAxisSize: MainAxisSize.max,
+                          backgroundColor: hasDiscount ? inputActiveBg : inputInactiveBg,
+                          foregroundColor: hasDiscount ? inputActiveFg : inputInactiveFg,
+                          onTap: widget.onDiscountTap,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
             ),
             _buildActionBtn(
               icon: Icons.keyboard_tab,
