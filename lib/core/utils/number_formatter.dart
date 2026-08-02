@@ -20,9 +20,22 @@ extension NumberFormatting on double {
   /// 1.0 -> "1kg"
   String toQuantityString(String? unit) {
     String unitStr = unit ?? '';
-    if (this % 1 == 0) return '${toInt()}$unitStr';
-    String value = toString();
-    return '$value$unitStr';
+    num value = this;
+
+    if (value > 0.0 && value < 1.0) {
+      if (unitStr == 'kg') {
+        unitStr = 'g';
+        value = value * 1000;
+      } else if (unitStr == 'lb') {
+        unitStr = 'oz';
+        value = value * 28.3495;
+      }
+    }
+
+    if (value % 1 == 0) return '${value.toInt()}$unitStr';
+
+    String formattedValue = value.toString();
+    return '$formattedValue$unitStr';
   }
 
   /// Converts a double to a formatted currency string with commas

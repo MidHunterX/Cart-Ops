@@ -221,11 +221,7 @@ class PurchasedItemTile extends StatelessWidget {
             fit: BoxFit.scaleDown,
             child: Text(
               pItem.isWeight
-                  ? pItem.quantity! < 1.0
-                        ? (pItem.quantity! * 1000).toQuantityString(
-                            context.weightUnit == 'kg' ? 'g' : 'oz',
-                          )
-                        : pItem.quantity!.toQuantityString(context.weightUnit)
+                  ? pItem.quantity!.toQuantityString(context.weightUnit)
                   : pItem.quantity! >= 1.0
                   ? pItem.quantity!.toQuantityString('')
                   : pItem.quantity! == 0.25
