@@ -13,7 +13,6 @@ import '../form_components/item_form_keypad.dart';
 import '../form_components/unit_price_calculator_dialog.dart';
 import '../form_components/discount_calculator_dialog.dart';
 import 'purchased_item_form_header.dart';
-import 'unit_quantity_selector.dart';
 
 class PurchasedItemForm extends StatefulWidget {
   final int? itemId; // for price history graph
@@ -314,6 +313,8 @@ class PurchasedItemFormState extends State<PurchasedItemForm> {
         _totalController.text = _totalStr;
       }
     });
+    _activeField = ActiveField.quantity;
+    _focusActiveField();
   }
 
   void _decrementQuantity() {
@@ -331,6 +332,8 @@ class PurchasedItemFormState extends State<PurchasedItemForm> {
           _totalController.text = _totalStr;
         }
       }
+      _activeField = ActiveField.quantity;
+      _focusActiveField();
     });
   }
 
@@ -476,37 +479,59 @@ class PurchasedItemFormState extends State<PurchasedItemForm> {
   Widget _buildFieldsRow(String weightUnit, String currencySymbol) {
     final isCompact = context.isCompactPriceInput;
 
+    Widget buildQuantityField() {
+      final colorScheme = Theme.of(context).colorScheme;
+      final isQtyActive = _activeField == ActiveField.quantity;
+      if (_isWeight) {
+        return InputFieldBox(
+          label: 'Weight ($weightUnit)',
+          suffixText: weightUnit,
+          value: _qtyStr,
+          isActive: isQtyActive,
+          onTap: () {
+            setState(() => _activeField = ActiveField.quantity);
+            _qtyFocusNode.requestFocus();
+          },
+          controller: _qtyController,
+          focusNode: _qtyFocusNode,
+        );
+      } else {
+        return InputFieldBox(
+          label: 'Quantity',
+          value: _qtyStr,
+          textAlign: TextAlign.center,
+          isActive: isQtyActive,
+          onTap: () {
+            setState(() => _activeField = ActiveField.quantity);
+            _qtyFocusNode.requestFocus();
+          },
+          controller: _qtyController,
+          focusNode: _qtyFocusNode,
+          prefixIcon: IconButton(
+            icon: const Icon(Icons.remove),
+            onPressed: _decrementQuantity,
+            style: IconButton.styleFrom(
+              backgroundColor: colorScheme.surfaceContainerHighest,
+              shape: const CircleBorder(),
+            ),
+          ),
+          suffixIcon: IconButton(
+            icon: const Icon(Icons.add),
+            onPressed: _incrementQuantity,
+            style: IconButton.styleFrom(
+              backgroundColor: colorScheme.surfaceContainerHighest,
+              shape: const CircleBorder(),
+            ),
+          ),
+        );
+      }
+    }
+
     if (isCompact) {
       return Row(
         spacing: 8,
         children: [
-          Expanded(
-            flex: 5,
-            child: _isWeight
-                ? InputFieldBox(
-                    label: 'Weight ($weightUnit)',
-                    suffixText: weightUnit,
-                    value: _qtyStr,
-                    isActive: _activeField == ActiveField.quantity,
-                    onTap: () {
-                      setState(() => _activeField = ActiveField.quantity);
-                      _qtyFocusNode.requestFocus();
-                    },
-                    controller: _qtyController,
-                    focusNode: _qtyFocusNode,
-                  )
-                : UnitQuantitySelector(
-                    controller: _qtyController,
-                    focusNode: _qtyFocusNode,
-                    isActive: _activeField == ActiveField.quantity,
-                    onTap: () {
-                      setState(() => _activeField = ActiveField.quantity);
-                      _qtyFocusNode.requestFocus();
-                    },
-                    onIncrement: _incrementQuantity,
-                    onDecrement: _decrementQuantity,
-                  ),
-          ),
+          Expanded(flex: 5, child: buildQuantityField()),
           Expanded(
             flex: 8,
             child: InputFieldBox(
@@ -537,33 +562,7 @@ class PurchasedItemFormState extends State<PurchasedItemForm> {
       return Row(
         spacing: 8,
         children: [
-          Expanded(
-            flex: 4,
-            child: _isWeight
-                ? InputFieldBox(
-                    label: 'Weight ($weightUnit)',
-                    suffixText: weightUnit,
-                    value: _qtyStr,
-                    isActive: _activeField == ActiveField.quantity,
-                    onTap: () {
-                      setState(() => _activeField = ActiveField.quantity);
-                      _qtyFocusNode.requestFocus();
-                    },
-                    controller: _qtyController,
-                    focusNode: _qtyFocusNode,
-                  )
-                : UnitQuantitySelector(
-                    controller: _qtyController,
-                    focusNode: _qtyFocusNode,
-                    isActive: _activeField == ActiveField.quantity,
-                    onTap: () {
-                      setState(() => _activeField = ActiveField.quantity);
-                      _qtyFocusNode.requestFocus();
-                    },
-                    onIncrement: _incrementQuantity,
-                    onDecrement: _decrementQuantity,
-                  ),
-          ),
+          Expanded(flex: 4, child: buildQuantityField()),
           Expanded(
             flex: 4,
             child: InputFieldBox(
