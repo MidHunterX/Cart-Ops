@@ -5,6 +5,7 @@ import 'package:shopping_assist/core/utils/image_picker_util.dart';
 import 'package:shopping_assist/core/utils/number_formatter.dart';
 import 'package:shopping_assist/core/widgets/delete_loading_overlay.dart';
 import 'package:shopping_assist/core/widgets/item_image_view.dart';
+import 'package:shopping_assist/features/settings/providers/settings_provider.dart';
 
 class ItemFormKeypad extends StatefulWidget {
   final bool isLoading;
@@ -321,46 +322,65 @@ class _ItemFormKeypadState extends State<ItemFormKeypad> {
               backgroundColorInactive: inputInactiveBg,
               foregroundColorInactive: inputInactiveFg,
             ),
-            Expanded(
-              flex: 2,
-              child: SizedBox(
-                height: 56,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                  child: Column(
-                    children: [
-                      Expanded(
-                        child: _buildStyledButton(
-                          icon: hasText ? null : Icons.add,
-                          text: widget.isLoading
-                              ? 'Loading...'
-                              : (hasText ? widget.itemName : 'Name'),
-                          isTextBold: hasText,
-                          mainAxisSize: MainAxisSize.max,
-                          backgroundColor: hasText ? inputActiveBg : inputInactiveBg,
-                          foregroundColor: hasText ? inputActiveFg : inputInactiveFg,
-                          onTap: widget.isLoading ? () {} : widget.onNameTap,
+            if (!context.isAltInfoLayout)
+              _buildActionBtn(
+                icon: hasText ? null : Icons.add,
+                text: widget.isLoading ? 'Loading...' : (hasText ? widget.itemName : 'Name'),
+                backgroundColor: hasText ? inputActiveBg : inputInactiveBg,
+                foregroundColor: hasText ? inputActiveFg : inputInactiveFg,
+                onTap: widget.isLoading ? () {} : widget.onNameTap,
+              ),
+            if (!context.isAltInfoLayout)
+              _buildActionBtn(
+                icon: hasDiscount ? null : Icons.add,
+                text: hasDiscount
+                    ? '${double.parse(widget.discountStr).toInputString()}%'
+                    : 'Discount',
+                backgroundColor: hasDiscount ? inputActiveBg : inputInactiveBg,
+                foregroundColor: hasDiscount ? inputActiveFg : inputInactiveFg,
+                onTap: widget.onDiscountTap,
+              ),
+            if (context.isAltInfoLayout)
+              Expanded(
+                flex: 2,
+                child: SizedBox(
+                  height: 56,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                    child: Column(
+                      children: [
+                        Expanded(
+                          child: _buildStyledButton(
+                            icon: hasText ? null : Icons.add,
+                            text: widget.isLoading
+                                ? 'Loading...'
+                                : (hasText ? widget.itemName : 'Name'),
+                            isTextBold: hasText,
+                            mainAxisSize: MainAxisSize.max,
+                            backgroundColor: hasText ? inputActiveBg : inputInactiveBg,
+                            foregroundColor: hasText ? inputActiveFg : inputInactiveFg,
+                            onTap: widget.isLoading ? () {} : widget.onNameTap,
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 4),
-                      Expanded(
-                        child: _buildStyledButton(
-                          icon: hasDiscount ? null : Icons.add,
-                          text: hasDiscount
-                              ? '${double.parse(widget.discountStr).toInputString()}%'
-                              : 'Discount',
-                          isTextBold: hasDiscount,
-                          mainAxisSize: MainAxisSize.max,
-                          backgroundColor: hasDiscount ? inputActiveBg : inputInactiveBg,
-                          foregroundColor: hasDiscount ? inputActiveFg : inputInactiveFg,
-                          onTap: widget.onDiscountTap,
+                        const SizedBox(height: 4),
+                        Expanded(
+                          child: _buildStyledButton(
+                            icon: hasDiscount ? null : Icons.add,
+                            text: hasDiscount
+                                ? '${double.parse(widget.discountStr).toInputString()}%'
+                                : 'Discount',
+                            isTextBold: hasDiscount,
+                            mainAxisSize: MainAxisSize.max,
+                            backgroundColor: hasDiscount ? inputActiveBg : inputInactiveBg,
+                            foregroundColor: hasDiscount ? inputActiveFg : inputInactiveFg,
+                            onTap: widget.onDiscountTap,
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ),
-            ),
             _buildActionBtn(
               icon: Icons.keyboard_tab,
               backgroundColor: functionalBg,

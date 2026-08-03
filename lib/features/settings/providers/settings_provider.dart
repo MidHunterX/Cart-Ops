@@ -86,9 +86,12 @@ class SettingsProvider extends ChangeNotifier {
 
   // Calculator vs Telephone Keypad
 
-  void _loadTelephoneSettings() {
+  void _loadKeypadSettings() {
     final isTelephone = _prefs.getBool(_telephoneLayoutKey);
     if (isTelephone != null) _useTelephoneLayout = isTelephone;
+
+    final isAltInfo = _prefs.getBool(_altInfoLayoutKey);
+    if (isAltInfo != null) _useAltInfoLayout = isAltInfo;
   }
 
   static const String _telephoneLayoutKey = 'use_telephone_layout';
@@ -98,6 +101,15 @@ class SettingsProvider extends ChangeNotifier {
     _useTelephoneLayout = useCalculator;
     notifyListeners();
     _prefs.setBool(_telephoneLayoutKey, useCalculator);
+  }
+
+  static const String _altInfoLayoutKey = 'use_alt_info_layout';
+  bool _useAltInfoLayout = false;
+  bool get isAltInfoLayout => _useAltInfoLayout;
+  void setAltInfoLayout(bool useAltInfoLayout) async {
+    _useAltInfoLayout = useAltInfoLayout;
+    notifyListeners();
+    _prefs.setBool(_altInfoLayoutKey, useAltInfoLayout);
   }
 
   // Weight Unit
@@ -196,7 +208,7 @@ class SettingsProvider extends ChangeNotifier {
     _loadCompactItemList();
     _loadCompactPriceInput();
     _loadDominantHandSettings();
-    _loadTelephoneSettings();
+    _loadKeypadSettings();
     _loadGroupSettings();
   }
 }
@@ -215,5 +227,6 @@ extension SettingsContext on BuildContext {
   Color get seedColor => settings.seedColor;
   String get dominantHand => settings.dominantHand;
   bool get isTelephoneLayout => settings.isTelephoneLayout;
+  bool get isAltInfoLayout => settings.isAltInfoLayout;
   bool get isGroupEnabled => settings.isGroupEnabled;
 }

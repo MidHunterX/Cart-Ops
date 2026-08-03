@@ -117,17 +117,10 @@ class SettingsScreen extends StatelessWidget {
           ),
 
           SettingCard(
-            title: 'Dominant Hand',
-            subtitle: 'FAB Placement: ${context.dominantHand.toUpperCase()}',
-            onTap: () => showModalBottomSheet(
-              context: context,
-              showDragHandle: true,
-              builder: (_) => FabLocationPicker(
-                currentLocation: context.dominantHand,
-                onChanged: settings.setFab,
-              ),
-            ),
-            wireframe: _DominantHandWireframe(position: context.dominantHand),
+            title: 'Alternate Info Layout',
+            subtitle: context.isAltInfoLayout ? 'Enabled (Stacked)' : 'Disabled (Side‑by‑side)',
+            control: Switch(value: context.isAltInfoLayout, onChanged: settings.setAltInfoLayout),
+            wireframe: _AltInfoLayoutWireframe(isAltInfo: context.isAltInfoLayout),
           ),
 
           SettingCard(
@@ -154,6 +147,20 @@ class SettingsScreen extends StatelessWidget {
               },
             ),
             wireframe: _KeypadLayoutWireframe(isTelephone: context.isTelephoneLayout),
+          ),
+
+          SettingCard(
+            title: 'Dominant Hand',
+            subtitle: 'FAB Placement: ${context.dominantHand.toUpperCase()}',
+            onTap: () => showModalBottomSheet(
+              context: context,
+              showDragHandle: true,
+              builder: (_) => FabLocationPicker(
+                currentLocation: context.dominantHand,
+                onChanged: settings.setFab,
+              ),
+            ),
+            wireframe: _DominantHandWireframe(position: context.dominantHand),
           ),
 
           const SizedBox(height: 32),
@@ -602,6 +609,86 @@ class _KeypadLayoutWireframe extends StatelessWidget {
           ),
         );
       }).toList(),
+    );
+  }
+}
+
+class _AltInfoLayoutWireframe extends StatelessWidget {
+  final bool isAltInfo;
+  const _AltInfoLayoutWireframe({required this.isAltInfo});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 56,
+      padding: const EdgeInsets.symmetric(horizontal: 8),
+      child: isAltInfo
+          ? Row(
+              children: [
+                Expanded(child: _buildIconBtn(context, Icons.image)),
+                const SizedBox(width: 6),
+                Expanded(
+                  flex: 2,
+                  child: Column(
+                    children: [
+                      Expanded(
+                        child: _buildActionBtn(context, text: 'Some Name Here', isActive: true),
+                      ),
+                      const SizedBox(height: 4),
+                      Expanded(child: _buildActionBtn(context, text: 'Discount', isActive: false)),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 6),
+                Expanded(child: _buildIconBtn(context, Icons.keyboard_tab)),
+              ],
+            )
+          : Row(
+              children: [
+                Expanded(child: _buildIconBtn(context, Icons.image)),
+                const SizedBox(width: 6),
+                Expanded(child: _buildActionBtn(context, text: 'Some Name Here', isActive: true)),
+                const SizedBox(width: 6),
+                Expanded(child: _buildActionBtn(context, text: 'Discount', isActive: false)),
+                const SizedBox(width: 6),
+                Expanded(child: _buildIconBtn(context, Icons.keyboard_tab)),
+              ],
+            ),
+    );
+  }
+
+  Widget _buildActionBtn(BuildContext context, {required String text, required bool isActive}) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return Container(
+      decoration: BoxDecoration(
+        color: isActive ? colorScheme.primaryContainer : colorScheme.surfaceContainer,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      alignment: Alignment.centerLeft,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8.0),
+        child: Text(
+          text,
+          style: TextStyle(
+            fontSize: 14,
+            overflow: TextOverflow.ellipsis,
+            fontWeight: FontWeight.bold,
+            color: isActive ? colorScheme.primary : colorScheme.onSurfaceVariant,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildIconBtn(BuildContext context, IconData icon) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return Container(
+      decoration: BoxDecoration(
+        color: colorScheme.surfaceContainer,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      alignment: Alignment.center,
+      child: Icon(icon, color: colorScheme.onSurfaceVariant, size: 24),
     );
   }
 }
