@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:shopping_assist/core/database/database.dart';
 import 'package:shopping_assist/core/widgets/delete_confirmation_dialog.dart';
 import 'package:shopping_assist/core/widgets/item_image_view.dart';
+import 'package:shopping_assist/features/items/views/screens/item_detail_screen.dart';
 import 'package:shopping_assist/features/purchased_items/repositories/purchased_items_repository.dart';
 import 'package:shopping_assist/features/settings/providers/settings_provider.dart';
 import 'package:shopping_assist/core/utils/number_formatter.dart';
@@ -444,14 +445,14 @@ class PurchasedItemTile extends StatelessWidget {
       onSelected: (value) {
         onMenuClosed(); // Reset highlight on selection
         switch (value) {
+          case 'view_item':
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => ItemDetailScreen(item: details.item)),
+            );
+            break;
           case 'edit':
             _showEditSheet(context);
-            break;
-          case 'edit_quantity':
-            _showEditSheet(context, initialField: ActiveField.quantity);
-            break;
-          case 'edit_price':
-            _showEditSheet(context, initialField: ActiveField.price);
             break;
           case 'edit_discount':
             _showEditSheet(context, openDiscount: true);
@@ -462,22 +463,25 @@ class PurchasedItemTile extends StatelessWidget {
         }
       },
       itemBuilder: (context) => [
+        if (details.purchasedItem.itemId != null)
+          const PopupMenuItem(
+            value: 'view_item',
+            child: Row(
+              children: [
+                Icon(Icons.inventory_2_outlined),
+                SizedBox(width: 8),
+                Text('Item Details'),
+              ],
+            ),
+          ),
         const PopupMenuItem(
           value: 'edit',
-          child: Row(children: [Icon(Icons.edit_outlined), SizedBox(width: 8), Text('Edit All')]),
-        ),
-        const PopupMenuItem(
-          value: 'edit_quantity',
-          child: Row(children: [Icon(Icons.numbers), SizedBox(width: 8), Text('Edit Quantity')]),
-        ),
-        const PopupMenuItem(
-          value: 'edit_price',
-          child: Row(children: [Icon(Icons.attach_money), SizedBox(width: 8), Text('Edit Price')]),
+          child: Row(children: [Icon(Icons.edit_outlined), SizedBox(width: 8), Text('Edit')]),
         ),
         const PopupMenuItem(
           value: 'edit_discount',
           child: Row(
-            children: [Icon(Icons.local_offer_outlined), SizedBox(width: 8), Text('Edit Discount')],
+            children: [Icon(Icons.local_offer_outlined), SizedBox(width: 8), Text('Discount')],
           ),
         ),
         PopupMenuItem(
