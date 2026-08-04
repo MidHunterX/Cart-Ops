@@ -1,0 +1,170 @@
+# vim: ft=sh
+
+# Configuration
+FLUTTER_PREFS_FILE="$HOME/.local/share/com.midhunterx.shopping_assist/shared_preferences.json"
+CENTER_BIAS=10
+HUE_MATCH_THRESHOLD=30 # Degrees for hue matching
+
+# Color definitions (argb32 values)
+declare -A COLOR_MAP=(
+    ["Green"]="4283215696"
+    ["Blue"]="4280391411"
+    ["Red"]="4294198070"
+    ["Orange"]="4294940672"
+    ["Purple"]="4288423856"
+    ["Teal"]="4278228616"
+    ["Pink"]="4293467747"
+)
+
+# Color RGB values for reference (r,g,b)
+declare -A COLOR_RGB=(
+    ["Green"]="0,128,0"
+    ["Blue"]="0,0,255"
+    ["Red"]="255,0,0"
+    ["Orange"]="255,165,0"
+    ["Purple"]="128,0,128"
+    ["Teal"]="0,128,128"
+    ["Pink"]="255,192,203"
+)
+
+# Convert RGB (0-255) to hue in degrees (0-359)
+rgb_to_hue() {
+    local r=$1 g=$2 b=$3
+    echo "$r $g $b" | awk '{
+        r=$1; g=$2; b=$3;
+        max = r; min = r;
+        if (g > max) max = g;
+        if (b > max) max = b;
+        if (g < min) min = g;
+        if (b < min) min = b;
+        diff = max - min;
+        if (diff == 0) {
+            hue = 0;
+        } else if (max == r) {
+            hue = 60 * ((g - b) / diff);
+        } else if (max == g) {
+            hue = 60 * (2 + (b - r) / diff);
+        } else {
+            hue = 60 * (4 + (r - g) / diff);
+        }
+        if (hue < 0) hue += 360;
+        printf("%.0f", hue);
+    }'
+}
+
+# Build hue map from COLOR_RGB
+declare -A COLOR_HUE
+for color in "${!COLOR_RGB[@]}"; do
+    IFS=',' read -r r g b <<<"${COLOR_RGB[$color]}"
+    COLOR_HUE["$color"]=$(rgb_to_hue "$r" "$g" "$b")
+done
+
+# Find closest color by hue (circular distance)
+find_closest_color() {
+    local target_r="$1" target_g="$2" target_b="$3"
+    local target_hue
+    target_hue=$(rgb_to_hue "$target_r" "$target_g" "$target_b")
+    local closest=""
+    local min_distance=360
+
+    for color_name in "${!COLOR_HUE[@]}"; do
+        local hue=${COLOR_HUE[$color_name]}
+        # Circular distance
+        local diff=$((target_hue - hue))
+        if [[ $diff -lt 0 ]]; then diff=$((-diff)); fi
+        if [[ $diff -gt 180 ]]; then diff=$((360 - diff)); fi
+
+        if [[ $diff -lt $min_distance ]]; then
+            min_distance=$diff
+            closest="$color_name"
+        fi
+    done
+
+    if [[ $min_distance -le $HUE_MATCH_THRESHOLD ]]; then
+        echo "$closest"
+    else
+        echo "UNKNOWN"
+    fi
+}
+
+get_wallpaper_path() {
+    local wallpaper
+    wallpaper=$(awww query 2>/dev/null | grep -oP 'currently displaying: image: \K.+$' || echo "")
+    if [[ -z "$wallpaper" || ! -f "$wallpaper" ]]; then
+        echo "ERROR: Could not find wallpaper" >&2
+        return 1
+    fi
+    echo "$wallpaper"
+}
+
+extract_dominant_color() {
+    local wallpaper="$1"
+    local border=$((100 - CENTER_BIAS))
+    local color_output
+    color_output=$(magick "$wallpaper" -gravity Center -crop "${border}%x${border}+0+0" -resize 1x1 txt:- 2>/dev/null)
+    local hex_color
+    hex_color=$(echo "$color_output" | grep -oE '#[0-9A-F]{6}' | head -1)
+    if [[ -z "$hex_color" ]]; then
+        echo "ERROR: Could not extract color from wallpaper" >&2
+        return 1
+    fi
+    echo "$hex_color"
+}
+
+hex_to_rgb() {
+    local hex="$1"
+    hex="${hex/#\#/}"
+    local r=$((16#${hex:0:2}))
+    local g=$((16#${hex:2:2}))
+    local b=$((16#${hex:4:2}))
+    echo "$r,$g,$b"
+}
+
+update_flutter_prefs() {
+    local color_name="$1"
+    local color_value="${COLOR_MAP[$color_name]}"
+    if [[ -z "$color_value" ]]; then
+        echo "ERROR: No color value found for $color_name" >&2
+        return 1
+    fi
+    if [[ ! -f "$FLUTTER_PREFS_FILE" ]]; then
+        echo "ERROR: Flutter preferences file not found: $FLUTTER_PREFS_FILE" >&2
+        return 1
+    fi
+    cp "$FLUTTER_PREFS_FILE" "${FLUTTER_PREFS_FILE}.backup"
+    if command -v jq &>/dev/null; then
+        local temp_file
+        temp_file=$(mktemp)
+        jq --arg color "$color_value" \
+            '.["flutter.seed_color"] = ($color | tonumber)' \
+            "$FLUTTER_PREFS_FILE" >"$temp_file"
+        mv "$temp_file" "$FLUTTER_PREFS_FILE"
+        echo "Updated flutter.seed_color to: $color_value (from $color_name)"
+    else
+        echo "jq not found, using sed (might break JSON)" >&2
+        sed -i "s/\"flutter.seed_color\":[0-9]*/\"flutter.seed_color\":$color_value/g" "$FLUTTER_PREFS_FILE"
+        echo "Updated flutter.seed_color to: $color_value"
+    fi
+}
+
+main() {
+    local wallpaper
+    wallpaper=$(get_wallpaper_path) || exit 1
+    echo "Current Wallpaper: $(basename "$wallpaper")"
+    local hex_color
+    hex_color=$(extract_dominant_color "$wallpaper") || exit 1
+    echo "Dominant color: $hex_color"
+    IFS=',' read -r r g b <<<"$(hex_to_rgb "$hex_color")"
+    echo "RGB: ($r, $g, $b)"
+    local closest_color
+    closest_color=$(find_closest_color "$r" "$g" "$b")
+    if [[ "$closest_color" == "UNKNOWN" ]]; then
+        echo "No matching color found in preset list"
+        echo "You may want to add this color to the COLOR_MAP and COLOR_RGB arrays"
+        exit 1
+    fi
+    echo "Matched material color: $closest_color"
+    update_flutter_prefs "$closest_color"
+}
+
+main
