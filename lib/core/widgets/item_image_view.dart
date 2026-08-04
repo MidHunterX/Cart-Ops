@@ -89,11 +89,7 @@ class ItemImageView extends StatelessWidget {
     Navigator.of(context).push(
       PageRouteBuilder(
         pageBuilder: (context, animation, secondaryAnimation) {
-          return FullScreenImageView(
-            imagePath: imagePath!,
-            heroTag: heroTag,
-            onDismiss: () => Navigator.of(context).pop(),
-          );
+          return FullScreenImageView(imagePath: imagePath!, heroTag: heroTag);
         },
         transitionsBuilder: (context, animation, secondaryAnimation, child) {
           return FadeTransition(opacity: animation, child: child);
@@ -105,91 +101,102 @@ class ItemImageView extends StatelessWidget {
   }
 }
 
-class FullScreenImageView extends StatelessWidget {
+class FullScreenImageView extends StatefulWidget {
   final String imagePath;
   final String? heroTag;
-  final VoidCallback onDismiss;
 
-  const FullScreenImageView({
-    super.key,
-    required this.imagePath,
-    this.heroTag,
-    required this.onDismiss,
-  });
+  const FullScreenImageView({super.key, required this.imagePath, this.heroTag});
+
+  @override
+  State<FullScreenImageView> createState() => _FullScreenImageViewState();
+}
+
+class _FullScreenImageViewState extends State<FullScreenImageView> {
+  final TransformationController _transformationController = TransformationController();
+
+  @override
+  void dispose() {
+    _transformationController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    // final colorScheme = Theme.of(context).colorScheme;
     return Scaffold(
       backgroundColor: Colors.black,
-      body: Stack(
-        children: [
-          Material(
-            color: Colors.transparent,
-            child: InkWell(
-              onTap: onDismiss,
-              // Flashbang Warning!
-              // splashColor: colorScheme.primary,
-              // highlightColor: colorScheme.onSurfaceVariant,
-              child: Center(
-                child: heroTag != null
-                    ? Hero(
-                        tag: heroTag!,
-                        child: Image.file(
-                          File(imagePath),
+      body: SafeArea(
+        child: Stack(
+          children: [
+            GestureDetector(
+              onTap: () => Navigator.of(context).pop(),
+              child: InteractiveViewer(
+                transformationController: _transformationController,
+                minScale: 0.8,
+                maxScale: 4.0,
+                boundaryMargin: const EdgeInsets.all(20),
+                panEnabled: true,
+                scaleEnabled: true,
+                child: Center(
+                  child: widget.heroTag != null
+                      ? Hero(
+                          tag: widget.heroTag!,
+                          child: Image.file(
+                            File(widget.imagePath),
+                            fit: BoxFit.contain,
+                            errorBuilder: (_, _, _) => const Icon(
+                              Icons.image_not_supported,
+                              color: Colors.white,
+                              size: 64,
+                            ),
+                          ),
+                        )
+                      : Image.file(
+                          File(widget.imagePath),
                           fit: BoxFit.contain,
                           errorBuilder: (_, _, _) =>
                               const Icon(Icons.image_not_supported, color: Colors.white, size: 64),
                         ),
-                      )
-                    : Image.file(
-                        File(imagePath),
-                        fit: BoxFit.contain,
-                        errorBuilder: (_, _, _) =>
-                            const Icon(Icons.image_not_supported, color: Colors.white, size: 64),
-                      ),
+                ),
               ),
             ),
-          ),
 
-          // Close button
-          Positioned(
-            top: MediaQuery.of(context).padding.top + 16,
-            right: 16,
-            child: Container(
-              decoration: BoxDecoration(
-                color: Colors.black.withValues(alpha: 0.5),
-                shape: BoxShape.circle,
-              ),
-              child: IconButton(
-                icon: const Icon(Icons.close, color: Colors.white, size: 28),
-                onPressed: onDismiss,
-                padding: const EdgeInsets.all(8),
-                constraints: const BoxConstraints.tightFor(width: 48, height: 48),
-              ),
-            ),
-          ),
-
-          // Hint text at bottom
-          Positioned(
-            bottom: MediaQuery.of(context).padding.bottom + 32,
-            left: 0,
-            right: 0,
-            child: Center(
+            Positioned(
+              top: 16,
+              right: 16,
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 decoration: BoxDecoration(
                   color: Colors.black.withValues(alpha: 0.5),
-                  borderRadius: BorderRadius.circular(20),
+                  shape: BoxShape.circle,
                 ),
-                child: const Text(
-                  'Tap anywhere to close',
-                  style: TextStyle(color: Colors.white70, fontSize: 14),
+                child: IconButton(
+                  icon: const Icon(Icons.close, color: Colors.white, size: 28),
+                  onPressed: () => Navigator.of(context).pop(),
+                  padding: const EdgeInsets.all(8),
+                  constraints: const BoxConstraints.tightFor(width: 48, height: 48),
                 ),
               ),
             ),
-          ),
-        ],
+
+            Positioned(
+              bottom: 32,
+              left: 0,
+              right: 0,
+              child: Center(
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withValues(alpha: 0.5),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: const Text(
+                    'Tap to close • Pinch to zoom',
+                    style: TextStyle(color: Colors.white70, fontSize: 14),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
