@@ -444,8 +444,17 @@ class _HistoryTile extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final p = entry.purchasedItem;
     final purchase = entry.purchase;
-    final originalPrice = p.price ?? 0;
-    final discountedPrice = originalPrice * (1 - p.discount / 100);
+    final originalRate = p.price ?? 0;
+    final discountedRate = originalRate * (1 - p.discount / 100);
+
+    final quantity = p.quantity ?? 1;
+    final formattedQuantity = quantity.toQuantityString(p.isWeight ? context.weightUnit : null);
+    final boughtPrice = ((discountedRate * quantity) * 1000).round() / 1000;
+    final formattedBoughtPrice = boughtPrice.toCurrencyString(
+      context.currencySymbol,
+      locale: context.currencyLocale,
+      preferWhole: true,
+    );
 
     return ListTile(
       contentPadding: const EdgeInsets.all(0),
@@ -473,20 +482,13 @@ class _HistoryTile extends StatelessWidget {
           ],
         ],
       ),
-      subtitle: Text(
-        p.isWeight
-            ? 'Bought ${p.quantity?.toQuantityString(context.weightUnit)}'
-            : 'Bought ${p.quantity?.toQuantityString('')} units',
-      ),
+      subtitle: Text('Bought $formattedQuantity at $formattedBoughtPrice'),
       trailing: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           Text(
-            discountedPrice.toCurrencyString(
-              context.currencySymbol,
-              locale: context.currencyLocale,
-            ),
+            discountedRate.toCurrencyString(context.currencySymbol, locale: context.currencyLocale),
             style: Theme.of(context).textTheme.labelLarge?.copyWith(
               fontSize: 18,
               color: colorScheme.primary,
@@ -495,10 +497,7 @@ class _HistoryTile extends StatelessWidget {
           ),
           if (p.discount > 0)
             Text(
-              originalPrice.toCurrencyString(
-                context.currencySymbol,
-                locale: context.currencyLocale,
-              ),
+              originalRate.toCurrencyString(context.currencySymbol, locale: context.currencyLocale),
               style: Theme.of(context).textTheme.labelLarge?.copyWith(
                 color: colorScheme.secondary,
                 decoration: TextDecoration.lineThrough,
