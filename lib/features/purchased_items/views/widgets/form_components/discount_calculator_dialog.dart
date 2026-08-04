@@ -177,6 +177,15 @@ class _DiscountCalculatorDialogState extends State<DiscountCalculatorDialog> {
     _isUpdating = false;
   }
 
+  void _clearDiscount() {
+    setState(() {
+      _discountAmountCtrl.text = '';
+      _discountPercentCtrl.text = '';
+      _sellingPriceCtrl.text = '';
+      _lastEdited = _EditType.percentage;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
@@ -245,6 +254,10 @@ class _DiscountCalculatorDialogState extends State<DiscountCalculatorDialog> {
         ),
       ),
       actions: [
+        TextButton(
+          onPressed: _clearDiscount,
+          child: const Text('Clear'),
+        ),
         TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
         FilledButton(
           onPressed: () => Navigator.pop(context, _discountPercentCtrl.text),

@@ -324,7 +324,6 @@ class _ItemFormKeypadState extends State<ItemFormKeypad> {
             ),
             if (!context.isAltInfoLayout)
               _buildActionBtn(
-                icon: hasText ? null : Icons.add,
                 text: widget.isLoading ? 'Loading...' : (hasText ? widget.itemName : 'Name'),
                 backgroundColor: hasText ? inputActiveBg : inputInactiveBg,
                 foregroundColor: hasText ? inputActiveFg : inputInactiveFg,
@@ -332,7 +331,6 @@ class _ItemFormKeypadState extends State<ItemFormKeypad> {
               ),
             if (!context.isAltInfoLayout)
               _buildActionBtn(
-                icon: hasDiscount ? null : Icons.add,
                 text: hasDiscount
                     ? '${double.parse(widget.discountStr).toInputString()}%'
                     : 'Discount',
