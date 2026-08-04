@@ -102,6 +102,7 @@ class SettingsScreen extends StatelessWidget {
           ),
 
           SettingCard(
+            isModalSheet: true,
             title: 'Compact Price Input',
             subtitle: context.isCompactPriceInput
                 ? 'Enabled (Modal Calculator)'
@@ -117,6 +118,7 @@ class SettingsScreen extends StatelessWidget {
           ),
 
           SettingCard(
+            isModalSheet: true,
             title: 'Alternate Info Layout',
             subtitle: context.isAltInfoLayout ? 'Enabled (Stacked)' : 'Disabled (Side‑by‑side)',
             control: Switch(value: context.isAltInfoLayout, onChanged: settings.setAltInfoLayout),
@@ -124,6 +126,7 @@ class SettingsScreen extends StatelessWidget {
           ),
 
           SettingCard(
+            isModalSheet: true,
             title: 'Keypad Layout',
             subtitle: context.isTelephoneLayout
                 ? 'Telephone Style (1-2-3 top)'
@@ -619,9 +622,8 @@ class _AltInfoLayoutWireframe extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return SizedBox(
       height: 56,
-      padding: const EdgeInsets.symmetric(horizontal: 8),
       child: isAltInfo
           ? Row(
               children: [

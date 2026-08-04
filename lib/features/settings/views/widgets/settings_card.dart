@@ -7,6 +7,7 @@ class SettingCard extends StatelessWidget {
   final Widget? bigControl;
   final Widget? wireframe;
   final VoidCallback? onTap;
+  final bool isModalSheet;
 
   const SettingCard({
     super.key,
@@ -16,11 +17,15 @@ class SettingCard extends StatelessWidget {
     this.bigControl,
     this.wireframe,
     this.onTap,
+    this.isModalSheet = false,
   });
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final bool hasWireframe = wireframe != null;
+    final bool hasBigControl = bigControl != null;
+    final double maxWidth = isModalSheet ? 600 : double.infinity;
 
     return Card(
       elevation: 0,
@@ -66,14 +71,14 @@ class SettingCard extends StatelessWidget {
                     Icon(Icons.chevron_right, color: colorScheme.onSurfaceVariant),
                 ],
               ),
-              bigControl != null ? bigControl! : const SizedBox.shrink(),
-              if (wireframe != null) const SizedBox(height: 12),
-              if (wireframe != null)
+              hasBigControl ? bigControl! : const SizedBox.shrink(),
+              if (hasWireframe) const SizedBox(height: 12),
+              if (hasWireframe)
                 ClipRRect(
                   borderRadius: BorderRadius.circular(10),
                   child: Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.only(bottom: 10, top: 10),
+                    width: maxWidth,
+                    padding: const EdgeInsets.all(10),
                     color: colorScheme.surfaceContainerHighest,
                     child: wireframe,
                   ),
