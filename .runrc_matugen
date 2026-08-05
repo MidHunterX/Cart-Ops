@@ -124,11 +124,11 @@ update_flutter_prefs() {
     local color_name="$1"
     local color_value="${COLOR_MAP[$color_name]}"
     if [[ -z "$color_value" ]]; then
-        echo "ERROR: No color value found for $color_name" >&2
+        log "ERROR: No color value found for $color_name" 2 true
         return 1
     fi
     if [[ ! -f "$FLUTTER_PREFS_FILE" ]]; then
-        echo "ERROR: Flutter preferences file not found: $FLUTTER_PREFS_FILE" >&2
+        log "ERROR: Flutter preferences file not found: $FLUTTER_PREFS_FILE" 2 true
         return 1
     fi
     cp "$FLUTTER_PREFS_FILE" "${FLUTTER_PREFS_FILE}.backup"
@@ -139,32 +139,35 @@ update_flutter_prefs() {
             '.["flutter.seed_color"] = ($color | tonumber)' \
             "$FLUTTER_PREFS_FILE" >"$temp_file"
         mv "$temp_file" "$FLUTTER_PREFS_FILE"
-        echo "Updated flutter.seed_color to: $color_value (from $color_name)"
+        log "Updated flutter.seed_color to: $color_value ($color_name)" 2 true
     else
-        echo "jq not found, using sed (might break JSON)" >&2
+        log "jq not found, using sed (might break JSON)" 2
         sed -i "s/\"flutter.seed_color\":[0-9]*/\"flutter.seed_color\":$color_value/g" "$FLUTTER_PREFS_FILE"
-        echo "Updated flutter.seed_color to: $color_value"
+        log "Updated flutter.seed_color to: $color_value" 2 true
     fi
 }
 
 main() {
     local wallpaper
-    wallpaper=$(get_wallpaper_path) || exit 1
-    echo "Current Wallpaper: $(basename "$wallpaper")"
-    local hex_color
-    hex_color=$(extract_dominant_color "$wallpaper") || exit 1
-    echo "Dominant color: $hex_color"
-    IFS=',' read -r r g b <<<"$(hex_to_rgb "$hex_color")"
-    echo "RGB: ($r, $g, $b)"
-    local closest_color
-    closest_color=$(find_closest_color "$r" "$g" "$b")
-    if [[ "$closest_color" == "UNKNOWN" ]]; then
-        echo "No matching color found in preset list"
-        echo "You may want to add this color to the COLOR_MAP and COLOR_RGB arrays"
-        exit 1
+    wallpaper=$(get_wallpaper_path)
+    if [[ $wallpaper ]]; then
+        log "Detected Wallpaper: $(basename "$wallpaper")" 2
+        local hex_color
+        hex_color=$(extract_dominant_color "$wallpaper")
     fi
-    echo "Matched material color: $closest_color"
-    update_flutter_prefs "$closest_color"
+    if [[ $hex_color ]]; then
+        log "Dominant color: $hex_color" 2
+        IFS=',' read -r r g b <<<"$(hex_to_rgb "$hex_color")"
+        log "RGB: ($r, $g, $b)" 2
+        local closest_color
+        closest_color=$(find_closest_color "$r" "$g" "$b")
+    fi
+    if [[ "$closest_color" == "UNKNOWN" ]]; then
+        log "No matching color found in preset list" 2
+        log "You may want to add this color to the COLOR_MAP and COLOR_RGB arrays" 2
+    fi
+    log "Matched M3 color: $closest_color" 2
+    update_flutter_prefs "$closest_color" # end
 }
 
 main

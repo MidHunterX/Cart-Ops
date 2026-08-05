@@ -18,10 +18,10 @@ setup_layout_custom() {
 }
 
 setup_post_init_hook() {
-  log "🎨 Configuring Flutter app..."
+  log "🎨 Setting flutter app theme..." 1
   source ./.runrc_matugen
 
-  log "📏 Resizing output window..."
+  log "📏 Resizing output window..." 1 true
   (
     local timeout=120
     while true; do
