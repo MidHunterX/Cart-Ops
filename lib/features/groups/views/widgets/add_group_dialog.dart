@@ -89,7 +89,7 @@ class _AddGroupDialogState extends State<AddGroupDialog> {
       title: Text(_isEditing ? 'Edit Shopping Group' : 'New Shopping Group'),
       content: SingleChildScrollView(
         child: SizedBox(
-          width: double.maxFinite,
+          width: 400,
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -117,7 +117,7 @@ class _AddGroupDialogState extends State<AddGroupDialog> {
               Text('Select Group Icon', style: Theme.of(context).textTheme.titleSmall),
               const SizedBox(height: 12),
               SizedBox(
-                height: 130,
+                height: 160,
                 child: GridView.builder(
                   shrinkWrap: true,
                   physics: const ClampingScrollPhysics(),
@@ -155,6 +155,7 @@ class _AddGroupDialogState extends State<AddGroupDialog> {
                           color: isSelected
                               ? colorScheme.onPrimaryContainer
                               : colorScheme.onSurfaceVariant,
+                          size: 28,
                         ),
                       ),
                     );
