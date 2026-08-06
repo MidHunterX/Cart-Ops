@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:drift/drift.dart' as drift;
 import 'package:shopping_assist/core/database/database.dart';
 import 'package:shopping_assist/core/utils/image_picker_util.dart';
+import 'package:shopping_assist/core/utils/number_formatter.dart';
 import 'package:shopping_assist/features/items/repositories/items_repository.dart';
 import 'package:shopping_assist/features/purchased_items/repositories/purchased_items_repository.dart';
 import 'package:shopping_assist/features/purchased_items/views/widgets/form_components/input_field_box.dart';
@@ -65,11 +66,15 @@ class _AddPurchasedItemSheetState extends State<AddPurchasedItemSheet> {
 
       if (lastPurchase != null && mounted) {
         _formKey.currentState?.updateValues(
-          price: lastPurchase.price.toString(),
-          qty: lastPurchase.isWeight ? '' : '1',
+          price: lastPurchase.price?.toInputString() ?? '',
+          qty: lastPurchase.quantity?.toInputString() ?? '',
+          packQty: lastPurchase.packQuantity?.toInputString() ?? '',
           isWeight: lastPurchase.isWeight,
+          hasPack: lastPurchase.packQuantity != null,
           discount: lastPurchase.discount > 0 ? lastPurchase.discount.toString() : '',
-          activeField: lastPurchase.isWeight ? ActiveField.quantity : ActiveField.price,
+          activeField: lastPurchase.packQuantity != null
+              ? ActiveField.packQuantity
+              : (lastPurchase.isWeight ? ActiveField.quantity : ActiveField.price),
         );
       }
     } catch (e) {
@@ -102,6 +107,7 @@ class _AddPurchasedItemSheetState extends State<AddPurchasedItemSheet> {
   Future<void> _submit(
     double? price,
     double? qty,
+    double? packQty,
     double discount,
     bool isWeight,
     XFile? pendingImage,
@@ -127,6 +133,7 @@ class _AddPurchasedItemSheetState extends State<AddPurchasedItemSheet> {
           name: name,
           price: price,
           qty: qty,
+          packQty: packQty,
           discount: discount,
           isWeight: isWeight,
           purchaseId: widget.purchase.id,

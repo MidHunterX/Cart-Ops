@@ -38,7 +38,8 @@ class PurchasedItems extends Table {
   TextColumn get imagePath => text().nullable()();
   RealColumn get price => real().nullable()();
   BoolColumn get isWeight => boolean().withDefault(const Constant(false))();
-  RealColumn get quantity => real().nullable()(); // int => unit, float => weight
+  RealColumn get quantity => real().nullable()(); // Unit Quantity: int => item, float => weight
+  RealColumn get packQuantity => real().nullable()(); // Pack Quantity
   RealColumn get discount => real().withDefault(const Constant(0.0))(); // Stored as a percentage
   BoolColumn get isChecked => boolean().withDefault(const Constant(false))();
   IntColumn get purchaseId => integer().references(Purchases, #id, onDelete: KeyAction.cascade)();

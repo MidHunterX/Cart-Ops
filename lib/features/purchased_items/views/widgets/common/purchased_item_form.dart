@@ -15,13 +15,15 @@ import '../form_components/discount_calculator_dialog.dart';
 import 'purchased_item_form_header.dart';
 
 class PurchasedItemForm extends StatefulWidget {
-  final int? itemId; // for price history graph
+  final int? itemId;
   final String title;
   final String itemName;
   final String initialPrice;
   final String initialQty;
+  final String initialPackQty;
   final String initialDiscount;
   final bool initialIsWeight;
+  final bool initialHasPack;
   final ActiveField initialActiveField;
   final String? initialImagePath;
   final bool isLoading;
@@ -31,6 +33,7 @@ class PurchasedItemForm extends StatefulWidget {
   final void Function(
     double? price,
     double? qty,
+    double? packQty,
     double discount,
     bool isWeight,
     XFile? pendingImage,
@@ -45,8 +48,10 @@ class PurchasedItemForm extends StatefulWidget {
     required this.itemName,
     this.initialPrice = '',
     this.initialQty = '1',
+    this.initialPackQty = '',
     this.initialDiscount = '0',
     this.initialIsWeight = false,
+    this.initialHasPack = false,
     this.initialActiveField = ActiveField.price,
     this.initialImagePath,
     this.isLoading = false,
@@ -62,16 +67,20 @@ class PurchasedItemForm extends StatefulWidget {
 class PurchasedItemFormState extends State<PurchasedItemForm> {
   late String _priceStr;
   late String _qtyStr;
+  late String _packQtyStr;
   late String _discountStr;
   late String _totalStr;
   late bool _isWeight;
+  late bool _hasPack;
   late ActiveField _activeField;
 
   late TextEditingController _priceController;
   late TextEditingController _qtyController;
+  late TextEditingController _packQtyController;
   late TextEditingController _totalController;
   late FocusNode _priceFocusNode;
   late FocusNode _qtyFocusNode;
+  late FocusNode _packQtyFocusNode;
   late FocusNode _totalFocusNode;
 
   String? _imagePath;
@@ -85,24 +94,29 @@ class PurchasedItemFormState extends State<PurchasedItemForm> {
     super.initState();
     _priceStr = widget.initialPrice;
     _qtyStr = widget.initialQty;
+    _packQtyStr = widget.initialPackQty;
     _discountStr = widget.initialDiscount;
     _isWeight = widget.initialIsWeight;
+    _hasPack = widget.initialHasPack;
     _activeField = widget.initialActiveField;
     _imagePath = widget.initialImagePath;
 
     final double p = double.tryParse(_priceStr) ?? 0.0;
     final double q = double.tryParse(_qtyStr) ?? 0.0;
+    final double packQ = _hasPack ? (double.tryParse(_packQtyStr) ?? 1.0) : 1.0;
     if (p > 0 && q > 0) {
-      _totalStr = (p * q).toInputString();
+      _totalStr = (p * q * packQ).toInputString();
     } else {
       _totalStr = _priceStr;
     }
 
     _priceController = TextEditingController(text: _priceStr);
     _qtyController = TextEditingController(text: _qtyStr);
+    _packQtyController = TextEditingController(text: _packQtyStr);
     _totalController = TextEditingController(text: _totalStr);
     _priceFocusNode = FocusNode();
     _qtyFocusNode = FocusNode();
+    _packQtyFocusNode = FocusNode();
     _totalFocusNode = FocusNode();
 
     _fetchHistory();
@@ -135,9 +149,11 @@ class PurchasedItemFormState extends State<PurchasedItemForm> {
   void dispose() {
     _priceController.dispose();
     _qtyController.dispose();
+    _packQtyController.dispose();
     _totalController.dispose();
     _priceFocusNode.dispose();
     _qtyFocusNode.dispose();
+    _packQtyFocusNode.dispose();
     _totalFocusNode.dispose();
     super.dispose();
   }
@@ -146,15 +162,16 @@ class PurchasedItemFormState extends State<PurchasedItemForm> {
     final controller = switch (_activeField) {
       ActiveField.price => _priceController,
       ActiveField.quantity => _qtyController,
+      ActiveField.packQuantity => _packQtyController,
       ActiveField.total => _totalController,
     };
     final node = switch (_activeField) {
       ActiveField.price => _priceFocusNode,
       ActiveField.quantity => _qtyFocusNode,
+      ActiveField.packQuantity => _packQtyFocusNode,
       ActiveField.total => _totalFocusNode,
     };
     node.requestFocus();
-    // Select all text so the next keypad press replaces it
     if (controller.text.isNotEmpty) {
       controller.selection = TextSelection(baseOffset: 0, extentOffset: controller.text.length);
     }
@@ -163,7 +180,10 @@ class PurchasedItemFormState extends State<PurchasedItemForm> {
   void updateValues({
     String? price,
     String? qty,
+    String? packQty,
     bool? isWeight,
+    bool? isDual,
+    bool? hasPack,
     String? discount,
     ActiveField? activeField,
   }) {
@@ -176,17 +196,27 @@ class PurchasedItemFormState extends State<PurchasedItemForm> {
         _qtyStr = qty;
         _qtyController.text = qty;
       }
-      if (price != null || qty != null) {
+      if (packQty != null) {
+        _packQtyStr = packQty;
+        _packQtyController.text = packQty;
+      }
+      if (isWeight != null) _isWeight = isWeight;
+      if (hasPack != null) {
+        _hasPack = hasPack;
+      } else if (isDual != null) {
+        _hasPack = isDual;
+      }
+      if (price != null || qty != null || packQty != null) {
         final double p = double.tryParse(_priceStr) ?? 0.0;
         final double q = double.tryParse(_qtyStr) ?? 0.0;
+        final double packQ = _hasPack ? (double.tryParse(_packQtyStr) ?? 1.0) : 1.0;
         if (p > 0 && q > 0) {
-          _totalStr = (p * q).toInputString();
+          _totalStr = (p * q * packQ).toInputString();
         } else {
           _totalStr = _priceStr;
         }
         _totalController.text = _totalStr;
       }
-      if (isWeight != null) _isWeight = isWeight;
       if (discount != null) _discountStr = discount;
       if (activeField != null) {
         _activeField = activeField;
@@ -203,28 +233,25 @@ class PurchasedItemFormState extends State<PurchasedItemForm> {
     });
   }
 
-  void _handleWeightToggle(bool val) {
+  void _handleWeightToggle(bool currentIsWeight) {
     setState(() {
-      _isWeight = val;
-      if (val) {
-        _qtyStr = '';
-        _qtyController.text = '';
-        _activeField = ActiveField.quantity;
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (mounted) {
-            _qtyFocusNode.requestFocus();
-          }
-        });
+      if (_hasPack) {
+        _hasPack = false;
+        _packQtyStr = '';
+        _packQtyController.text = '';
       } else {
-        _qtyStr = '1';
-        _qtyController.text = '1';
-        _activeField = ActiveField.price;
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (mounted) {
-            _priceFocusNode.requestFocus();
-          }
-        });
+        _isWeight = !currentIsWeight;
+        if (_isWeight) {
+          _qtyStr = '';
+          _qtyController.text = '';
+          _activeField = ActiveField.quantity;
+        } else {
+          _qtyStr = '1';
+          _qtyController.text = '1';
+          _activeField = ActiveField.price;
+        }
       }
+
       final double price = double.tryParse(_priceStr) ?? 0.0;
       final double qty = double.tryParse(_qtyStr) ?? 0.0;
       if (price > 0 && qty > 0) {
@@ -232,24 +259,76 @@ class PurchasedItemFormState extends State<PurchasedItemForm> {
         _totalController.text = _totalStr;
       }
     });
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _focusActiveField();
+    });
+  }
+
+  void _handlePackToggle() {
+    setState(() {
+      if (_hasPack) {
+        _hasPack = false;
+        _packQtyStr = '';
+        _packQtyController.text = '';
+        _activeField = _isWeight ? ActiveField.quantity : ActiveField.price;
+      } else {
+        _hasPack = true;
+        if (_packQtyStr.isEmpty) {
+          _packQtyStr = '1';
+          _packQtyController.text = '1';
+        }
+        if (_qtyStr.isEmpty && !_isWeight) {
+          _qtyStr = '1';
+          _qtyController.text = '1';
+        }
+        _activeField = ActiveField.packQuantity;
+      }
+
+      final double price = double.tryParse(_priceStr) ?? 0.0;
+      final double qty = double.tryParse(_qtyStr) ?? 0.0;
+      final double packQ = _hasPack ? (double.tryParse(_packQtyStr) ?? 1.0) : 1.0;
+      if (price > 0 && qty > 0) {
+        _totalStr = (price * qty * packQ).toInputString();
+        _totalController.text = _totalStr;
+      }
+    });
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _focusActiveField();
+    });
   }
 
   void _handleKeypadPress(String val) {
     if (val == '=>') {
-      // settingsRead if outside build
       final isCompact = context.settingsRead.compactItemList;
       setState(() {
-        if (isCompact) {
-          _activeField = _activeField == ActiveField.price
-              ? ActiveField.quantity
-              : ActiveField.price;
-        } else {
-          if (_activeField == ActiveField.price) {
-            _activeField = ActiveField.total;
-          } else if (_activeField == ActiveField.total) {
-            _activeField = ActiveField.quantity;
+        if (_hasPack) {
+          if (isCompact) {
+            _activeField = switch (_activeField) {
+              ActiveField.packQuantity => ActiveField.quantity,
+              ActiveField.quantity => ActiveField.price,
+              _ => ActiveField.packQuantity,
+            };
           } else {
-            _activeField = ActiveField.price;
+            _activeField = switch (_activeField) {
+              ActiveField.packQuantity => ActiveField.quantity,
+              ActiveField.quantity => ActiveField.price,
+              ActiveField.price => ActiveField.total,
+              ActiveField.total => ActiveField.packQuantity,
+            };
+          }
+        } else {
+          if (isCompact) {
+            _activeField = _activeField == ActiveField.price
+                ? ActiveField.quantity
+                : ActiveField.price;
+          } else {
+            if (_activeField == ActiveField.price) {
+              _activeField = ActiveField.total;
+            } else if (_activeField == ActiveField.total) {
+              _activeField = ActiveField.quantity;
+            } else {
+              _activeField = ActiveField.price;
+            }
           }
         }
         _focusActiveField();
@@ -260,6 +339,7 @@ class PurchasedItemFormState extends State<PurchasedItemForm> {
     final targetController = switch (_activeField) {
       ActiveField.price => _priceController,
       ActiveField.quantity => _qtyController,
+      ActiveField.packQuantity => _packQtyController,
       ActiveField.total => _totalController,
     };
 
@@ -267,15 +347,20 @@ class PurchasedItemFormState extends State<PurchasedItemForm> {
       KeypadLogic.handleInput(targetController, val);
       _priceStr = _priceController.text;
       _qtyStr = _qtyController.text;
+      _packQtyStr = _packQtyController.text;
       _totalStr = _totalController.text;
+
+      final double price = double.tryParse(_priceStr) ?? 0.0;
+      final double qty = double.tryParse(_qtyStr) ?? 0.0;
+      final double packQty = _hasPack ? (double.tryParse(_packQtyStr) ?? 1.0) : 1.0;
+      final double effectiveQty = qty * packQty;
 
       if (_activeField == ActiveField.total) {
         final double total = double.tryParse(_totalStr) ?? 0.0;
-        final double qty = double.tryParse(_qtyStr) ?? 0.0;
-        if (total > 0 && qty > 0) {
-          _priceStr = (total / qty).toInputString();
+        if (total > 0 && effectiveQty > 0) {
+          _priceStr = (total / effectiveQty).toInputString();
           _priceController.text = _priceStr;
-        } else if (total > 0 && qty == 0) {
+        } else if (total > 0 && effectiveQty == 0) {
           _priceStr = _totalStr;
           _priceController.text = _priceStr;
         } else if (total == 0) {
@@ -283,12 +368,10 @@ class PurchasedItemFormState extends State<PurchasedItemForm> {
           _priceController.text = '';
         }
       } else {
-        final double price = double.tryParse(_priceStr) ?? 0.0;
-        final double qty = double.tryParse(_qtyStr) ?? 0.0;
-        if (price > 0 && qty > 0) {
-          _totalStr = (price * qty).toInputString();
+        if (price > 0 && effectiveQty > 0) {
+          _totalStr = (price * effectiveQty).toInputString();
           _totalController.text = _totalStr;
-        } else if (price > 0 && qty == 0) {
+        } else if (price > 0 && effectiveQty == 0) {
           _totalStr = _priceStr;
           _totalController.text = _totalStr;
         } else if (price == 0) {
@@ -301,27 +384,15 @@ class PurchasedItemFormState extends State<PurchasedItemForm> {
 
   void _incrementQuantity() {
     setState(() {
-      int currentQty = double.tryParse(_qtyStr)?.toInt() ?? 1;
-      currentQty++;
-      _qtyStr = currentQty.toString();
-      _qtyController.text = _qtyStr;
-
-      final double price = double.tryParse(_priceStr) ?? 0.0;
-      final double qty = double.tryParse(_qtyStr) ?? 0.0;
-      if (price > 0 && qty > 0) {
-        _totalStr = (price * qty).toInputString();
-        _totalController.text = _totalStr;
-      }
-    });
-    _activeField = ActiveField.quantity;
-    _focusActiveField();
-  }
-
-  void _decrementQuantity() {
-    setState(() {
-      int currentQty = double.tryParse(_qtyStr)?.toInt() ?? 1;
-      if (currentQty > 1) {
-        currentQty--;
+      if (_hasPack || _activeField == ActiveField.packQuantity) {
+        int currentQty = double.tryParse(_packQtyStr)?.toInt() ?? 1;
+        currentQty++;
+        _packQtyStr = currentQty.toString();
+        _packQtyController.text = _packQtyStr;
+        _activeField = ActiveField.packQuantity;
+      } else {
+        int currentQty = double.tryParse(_qtyStr)?.toInt() ?? 1;
+        currentQty++;
         _qtyStr = currentQty.toString();
         _qtyController.text = _qtyStr;
 
@@ -331,8 +402,38 @@ class PurchasedItemFormState extends State<PurchasedItemForm> {
           _totalStr = (price * qty).toInputString();
           _totalController.text = _totalStr;
         }
+        _activeField = ActiveField.quantity;
       }
-      _activeField = ActiveField.quantity;
+      _focusActiveField();
+    });
+  }
+
+  void _decrementQuantity() {
+    setState(() {
+      if (_hasPack || _activeField == ActiveField.packQuantity) {
+        int currentQty = double.tryParse(_packQtyStr)?.toInt() ?? 1;
+        if (currentQty > 1) {
+          currentQty--;
+          _packQtyStr = currentQty.toString();
+          _packQtyController.text = _packQtyStr;
+        }
+        _activeField = ActiveField.packQuantity;
+      } else {
+        int currentQty = double.tryParse(_qtyStr)?.toInt() ?? 1;
+        if (currentQty > 1) {
+          currentQty--;
+          _qtyStr = currentQty.toString();
+          _qtyController.text = _qtyStr;
+
+          final double price = double.tryParse(_priceStr) ?? 0.0;
+          final double qty = double.tryParse(_qtyStr) ?? 0.0;
+          if (price > 0 && qty > 0) {
+            _totalStr = (price * qty).toInputString();
+            _totalController.text = _totalStr;
+          }
+        }
+        _activeField = ActiveField.quantity;
+      }
       _focusActiveField();
     });
   }
@@ -347,9 +448,11 @@ class PurchasedItemFormState extends State<PurchasedItemForm> {
   void _submit() {
     final priceStr = _priceStr.trim();
     final qtyStr = _qtyStr.trim();
+    final packQtyStr = _packQtyStr.trim();
 
     final pricePerUnit = priceStr.isEmpty ? null : double.tryParse(priceStr);
     final qty = qtyStr.isEmpty ? null : double.tryParse(qtyStr);
+    final packQty = (_hasPack && packQtyStr.isNotEmpty) ? double.tryParse(packQtyStr) : null;
     final discount = double.tryParse(_discountStr.trim()) ?? 0.0;
 
     if (pricePerUnit != null && pricePerUnit <= 0) {
@@ -373,7 +476,7 @@ class PurchasedItemFormState extends State<PurchasedItemForm> {
       return;
     }
 
-    widget.onSubmit(pricePerUnit, qty, discount, _isWeight, _pendingImage, _imageRemoved);
+    widget.onSubmit(pricePerUnit, qty, packQty, discount, _isWeight, _pendingImage, _imageRemoved);
   }
 
   @override
@@ -386,12 +489,13 @@ class PurchasedItemFormState extends State<PurchasedItemForm> {
           child: PurchasedItemFormHeader(
             title: widget.title,
             isWeight: _isWeight,
+            hasPack: _hasPack,
             onWeightChanged: _handleWeightToggle,
+            onLongPressToggle: _handlePackToggle,
           ),
         ),
         const SizedBox(height: 8),
 
-        // CHART INTEGRATION
         if (_historyFuture != null)
           FutureBuilder<List<PurchasedItemWithPurchase>>(
             future: _historyFuture,
@@ -465,8 +569,9 @@ class PurchasedItemFormState extends State<PurchasedItemForm> {
 
         final double p = double.tryParse(_priceStr) ?? 0.0;
         final double q = double.tryParse(_qtyStr) ?? 0.0;
+        final double packQ = _hasPack ? (double.tryParse(_packQtyStr) ?? 1.0) : 1.0;
         if (p > 0 && q > 0) {
-          _totalStr = (p * q).toInputString();
+          _totalStr = (p * q * packQ).toInputString();
           _totalController.text = _totalStr;
         }
 
@@ -478,6 +583,86 @@ class PurchasedItemFormState extends State<PurchasedItemForm> {
 
   Widget _buildFieldsRow(String weightUnit, String currencySymbol) {
     final isCompact = context.isCompactPriceInput;
+
+    if (_hasPack) {
+      final packQtyBox = InputFieldBox(
+        label: 'Packs',
+        value: _packQtyStr,
+        isActive: _activeField == ActiveField.packQuantity,
+        onTap: () {
+          setState(() => _activeField = ActiveField.packQuantity);
+          _packQtyFocusNode.requestFocus();
+        },
+        controller: _packQtyController,
+        focusNode: _packQtyFocusNode,
+      );
+
+      final qtyBox = InputFieldBox(
+        label: _isWeight ? 'Weight ($weightUnit)' : 'Pcs / Pack',
+        suffixText: _isWeight ? weightUnit : '',
+        value: _qtyStr,
+        isActive: _activeField == ActiveField.quantity,
+        onTap: () {
+          setState(() => _activeField = ActiveField.quantity);
+          _qtyFocusNode.requestFocus();
+        },
+        controller: _qtyController,
+        focusNode: _qtyFocusNode,
+      );
+
+      final priceBox = InputFieldBox(
+        label: _isWeight ? '$currencySymbol Price (/$weightUnit)' : '$currencySymbol Unit Price',
+        prefixText: '$currencySymbol ',
+        value: _priceStr,
+        isActive: _activeField == ActiveField.price,
+        onTap: () {
+          setState(() => _activeField = ActiveField.price);
+          _priceFocusNode.requestFocus();
+        },
+        controller: _priceController,
+        focusNode: _priceFocusNode,
+        suffixIcon: IconButton(
+          icon: const Icon(Icons.calculate_outlined),
+          onPressed: () => _handleUnitPriceCalulatorTap(currencySymbol, weightUnit),
+          tooltip: 'Calculate unit price',
+          color: Theme.of(context).colorScheme.primary,
+        ),
+      );
+
+      if (isCompact) {
+        return Row(
+          spacing: 6,
+          children: [
+            Expanded(flex: 3, child: packQtyBox),
+            Expanded(flex: 4, child: qtyBox),
+            Expanded(flex: 5, child: priceBox),
+          ],
+        );
+      } else {
+        final totalBox = InputFieldBox(
+          label: '$currencySymbol Total',
+          prefixText: '$currencySymbol ',
+          value: _totalStr,
+          isActive: _activeField == ActiveField.total,
+          onTap: () {
+            setState(() => _activeField = ActiveField.total);
+            _totalFocusNode.requestFocus();
+          },
+          controller: _totalController,
+          focusNode: _totalFocusNode,
+        );
+
+        return Row(
+          spacing: 6,
+          children: [
+            Expanded(flex: 3, child: packQtyBox),
+            Expanded(flex: 3, child: qtyBox),
+            Expanded(flex: 3, child: priceBox),
+            Expanded(flex: 3, child: totalBox),
+          ],
+        );
+      }
+    }
 
     Widget buildQuantityField() {
       final colorScheme = Theme.of(context).colorScheme;

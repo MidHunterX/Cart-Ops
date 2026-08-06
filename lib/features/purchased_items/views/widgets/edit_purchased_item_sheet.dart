@@ -77,10 +77,14 @@ class _EditPurchasedItemSheetState extends State<EditPurchasedItemSheet> {
       if (lastPurchase != null && mounted) {
         _formKey.currentState?.updateValues(
           price: lastPurchase.price?.toInputString() ?? '',
-          qty: lastPurchase.isWeight ? '' : '1',
+          qty: lastPurchase.quantity?.toInputString() ?? '',
+          packQty: lastPurchase.packQuantity?.toInputString() ?? '',
           isWeight: lastPurchase.isWeight,
+          hasPack: lastPurchase.packQuantity != null,
           discount: lastPurchase.discount > 0 ? lastPurchase.discount.toString() : '',
-          activeField: lastPurchase.isWeight ? ActiveField.quantity : ActiveField.price,
+          activeField: lastPurchase.packQuantity != null
+              ? ActiveField.packQuantity
+              : (lastPurchase.isWeight ? ActiveField.quantity : ActiveField.price),
         );
       }
     } catch (e) {
@@ -113,6 +117,7 @@ class _EditPurchasedItemSheetState extends State<EditPurchasedItemSheet> {
   Future<void> _submit(
     double? price,
     double? qty,
+    double? packQty,
     double discount,
     bool isWeight,
     XFile? pendingImage,
@@ -137,6 +142,7 @@ class _EditPurchasedItemSheetState extends State<EditPurchasedItemSheet> {
           name: _name,
           price: price,
           qty: qty,
+          packQty: packQty,
           discount: discount,
           isWeight: isWeight,
           groupId: widget.item.groupId,
@@ -163,8 +169,10 @@ class _EditPurchasedItemSheetState extends State<EditPurchasedItemSheet> {
       itemName: _name,
       initialPrice: widget.purchasedItem.price?.toInputString() ?? '',
       initialQty: widget.purchasedItem.quantity?.toInputString() ?? '',
+      initialPackQty: widget.purchasedItem.packQuantity?.toInputString() ?? '',
       initialDiscount: discount > 0 ? discount.toString() : '',
       initialIsWeight: widget.purchasedItem.isWeight,
+      initialHasPack: widget.purchasedItem.packQuantity != null,
       initialActiveField: widget.initialField,
       initialImagePath: widget.item.imagePath,
       openDiscountDialog: widget.openDiscountDialog,

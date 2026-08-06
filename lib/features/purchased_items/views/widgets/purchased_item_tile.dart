@@ -11,14 +11,24 @@ import 'package:shopping_assist/core/utils/number_formatter.dart';
 import 'edit_purchased_item_sheet.dart';
 import 'form_components/input_field_box.dart' show ActiveField;
 
-double _calcTotalPrice(double price, double discountPercent, double quantity) {
+double _calcTotalPrice(
+  double quantity,
+  double price,
+  double discountPercent,
+  double? packQuantity,
+) {
   final Decimal priceDec = Decimal.parse(price.toString());
   final Decimal discountDec = Decimal.parse(discountPercent.toString());
   final Decimal quantityDec = Decimal.parse(quantity.toString());
 
   final discount = (discountDec / Decimal.parse('100'));
   final Decimal discountAmount = priceDec * discount.toDecimal();
-  final Decimal total = (priceDec - discountAmount) * quantityDec;
+  Decimal total = (priceDec - discountAmount) * quantityDec;
+
+  if (packQuantity != null) {
+    final packQuantityDec = Decimal.parse(packQuantity.toString());
+    total = total * packQuantityDec;
+  }
   return total.toDouble();
 }
 
@@ -89,7 +99,7 @@ class PurchasedItemTile extends StatelessWidget {
 
     final pricePerUnit = pItem.price ?? 0.0;
     final qty = pItem.quantity ?? 0.0;
-    final totalPrice = _calcTotalPrice(pricePerUnit, pItem.discount, qty);
+    final totalPrice = _calcTotalPrice(qty, pricePerUnit, pItem.discount, pItem.packQuantity);
     final discountApplied = pItem.discount > 0;
 
     final hasQty = pItem.quantity != null;
@@ -215,6 +225,33 @@ class PurchasedItemTile extends StatelessWidget {
     ColorScheme colorScheme,
   ) {
     if (hasQty) {
+      if (pItem.packQuantity != null) {
+        final subUnit = pItem.isWeight ? context.weightUnit : 'pcs';
+        return Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(
+                pItem.packQuantity!.toQuantityString('x'),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+              ),
+            ),
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(
+                pItem.quantity!.toQuantityString(subUnit),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant),
+              ),
+            ),
+          ],
+        );
+      }
+
       return Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
