@@ -56,7 +56,9 @@ class _ItemStats {
       final p = h.purchasedItem;
       final discounted = _discounted(p);
       totalSpent += discounted;
-      totalQuantity += p.quantity ?? 0;
+      final qty = p.quantity ?? 0;
+      final packs = p.packQuantity ?? 1;
+      totalQuantity += qty * packs;
       if (discounted < minPrice) {
         minPrice = discounted;
         minDate = h.purchase.purchaseDate;
@@ -444,17 +446,36 @@ class _HistoryTile extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final p = entry.purchasedItem;
     final purchase = entry.purchase;
-    final originalRate = p.price ?? 0;
-    final discountedRate = originalRate * (1 - p.discount / 100);
 
-    final quantity = p.quantity ?? 1;
-    final formattedQuantity = quantity.toQuantityString(p.isWeight ? context.weightUnit : null);
-    final boughtPrice = ((discountedRate * quantity) * 1000).round() / 1000;
-    final formattedBoughtPrice = boughtPrice.toCurrencyString(
+    final originalRate = p.price ?? 0;
+    final discountPercent = p.discount;
+    final discountedRate = originalRate * (1 - discountPercent / 100);
+
+    final perUnitQty = p.quantity ?? 1;
+    final packCount = p.packQuantity ?? 1;
+    final totalQty = perUnitQty * packCount;
+
+    final bool isWeight = p.isWeight;
+    final bool isPack = p.packQuantity != null;
+
+    final totalCost = ((discountedRate * totalQty) * 100).round() / 100;
+
+    final perUnitQtyFmt = perUnitQty.toQuantityString(isWeight ? context.weightUnit : null);
+    final totalCostFmt = totalCost.toCurrencyString(
       context.currencySymbol,
       locale: context.currencyLocale,
       preferWhole: true,
     );
+
+    String subtitle;
+    if (packCount > 1) {
+      subtitle =
+          '${packCount.toQuantityString('')} pack'
+          ' × $perUnitQtyFmt'
+          ' · Total $totalCostFmt';
+    } else {
+      subtitle = '$perUnitQtyFmt item · Total $totalCostFmt';
+    }
 
     return ListTile(
       contentPadding: const EdgeInsets.all(0),
@@ -463,7 +484,11 @@ class _HistoryTile extends StatelessWidget {
             ? Colors.green.withValues(alpha: 0.30)
             : colorScheme.secondaryContainer,
         child: Icon(
-          isBestPrice ? Icons.star : Icons.history,
+          isBestPrice
+              ? Icons.star
+              : isPack
+              ? Icons.layers
+              : Icons.history,
           color: isBestPrice ? Colors.green : colorScheme.onSecondaryContainer,
         ),
       ),
@@ -482,7 +507,7 @@ class _HistoryTile extends StatelessWidget {
           ],
         ],
       ),
-      subtitle: Text('Bought $formattedQuantity at $formattedBoughtPrice'),
+      subtitle: Text(subtitle),
       trailing: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.end,
