@@ -242,7 +242,8 @@ The best way is to give a dedicated discount calculating utility as input:
 - Price: `[Listing Price] - [Discount] = [Selling Price] per unit`
 - Percentage: `[Listing Price] x [Percentage]% = [Selling Price] /unit`
 
-Where three input fields can be edited and calculated in real time.
+Where all four input fields (Listing, Percentage, Discount, Selling) can be
+edited, calculated and reviewed in real time.
 
 ### Pricing Entry UX Problem
 
@@ -302,7 +303,7 @@ User onboarding is plain simple naturally following the principle of
 4. You can go to settings and enable groups feature to enable purchase groups
    only if you want.
 
-### The Friction of Finding Your Workflow (Settings)
+### 🏄 The Friction of Finding Your Workflow (Settings)
 
 Having to pick and choose between different workflow and UI features introduces
 a different kind of friction. This can be solved with proper sane defaults.
@@ -346,3 +347,90 @@ applied depends on the classification of the goods. For e.g.:
 - 5%: Daily household essentials, dairy products, packaged foods, and agricultural equipment.
 - 18%: Standard rate for most items, including electronics, appliances, and consumer goods.
 - 40% (Luxury): High-end vehicles, tobacco, aerated beverages, and betting.
+
+### 👑 The Master of Data Entry
+
+Using all of the input tools like 4-way Discount Calculators, Unit Price
+calculator with discount aware total breakup, Unit item (Unit x Price) vs
+Weight item (Weight x Price) toggle, ensures that clean data is stored in the
+database which can be used for analytics.
+
+Even with this, there's still one problem when it comes storing to unit packs.
+If you bought 2 30xEgg pack, you will have to input Name as "Eggs (30)" and
+Quantity as 2. You'll have to consider the 30 eggs as a single unit which is
+lossy information as you'll lose the 30 nos for analytics. What if you want to
+buy 2 packs of Lay's chips which is 67g each? To avoid lossy information you
+have to enter price and weight then duplicate it two times but this is not a
+weight item which is still lossy.
+
+To mitigate this final boss, there's one more extra mode.
+
+> Long press on the item mode toggle button
+
+This will change the input fields to support adding: Unit Quantity, Quantity
+(int=Unit / float=Weight) and Price per Quantity. With this, you'll receive the
+ability to handle all weight+unit items and all data shall be stored lossless
+once again.
+
+## Problems Faced
+
+### ♾️ Representation of Infinite Set
+
+Pick a base: 1kg decimal. Pick a format: 4 point decimal (`0.0001kg == 1mg precision`)
+
+> Limited by finite space, one cannot represent an arbitrary member of an
+> infinite set. Every non-empty interval contains an infinite set of real
+> numbers. The set of real numbers that can be represented in finite space
+> depends upon the numeral system that is used. In our (familiar) positional
+> base-10 system, finite space will suffice for one-half (0.510) but not for
+> one-third (0.33333…10). [[1]][weight]
+
+There's always going to be precision issues when doing unit calculation with
+huge quantities with exaggerated rates. But this covers for most of the typical
+shopping cases.
+
+## Deep dive into an Analytic Mind (Use Cases)
+
+### The Art of Deal - Shop Tzu
+
+Imagine a product packaged in multiple price ranges. You have to find which
+pack is actually the best deal and which one is secretly overpriced. A unit
+price calculator is the answer. Now you can finally achieve enlightenment
+knowing that the medium size Lay's costs lesser than small and large size for
+some reason.
+
+`Unit Price Calculator` from `Six By Nine Apps` does this really well. It
+offers unit conversion, comparison and ability to add multiple products for
+comparison to find out the best deal.
+
+The Unit Price Calculator included in the input can also be used for quick
+analysis of package rates before deciding on which rate to choose. You'll have
+to keep temporary mental notes on which version is the best deal. This is one
+of the compromises when using a simplified interface. The three way input
+flexibility makes up for this. It's baffling to see many apps in playstore with
+5 stars that can't even do this non-negotiable feature in their apps though.
+
+### To Make or Not to Make, That is the Question
+
+Imagine trying out different chicken products. You bought raw chicken before
+and you want to know how much extra they are charging for cooking.
+
+`Tracked Items > Search > "chicken"`. Look into each entry. Regardless of how
+much quantity you bought, all items here will be normalized to show the price
+per Kg/Lb along with other useful analytics.
+
+Raw Chicken is 210, Broasted Chicken is 676, Kadai Chicken is 500, Chicken-65
+is 800, Mandhi is 360 but has has about quarter chicken in it which takes up
+less than half so, about ~670-700 range. All of these means that they charge
+about extra 500 (more than 2x extra on top of the raw chicken) for the cooking.
+Get the 200 and make it yourself or give extra 500 to the establishment and
+enjoy the delicacy? The choice is yours.
+
+### Comparison Is The Source Of Joy
+
+Next is mostly a kind of uncharted territory. Comparison among entirely
+different products of the same category. With Item tagging, you can compare the
+full rate history of chips/chocolate from different companies to see which is
+truly worth it.
+
+[weight]: https://stackoverflow.com/a/12977067
