@@ -140,7 +140,7 @@ where it is exactly; catering to ASD like neuro-types. But the Dynamic List
 reduces the visual noise to the maximum so, sticking to self selected
 attributes only helps not breaking the pattern.
 
-### 📜 Checklist Mode
+#### 📜 Checklist Mode
 
 Purchased Item List can be toggled into Checklist Mode. In this mode, you can
 reuse the same interface for:
@@ -148,6 +148,11 @@ reuse the same interface for:
 - Using list as a grocery list and toggling items as completed
 - Toggle list to check how much each set of items cost together
 - Find how much lesser the total cost would be without certain items
+
+#### Percentage Mode
+
+A temporary mode which shows all price values in percentages relative to the
+set budget. Allows you to see how much impact each item has on your budget.
 
 ### 🔧 Settings
 
