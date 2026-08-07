@@ -326,7 +326,7 @@ verbose. So, use it in very important scenarios like accessibility only.
 Enable `Purchase Groups` feature while no purchases or groups have been made.
 Take the correct choice to go into a specialized Home Screen UI for Groups.
 
-### 🏦 Tax Rates
+### 🏦 Tax Rates (De-prioritized)
 
 This is where almost every single app fails in implementation except for MLZ
 and other professional budgeting software. Many apps straight up uses global
@@ -340,13 +340,11 @@ work like that, taxes changes over time and differs from geography.
   rates to use while attaching to purchase events.
 - Ability to create and choose between multiple tax rates is essential.
 
-Multiple tax rates can be created because in many countries, the exact tax rate
-applied depends on the classification of the goods. For e.g.:
+Most of the world (EU, UK, India, Australia, most of Asia) uses VAT/GST
+inclusive pricing. The price on the shelf is the price you pay. The US/Canadian
+model of "add 7.5% at the register" is actually the global minority.
 
-- 0% (Exempt): Unprocessed food staples, certain life-saving medicines, and educational materials.
-- 5%: Daily household essentials, dairy products, packaged foods, and agricultural equipment.
-- 18%: Standard rate for most items, including electronics, appliances, and consumer goods.
-- 40% (Luxury): High-end vehicles, tobacco, aerated beverages, and betting.
+> This feature is fully de-prioritized as I cannot dogfood to test-run this properly.
 
 ### 👑 The Master of Data Entry
 

@@ -57,7 +57,6 @@ financial resource management via technological assistance.
 - [x] Globally Set Currency Symbol
 - [x] Globally Set Theme Colors
 - [x] Globally Set Weight Unit (Metric, Imperial or Both)
-- [ ] Globally Set Tax Rate (0-100) for countries/stores that display prices without tax
 
 #### Core Operations
 
@@ -70,8 +69,8 @@ financial resource management via technological assistance.
 ### PHASE BRAVO: OPERATOR QUALITY OF LIFE
 
 - [x] Item details autocompletion while typing
-- [x] ~Item Camera identification (tensorflow)~ Autocompletion works way too well for needing this
-- [x] ~Item duplication~ Can be done quickly with autocompletion
+- [x] ~~Item Camera identification (tensorflow)~~ Autocompletion works way too well for needing this
+- [x] ~~Item duplication~~ Can be done quickly with autocompletion
 - [x] Item suggestions while typing based on history
 - [x] Easy price per item/quantity toggle
 - [x] Core Numpad UI
@@ -96,6 +95,12 @@ financial resource management via technological assistance.
 - [x] Auto-detect recommended default settings
 - [x] Keypad Haptics
 - [x] Checklist Mode
+
+### PHASE ECHO: FUTURE OPERATIONS
+
+- [x] ~~Globally Set Tax Rate (0-100) for countries/stores that display prices without tax~~ De-prioritized.
+- [x] View everything in percentages (Budget mode only)
+- [x] Long press on Item/Weight toggle to enter pack mode
 
 ## 🚨 Known Operational Defects
 
