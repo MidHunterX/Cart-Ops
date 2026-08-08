@@ -71,6 +71,17 @@ features.
 
 Dynamically shows Purchases/Groups list based on intent and behavior.
 
+| Groups Enabled | Purchase Made | Group Made | Behavior                    |
+| -------------- | ------------- | ---------- | --------------------------- |
+| Yes            | Yes           | Yes        | Split Screen                |
+| Yes            | No            | No         | Easter Egg                  |
+| Yes            | No            | Yes        | Groups Only UI, FAB Hidden  |
+| Yes            | Yes           | No         | Split Screen                |
+| No             | Yes           | No         | Purchase Only UI            |
+| No             | No            | Yes        | Groups Only UI, FAB Enabled |
+| No             | Yes           | Yes        | Split Screen                |
+| No             | No            | No         | Welcome UI                  |
+
 #### Split Screen
 
 If both groups and ungrouped purchases are present, the main screen is divided
@@ -96,6 +107,14 @@ If only one of the groups or ungrouped purchases are present, the main screen
 turns into a dedicated screen for the respective list. If only groups is
 present, group specific details and a big grid view will be shown. If only
 ungrouped purchases is present, a list view will be shown.
+
+##### Dedicated Groups Screen
+
+**🥚 Easter Egg**: Enable `Purchase Groups` feature while no purchases or
+groups have been made. Take the correct choice to go into a specialized Home
+Screen UI for Groups. The "Add Purchase" button will be gone. If the user goes
+back to settings and turn of groups feature, the intent is they want ungrouped
+purchases. The button will come back.
 
 ### 📃 Purchased Items List
 
@@ -294,9 +313,10 @@ your time. But, if done correctly, it can be very effective.
 User onboarding is plain simple naturally following the principle of
 **Progressive Disclosure**.
 
-1. At first it will be just a simple app. There's a button to add purchase
-   event which automatically sets up everything just ready to receive
-   purchases. Type item name > price > add. View running totals nothing more.
+1. At first it will be just a simple app. The user is presented with an empty
+   screen with only one button to add purchase events. This automatically sets
+   up everything just ready to receive purchases. Type item name > price > add.
+   View running totals nothing more.
 2. On second purchase event, upon adding items, you type the item name as usual
    but what's this? There's now a dropdown with the item names. Click on it and
    every information including name, price, discount and image is auto-filled
@@ -307,6 +327,8 @@ User onboarding is plain simple naturally following the principle of
    pricing fluctuations and trends over time.
 4. You can go to settings and enable groups feature to enable purchase groups
    only if you want.
+5. Over time, dedicated price analytics screen can be used to do pattern
+   detection and information intelligence work.
 
 ### 🏄 The Friction of Finding Your Workflow (Settings)
 
@@ -325,11 +347,6 @@ UI/Workflow Setting.
 
 The downside of this approach is that settings can become very visually
 verbose. So, use it in very important scenarios like accessibility only.
-
-### 🥚 Easter Egg
-
-Enable `Purchase Groups` feature while no purchases or groups have been made.
-Take the correct choice to go into a specialized Home Screen UI for Groups.
 
 ### 🏦 Tax Rates (De-prioritized)
 

@@ -107,22 +107,24 @@ class _GroupsScreenState extends State<GroupsScreen> {
           ),
         ],
       ),
-      floatingActionButton: DextrousFloatingActionButton(
-        isCenter: context.dominantHand == DominantHand.center,
-        icon: Icons.shopping_cart_checkout,
-        label: 'Add Purchase',
-        onPressed: () async {
-          final purchase = await purchasesRepo.createPurchase(null);
-          if (context.mounted) {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => PurchasedItemsScreen(purchase: purchase, group: null),
-              ),
-            );
-          }
-        },
-      ),
+      floatingActionButton: onlyGroups && isGroupEnabled
+          ? null
+          : DextrousFloatingActionButton(
+              isCenter: context.dominantHand == DominantHand.center,
+              icon: Icons.shopping_cart_checkout,
+              label: 'Add Purchase',
+              onPressed: () async {
+                final purchase = await purchasesRepo.createPurchase(null);
+                if (context.mounted) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => PurchasedItemsScreen(purchase: purchase, group: null),
+                    ),
+                  );
+                }
+              },
+            ),
       floatingActionButtonLocation: context.dominantHand == DominantHand.right
           ? FloatingActionButtonLocation.endFloat
           : context.dominantHand == DominantHand.left
