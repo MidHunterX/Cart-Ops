@@ -444,37 +444,68 @@ class _HistoryTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
     final p = entry.purchasedItem;
     final purchase = entry.purchase;
 
-    final originalRate = p.price ?? 0;
+    // CORE PRICING
+    final originalUnitPrice = p.price ?? 0;
     final discountPercent = p.discount;
-    final discountedRate = originalRate * (1 - discountPercent / 100);
+    final discountedUnitPrice = originalUnitPrice * (1 - discountPercent / 100);
 
-    final perUnitQty = p.quantity ?? 1;
+    // QUANTITIES
+    final perPackQty = p.quantity ?? 1;
     final packCount = p.packQuantity ?? 1;
-    final totalQty = perUnitQty * packCount;
+    final totalQuantity = perPackQty * packCount;
 
     final bool isWeight = p.isWeight;
-    final bool isPack = p.packQuantity != null;
+    // final bool isPack = p.packQuantity != null;
 
-    final totalCost = ((discountedRate * totalQty) * 100).round() / 100;
+    // DERIVED VALUES
+    final totalCost = ((discountedUnitPrice * totalQuantity) * 100).round() / 100;
+    // final originalTotalCost = originalUnitPrice * totalQuantity;
+    // final savings = originalTotalCost - totalCost;
+    final perUnitPrice = ((discountedUnitPrice * perPackQty) * 100).round() / 100;
 
-    final perUnitQtyFmt = perUnitQty.toQuantityString(isWeight ? context.weightUnit : null);
+    // FORMATTING
+    final unitString = isWeight ? context.weightUnit : 'pc';
+    final perUnitQtyFmt = perPackQty.toQuantityString(unitString);
+    final perUnitPriceFmt = perUnitPrice.toCurrencyString(
+      context.currencySymbol,
+      locale: context.currencyLocale,
+      preferWhole: true,
+    );
+    final discountedUnitPriceFmt = discountedUnitPrice.toCurrencyString(
+      context.currencySymbol,
+      locale: context.currencyLocale,
+    );
+    final originalUnitPriceFmt = originalUnitPrice.toCurrencyString(
+      context.currencySymbol,
+      locale: context.currencyLocale,
+    );
     final totalCostFmt = totalCost.toCurrencyString(
       context.currencySymbol,
       locale: context.currencyLocale,
       preferWhole: true,
     );
 
-    String subtitle;
+    Widget subtitle;
     if (packCount > 1) {
-      subtitle =
-          '${packCount.toQuantityString('')} pack'
-          ' × $perUnitQtyFmt'
-          ' · Total $totalCostFmt';
+      subtitle = Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            '$perUnitPriceFmt / $perUnitQtyFmt',
+            style: textTheme.bodyMedium!.copyWith(
+              color: colorScheme.primary,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          Text('${packCount.toQuantityString('')} packs · Total: $totalCostFmt'),
+        ],
+      );
     } else {
-      subtitle = '$perUnitQtyFmt item · Total $totalCostFmt';
+      subtitle = Text('$perUnitQtyFmt · Total: $totalCostFmt');
     }
 
     return ListTile(
@@ -484,11 +515,7 @@ class _HistoryTile extends StatelessWidget {
             ? Colors.green.withValues(alpha: 0.30)
             : colorScheme.secondaryContainer,
         child: Icon(
-          isBestPrice
-              ? Icons.star
-              : isPack
-              ? Icons.layers
-              : Icons.history,
+          isBestPrice ? Icons.star : Icons.history,
           color: isBestPrice ? Colors.green : colorScheme.onSecondaryContainer,
         ),
       ),
@@ -507,22 +534,35 @@ class _HistoryTile extends StatelessWidget {
           ],
         ],
       ),
-      subtitle: Text(subtitle),
+      subtitle: subtitle,
       trailing: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
-          Text(
-            discountedRate.toCurrencyString(context.currencySymbol, locale: context.currencyLocale),
-            style: Theme.of(context).textTheme.labelLarge?.copyWith(
-              fontSize: 18,
-              color: colorScheme.primary,
-              fontWeight: FontWeight.bold,
-            ),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              Text(
+                discountedUnitPriceFmt,
+                style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                  fontSize: 18,
+                  color: colorScheme.primary,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              Text(
+                ' /$unitString',
+                style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                  fontSize: 12,
+                  color: colorScheme.primary,
+                ),
+              ),
+            ],
           ),
           if (p.discount > 0)
             Text(
-              originalRate.toCurrencyString(context.currencySymbol, locale: context.currencyLocale),
+              originalUnitPriceFmt,
               style: Theme.of(context).textTheme.labelLarge?.copyWith(
                 color: colorScheme.secondary,
                 decoration: TextDecoration.lineThrough,
