@@ -104,7 +104,9 @@ class _ItemsScreenState extends State<ItemsScreen> {
               title: _isSearching ? 'No Matching Items' : 'No Items Yet',
               message: _isSearching
                   ? 'Try entering a different item name.'
-                  : 'Start by adding a new item to this list.',
+                  : context.isManualItemEnabled
+                  ? 'Start by adding a new item to this list.'
+                  : 'Items will appear here when purchased.',
             );
           }
 
@@ -173,15 +175,17 @@ class _ItemsScreenState extends State<ItemsScreen> {
           );
         },
       ),
-      floatingActionButton: DextrousFloatingActionButton(
-        isCenter: context.dominantHand == DominantHand.center,
-        icon: Icons.inventory_2_outlined,
-        label: 'Add Item',
-        onPressed: () => showDialog(
-          context: context,
-          builder: (_) => AddItemDialog(groupId: widget.group?.id),
-        ),
-      ),
+      floatingActionButton: context.isManualItemEnabled
+          ? DextrousFloatingActionButton(
+              isCenter: context.dominantHand == DominantHand.center,
+              icon: Icons.inventory_2_outlined,
+              label: 'Add Item',
+              onPressed: () => showDialog(
+                context: context,
+                builder: (_) => AddItemDialog(groupId: widget.group?.id),
+              ),
+            )
+          : null,
       floatingActionButtonLocation: context.dominantHand == DominantHand.right
           ? FloatingActionButtonLocation.endFloat
           : context.dominantHand == DominantHand.left

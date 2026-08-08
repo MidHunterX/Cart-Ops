@@ -75,7 +75,7 @@ class SettingsProvider extends ChangeNotifier {
     if (dominantHand != null) _dominantHand = dominantHand;
   }
 
-  static const String _dominantHandKey = DominantHand.right;
+  static const String _dominantHandKey = 'dominant_hand';
   String _dominantHand = DominantHand.right;
   String get dominantHand => _dominantHand;
   void setFab(String fabLocation) async {
@@ -84,7 +84,7 @@ class SettingsProvider extends ChangeNotifier {
     _prefs.setString(_dominantHandKey, fabLocation);
   }
 
-  // Calculator vs Telephone Keypad
+  // KEYPAD LAYOUT SETTINGS
 
   void _loadKeypadSettings() {
     final isTelephone = _prefs.getBool(_telephoneLayoutKey);
@@ -166,6 +166,7 @@ class SettingsProvider extends ChangeNotifier {
     if (currency.countryCode != null) return 'en_${currency.countryCode}';
     return 'en_US';
   }
+
   bool get isCurrencyDefault => _prefs.getString(_currencyKey) == null;
 
   void setCurrency(String code) async {
@@ -180,11 +181,14 @@ class SettingsProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  // Groups Feature
+  // FEATURE SETTINGS
 
-  void _loadGroupSettings() {
+  void _loadFeatureSettings() {
     final isGroup = _prefs.getBool(_groupEnabledKey);
     if (isGroup != null) _useGroupLayout = isGroup;
+
+    final isManualItem = _prefs.getBool(_manualItemEnabledKey);
+    if (isManualItem != null) _useManualItem = isManualItem;
   }
 
   static const String _groupEnabledKey = 'is_group_enabled';
@@ -194,6 +198,15 @@ class SettingsProvider extends ChangeNotifier {
     _useGroupLayout = useGroupFeature;
     notifyListeners();
     _prefs.setBool(_groupEnabledKey, useGroupFeature);
+  }
+
+  static const String _manualItemEnabledKey = 'is_manual_item_enabled';
+  bool _useManualItem = false;
+  bool get isManualItemEnabled => _useManualItem;
+  void setManualItemFeatureStatus(bool useManualItemFeature) async {
+    _useManualItem = useManualItemFeature;
+    notifyListeners();
+    _prefs.setBool(_manualItemEnabledKey, useManualItemFeature);
   }
 
   // ======================================================================= //
@@ -209,7 +222,7 @@ class SettingsProvider extends ChangeNotifier {
     _loadCompactPriceInput();
     _loadDominantHandSettings();
     _loadKeypadSettings();
-    _loadGroupSettings();
+    _loadFeatureSettings();
   }
 }
 
@@ -229,4 +242,5 @@ extension SettingsContext on BuildContext {
   bool get isTelephoneLayout => settings.isTelephoneLayout;
   bool get isAltInfoLayout => settings.isAltInfoLayout;
   bool get isGroupEnabled => settings.isGroupEnabled;
+  bool get isManualItemEnabled => settings.isManualItemEnabled;
 }

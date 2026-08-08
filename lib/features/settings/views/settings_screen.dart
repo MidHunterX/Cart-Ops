@@ -81,6 +81,17 @@ class SettingsScreen extends StatelessWidget {
             ),
           ),
 
+          SettingCard(
+            title: 'Item Creation',
+            subtitle: context.isManualItemEnabled
+                ? 'Enabled (Option to add items unlocked)'
+                : 'Disabled (Automatic only)',
+            control: Switch(
+              value: context.isManualItemEnabled,
+              onChanged: settings.setManualItemFeatureStatus,
+            ),
+          ),
+
           const SettingsSectionHeader(
             title: 'Accessibility & Layout',
             icon: Icons.accessibility_new,
