@@ -505,13 +505,14 @@ class _HistoryTile extends StatelessWidget {
         children: [
           Row(
             children: [
-              Text(
-                '$perOriginalUnitPriceFmt ',
-                style: textTheme.bodyMedium!.copyWith(
-                  color: colorScheme.secondary,
-                  decoration: TextDecoration.lineThrough,
+              if (discountPercent > 0.0)
+                Text(
+                  '$perOriginalUnitPriceFmt ',
+                  style: textTheme.bodyMedium!.copyWith(
+                    color: colorScheme.secondary,
+                    decoration: TextDecoration.lineThrough,
+                  ),
                 ),
-              ),
               Text(
                 '$perDiscountedUnitPriceFmt / $perUnitQtyFmt',
                 style: textTheme.bodyMedium!.copyWith(
