@@ -297,7 +297,10 @@ class _PurchaseTileState extends State<_PurchaseTile> {
           ListTile(
             tileColor: tileBgColor,
             contentPadding: const EdgeInsets.only(left: 16),
-            leading: const Icon(Icons.shopping_cart_outlined),
+            leading: Hero(
+              tag: 'cart_icon_${purchase.id}',
+              child: const Icon(Icons.shopping_cart_outlined),
+            ),
             title: Text(purchase.name),
             subtitle: Text(
               '${purchase.purchaseDate.toShortDateNoYear} at ${purchase.purchaseDate.toShortTime}',

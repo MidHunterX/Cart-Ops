@@ -465,12 +465,18 @@ class _HistoryTile extends StatelessWidget {
     final totalCost = ((discountedUnitPrice * totalQuantity) * 100).round() / 100;
     // final originalTotalCost = originalUnitPrice * totalQuantity;
     // final savings = originalTotalCost - totalCost;
-    final perUnitPrice = ((discountedUnitPrice * perPackQty) * 100).round() / 100;
+    final perOriginalUnitPrice = ((originalUnitPrice * perPackQty) * 100).round() / 100;
+    final perDiscountedUnitPrice = ((discountedUnitPrice * perPackQty) * 100).round() / 100;
 
     // FORMATTING
     final unitString = isWeight ? context.weightUnit : 'pc';
     final perUnitQtyFmt = perPackQty.toQuantityString(unitString);
-    final perUnitPriceFmt = perUnitPrice.toCurrencyString(
+    final perOriginalUnitPriceFmt = perOriginalUnitPrice.toCurrencyString(
+      context.currencySymbol,
+      locale: context.currencyLocale,
+      preferWhole: true,
+    );
+    final perDiscountedUnitPriceFmt = perDiscountedUnitPrice.toCurrencyString(
       context.currencySymbol,
       locale: context.currencyLocale,
       preferWhole: true,
@@ -494,12 +500,23 @@ class _HistoryTile extends StatelessWidget {
       subtitle = Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            '$perUnitPriceFmt / $perUnitQtyFmt',
-            style: textTheme.bodyMedium!.copyWith(
-              color: colorScheme.primary,
-              fontWeight: FontWeight.bold,
-            ),
+          Row(
+            children: [
+              Text(
+                '$perOriginalUnitPriceFmt ',
+                style: textTheme.bodyMedium!.copyWith(
+                  color: colorScheme.secondary,
+                  decoration: TextDecoration.lineThrough,
+                ),
+              ),
+              Text(
+                '$perDiscountedUnitPriceFmt / $perUnitQtyFmt',
+                style: textTheme.bodyMedium!.copyWith(
+                  color: colorScheme.primary,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
           ),
           Text('${packCount.toQuantityString('')} packs · Total: $totalCostFmt'),
         ],
@@ -553,10 +570,9 @@ class _HistoryTile extends StatelessWidget {
               ),
               Text(
                 ' /$unitString',
-                style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                  fontSize: 12,
-                  color: colorScheme.primary,
-                ),
+                style: Theme.of(
+                  context,
+                ).textTheme.labelLarge?.copyWith(fontSize: 12, color: colorScheme.primary),
               ),
             ],
           ),

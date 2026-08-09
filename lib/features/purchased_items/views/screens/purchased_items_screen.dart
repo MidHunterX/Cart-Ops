@@ -367,6 +367,7 @@ class _PurchasedItemsScreenState extends State<PurchasedItemsScreen> {
             : Column(
                 children: [
                   PurchaseSummaryCard(
+                    purchaseId: _currentPurchase.id,
                     itemCount: displayTotalItems,
                     totalItems: totalItemsListLength,
                     isChecklistMode: _currentPurchase.isChecklistMode,
