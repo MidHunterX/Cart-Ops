@@ -99,7 +99,8 @@ class _ItemStats {
 
 class ItemDetailScreen extends StatelessWidget {
   final Item item;
-  const ItemDetailScreen({super.key, required this.item});
+  final String? tag;
+  const ItemDetailScreen({super.key, required this.item, this.tag});
 
   @override
   Widget build(BuildContext context) {
@@ -124,6 +125,7 @@ class ItemDetailScreen extends StatelessWidget {
                 _Header(
                   item: item,
                   stats: stats,
+                  tag: tag ?? 'item_detail_${item.id}',
                   daysAgoText: stats.lastPurchaseDate.toRelativeTime(),
                 ),
                 const SizedBox(height: 24),
@@ -176,7 +178,8 @@ class _Header extends StatelessWidget {
   final Item item;
   final _ItemStats stats;
   final String daysAgoText;
-  const _Header({required this.item, required this.stats, required this.daysAgoText});
+  final String? tag;
+  const _Header({required this.item, required this.stats, required this.daysAgoText, this.tag});
 
   @override
   Widget build(BuildContext context) {
@@ -191,7 +194,7 @@ class _Header extends StatelessWidget {
               height: 200,
               width: double.maxFinite,
               borderRadius: BorderRadius.circular(16),
-              heroTag: 'itemDetail-${item.id}',
+              heroTag: tag,
               enableTapToView: true,
             ),
           ),
