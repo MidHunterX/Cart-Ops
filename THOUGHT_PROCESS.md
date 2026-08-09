@@ -73,14 +73,14 @@ Dynamically shows Purchases/Groups list based on intent and behavior.
 
 | Groups Enabled | Purchase Made | Group Made | Behavior                    |
 | -------------- | ------------- | ---------- | --------------------------- |
-| Yes            | Yes           | Yes        | Split Screen                |
-| Yes            | No            | No         | Easter Egg                  |
-| Yes            | No            | Yes        | Groups Only UI, FAB Hidden  |
-| Yes            | Yes           | No         | Split Screen                |
-| No             | Yes           | No         | Purchase Only UI            |
-| No             | No            | Yes        | Groups Only UI, FAB Enabled |
-| No             | Yes           | Yes        | Split Screen                |
 | No             | No            | No         | Welcome UI                  |
+| Yes            | No            | No         | Easter Egg                  |
+| No             | Yes           | No         | Purchase Only UI            |
+| No             | Yes           | Yes        | Split Screen                |
+| No             | No            | Yes        | Groups Only UI, FAB Enabled |
+| Yes            | Yes           | Yes        | Split Screen                |
+| Yes            | Yes           | No         | Split Screen, Add Group Box |
+| Yes            | No            | Yes        | Groups Only UI, FAB Hidden  |
 
 #### Split Screen
 
@@ -409,6 +409,8 @@ There's always going to be precision issues when doing unit calculation with
 huge quantities with exaggerated rates. But this covers for most of the typical
 shopping cases.
 
+[weight]: https://stackoverflow.com/a/12977067
+
 ## Deep dive into an Analytic Mind (Use Cases)
 
 ### The Art of Deal - Shop Tzu
@@ -448,9 +450,33 @@ enjoy the delicacy? The choice is yours.
 
 ### Comparison Is The Source Of Joy
 
+#### Tagging
+
 Next is mostly a kind of uncharted territory. Comparison among entirely
 different products of the same category. With Item tagging, you can compare the
 full rate history of chips/chocolate from different companies to see which is
 truly worth it.
 
-[weight]: https://stackoverflow.com/a/12977067
+#### Historical Data Rows
+
+Analytics rows based on purchase history will always contain a mix of purchased
+data (packs bought, bought for price), general data (weight per unit, price per
+unit, normalized values for comparison) and inferred data (how much you saved).
+
+These types of data should not be mixed and should always be kept separate but
+near. This way you can navigate the data visually with proper structure.
+
+## Conclusion
+
+With all of the operator tool set in place, clean data can be collected with
+optimal ergonomics and minimal cognitive friction. Now the task is data
+collection across time.
+
+Even with minimal analytics, information like how much extra stores charge,
+catch pricing psychology of different packs (higher price even with discounts),
+pricing trends, patterns etc. is extracted and viewed immediately upon input
+before a purchase happens. This is known as the Mosaic Effect in intelligence.
+
+With the extensive real-world data, it would be possible to add even more
+analytics, predictions, insights, inferences about internal company decisions,
+inferring market from pricing/packaging reaction, retail information and more.
