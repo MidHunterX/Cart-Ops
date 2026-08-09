@@ -360,105 +360,96 @@ class _PurchasedItemsScreenState extends State<PurchasedItemsScreen> {
           ),
         ],
       ),
-      body: AnimatedSwitcher(
-        duration: const Duration(milliseconds: 300),
-        child: _isLoading
-            ? const Center(child: CircularProgressIndicator())
-            : Column(
-                children: [
-                  PurchaseSummaryCard(
-                    purchaseId: _currentPurchase.id,
-                    itemCount: displayTotalItems,
-                    totalItems: totalItemsListLength,
-                    isChecklistMode: _currentPurchase.isChecklistMode,
-                    total: displayTotalPrice,
-                    budget: _currentPurchase.budget,
-                    allChecked: allCheckedState,
-                    onToggleAll: (bool? checkAll) {
-                      bool isAllChecked = checkAll == null;
-                      bool isNoneChecked = checkAll == true;
-                      bool isSomeChecked = checkAll == false;
-                      bool lessItemsChecked = displayTotalItems < (totalItemsListLength / 2);
-                      isAllChecked
-                          ? checkAll = false
-                          : isNoneChecked
-                          ? checkAll = true
-                          : isSomeChecked
-                          ? lessItemsChecked
-                                ? checkAll = false
-                                : checkAll = true
-                          : null;
-                      context.read<PurchasedItemsRepository>().setAllItemsCheckState(
-                        _currentPurchase.id,
-                        checkAll,
-                      );
-                    },
-                  ),
-                  Expanded(
-                    child: CustomScrollView(
-                      slivers: [
-                        if (_isListEmpty || displayItemsList.isEmpty)
-                          SliverFillRemaining(
-                            hasScrollBody: false,
-                            child: EmptyState(
-                              icon: _isSearching
-                                  ? Icons.search_off_outlined
-                                  : Icons.shopping_cart_outlined,
-                              title: _isSearching ? 'No Matching Items' : 'Your Cart is Ready',
-                              message: _isSearching
-                                  ? 'Try entering a different item name.'
-                                  : 'Add some items to see the running total.',
-                            ),
-                          ),
-                        if (!_isListEmpty && displayItemsList.isNotEmpty)
-                          SliverPadding(
-                            padding: const EdgeInsets.only(bottom: 80),
-                            sliver: _isSearching
-                                ? SliverList(
-                                    delegate: SliverChildBuilderDelegate(
-                                      (context, index) => PurchasedItemTile(
-                                        details: displayItemsList[index],
-                                        index: index,
-                                        totalItems: displayItemsList.length,
-                                        isSelected:
-                                            _selectedItemId ==
-                                            displayItemsList[index].purchasedItem.id,
-                                        isChecklistMode: _currentPurchase.isChecklistMode,
-                                        showAsBudgetPercentage: _showAsBudgetPercentage,
-                                        budget: _currentPurchase.budget,
-                                        onToggleCheck: (val) {
-                                          context.read<PurchasedItemsRepository>().toggleItemCheck(
-                                            displayItemsList[index].purchasedItem.id,
-                                            val ?? false,
-                                          );
-                                        },
-                                        onMenuOpened: () => setState(
-                                          () => _selectedItemId =
-                                              displayItemsList[index].purchasedItem.id,
-                                        ),
-                                        onMenuClosed: () => setState(() => _selectedItemId = null),
-                                      ),
-                                      childCount: displayItemsList.length,
-                                    ),
-                                  )
-                                : SliverAnimatedList(
-                                    key: _listKey,
-                                    initialItemCount: _purchasedItems.length,
-                                    itemBuilder: (context, index, animation) {
-                                      return _buildItemTile(
-                                        _purchasedItems[index],
-                                        index,
-                                        totalItemsListLength,
-                                        animation,
-                                      );
-                                    },
-                                  ),
-                          ),
-                      ],
+      body: Column(
+        children: [
+          PurchaseSummaryCard(
+            purchaseId: _currentPurchase.id,
+            itemCount: displayTotalItems,
+            totalItems: totalItemsListLength,
+            isChecklistMode: _currentPurchase.isChecklistMode,
+            total: displayTotalPrice,
+            budget: _currentPurchase.budget,
+            allChecked: allCheckedState,
+            onToggleAll: (bool? checkAll) {
+              bool isAllChecked = checkAll == null;
+              bool isNoneChecked = checkAll == true;
+              bool isSomeChecked = checkAll == false;
+              bool lessItemsChecked = displayTotalItems < (totalItemsListLength / 2);
+              isAllChecked
+                  ? checkAll = false
+                  : isNoneChecked
+                  ? checkAll = true
+                  : isSomeChecked
+                  ? lessItemsChecked
+                        ? checkAll = false
+                        : checkAll = true
+                  : null;
+              context.read<PurchasedItemsRepository>().setAllItemsCheckState(
+                _currentPurchase.id,
+                checkAll,
+              );
+            },
+          ),
+          Expanded(
+            child: CustomScrollView(
+              slivers: [
+                if (_isListEmpty || displayItemsList.isEmpty)
+                  SliverFillRemaining(
+                    hasScrollBody: false,
+                    child: EmptyState(
+                      icon: _isSearching ? Icons.search_off_outlined : Icons.shopping_cart_outlined,
+                      title: _isSearching ? 'No Matching Items' : 'Your Cart is Ready',
+                      message: _isSearching
+                          ? 'Try entering a different item name.'
+                          : 'Add some items to see the running total.',
                     ),
                   ),
-                ],
-              ),
+                if (!_isListEmpty && displayItemsList.isNotEmpty)
+                  SliverPadding(
+                    padding: const EdgeInsets.only(bottom: 80),
+                    sliver: _isSearching
+                        ? SliverList(
+                            delegate: SliverChildBuilderDelegate(
+                              (context, index) => PurchasedItemTile(
+                                details: displayItemsList[index],
+                                index: index,
+                                totalItems: displayItemsList.length,
+                                isSelected:
+                                    _selectedItemId == displayItemsList[index].purchasedItem.id,
+                                isChecklistMode: _currentPurchase.isChecklistMode,
+                                showAsBudgetPercentage: _showAsBudgetPercentage,
+                                budget: _currentPurchase.budget,
+                                onToggleCheck: (val) {
+                                  context.read<PurchasedItemsRepository>().toggleItemCheck(
+                                    displayItemsList[index].purchasedItem.id,
+                                    val ?? false,
+                                  );
+                                },
+                                onMenuOpened: () => setState(
+                                  () => _selectedItemId = displayItemsList[index].purchasedItem.id,
+                                ),
+                                onMenuClosed: () => setState(() => _selectedItemId = null),
+                              ),
+                              childCount: displayItemsList.length,
+                            ),
+                          )
+                        : SliverAnimatedList(
+                            key: _listKey,
+                            initialItemCount: _purchasedItems.length,
+                            itemBuilder: (context, index, animation) {
+                              return _buildItemTile(
+                                _purchasedItems[index],
+                                index,
+                                totalItemsListLength,
+                                animation,
+                              );
+                            },
+                          ),
+                  ),
+              ],
+            ),
+          ),
+        ],
       ),
       floatingActionButton: DextrousFloatingActionButton(
         isCenter: context.dominantHand == DominantHand.center,
