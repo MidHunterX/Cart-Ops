@@ -65,9 +65,10 @@ class _AddPurchasedItemSheetState extends State<AddPurchasedItemSheet> {
       final lastPurchase = await repo.getLastPurchasedDetails(itemId);
 
       if (lastPurchase != null && mounted) {
+        final bool isPack = lastPurchase.packQuantity != null;
         _formKey.currentState?.updateValues(
           price: lastPurchase.price?.toInputString() ?? '',
-          qty: lastPurchase.quantity?.toInputString() ?? '',
+          qty: isPack ? lastPurchase.quantity?.toInputString() ?? '' : '',
           packQty: lastPurchase.packQuantity?.toInputString() ?? '',
           isWeight: lastPurchase.isWeight,
           hasPack: lastPurchase.packQuantity != null,
