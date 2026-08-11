@@ -100,6 +100,8 @@ class _AddPurchasedItemSheetState extends State<AddPurchasedItemSheet> {
             _formKey.currentState?.updateImage(selectedItem.imagePath, changed: false);
           } catch (_) {}
           _loadLastPurchaseDetails(itemId);
+        } else {
+          _formKey.currentState?.updateImage(null, changed: false);
         }
       },
     );

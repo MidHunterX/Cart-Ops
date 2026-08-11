@@ -11,6 +11,15 @@ class ItemNameDialog {
     final nameCtrl = TextEditingController(text: currentName);
     int? selectedItemId;
 
+    try {
+      final initialMatch = allItems.firstWhere(
+        (item) => item.name.toLowerCase() == currentName.toLowerCase(),
+      );
+      selectedItemId = initialMatch.id;
+    } catch (_) {
+      selectedItemId = null;
+    }
+
     await showDialog(
       context: context,
       builder: (context) => GestureDetector(
@@ -33,7 +42,18 @@ class ItemNameDialog {
               selectedItemId = selection.id;
             },
             fieldViewBuilder: (context, controller, focusNode, onFieldSubmitted) {
-              controller.addListener(() => nameCtrl.text = controller.text);
+              controller.addListener(() {
+                nameCtrl.text = controller.text;
+                if (selectedItemId != null) {
+                  final matchingItem = allItems
+                      .where((item) => item.id == selectedItemId)
+                      .firstOrNull;
+                  if (matchingItem == null ||
+                      matchingItem.name.toLowerCase() != controller.text.toLowerCase()) {
+                    selectedItemId = null;
+                  }
+                }
+              });
               return TextField(
                 controller: controller,
                 focusNode: focusNode,
