@@ -68,7 +68,9 @@ class _AddPurchasedItemSheetState extends State<AddPurchasedItemSheet> {
         final bool isPack = lastPurchase.packQuantity != null;
         _formKey.currentState?.updateValues(
           price: lastPurchase.price?.toInputString() ?? '',
-          qty: isPack ? lastPurchase.quantity?.toInputString() ?? '' : '',
+          qty: isPack
+              ? lastPurchase.quantity?.toInputString() ?? ''
+              : (lastPurchase.isWeight ? '' : '1'),
           packQty: lastPurchase.packQuantity?.toInputString() ?? '',
           isWeight: lastPurchase.isWeight,
           hasPack: lastPurchase.packQuantity != null,

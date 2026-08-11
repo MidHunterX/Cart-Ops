@@ -459,7 +459,7 @@ class _PurchasedItemsScreenState extends State<PurchasedItemsScreen> {
           context: context,
           isScrollControlled: true, // Must resize on graph UI
           useSafeArea: false, // Must be behind keyboard
-          // enableDrag: false, // Disable dismiss gestures for messy fast typing
+          enableDrag: false, // Disable dismiss gestures for messy fast typing
           showDragHandle: true, // but, can be dismissed with the handle
           builder: (context) =>
               AddPurchasedItemSheet(purchase: _currentPurchase, group: widget.group),
