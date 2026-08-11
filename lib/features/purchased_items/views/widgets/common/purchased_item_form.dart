@@ -220,8 +220,10 @@ class PurchasedItemFormState extends State<PurchasedItemForm> {
       if (discount != null) _discountStr = discount;
       if (activeField != null) {
         _activeField = activeField;
-        _focusActiveField();
+      } else if (!_hasPack && _activeField == ActiveField.packQuantity) {
+        _activeField = _isWeight ? ActiveField.quantity : ActiveField.price;
       }
+      _focusActiveField();
     });
   }
 
@@ -239,6 +241,7 @@ class PurchasedItemFormState extends State<PurchasedItemForm> {
         _hasPack = false;
         _packQtyStr = '';
         _packQtyController.text = '';
+        _activeField = _isWeight ? ActiveField.quantity : ActiveField.price;
       } else {
         _isWeight = !currentIsWeight;
         if (_isWeight) {
