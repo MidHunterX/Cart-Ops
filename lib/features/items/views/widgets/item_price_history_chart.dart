@@ -23,24 +23,21 @@ class ItemPriceHistoryChart extends StatelessWidget {
     // Deduplicate consecutive points with similar final price
     const double epsilon = 0.001;
     final deduped = <PurchasedItemWithPurchase>[];
-    if (chronological.length == 2) {
-      // Special case for two points
-      deduped.addAll(chronological);
-    } else {
-      for (var i = 0; i < chronological.length; i++) {
-        final current = chronological[i];
-        final currentPrice = current.purchasedItem.price! - current.purchasedItem.discount;
-        if (i == 0) {
+    for (var i = 0; i < chronological.length; i++) {
+      final current = chronological[i];
+      final currentPrice = current.purchasedItem.price! - current.purchasedItem.discount;
+      if (i == 0) {
+        deduped.add(current);
+      } else {
+        final previous = deduped.last;
+        final previousPrice = previous.purchasedItem.price! - previous.purchasedItem.discount;
+        if ((currentPrice - previousPrice).abs() > epsilon) {
           deduped.add(current);
-        } else {
-          final previous = deduped.last;
-          final previousPrice = previous.purchasedItem.price! - previous.purchasedItem.discount;
-          if ((currentPrice - previousPrice).abs() > epsilon) {
-            deduped.add(current);
-          }
         }
       }
     }
+    // Special case for multiple equal points
+    if (deduped.length < 2) deduped.addAll(chronological);
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -50,7 +47,7 @@ class ItemPriceHistoryChart extends StatelessWidget {
           context,
           validHistory,
           maxWidth: availableWidth,
-          extraLetters: currency.length + 1, // currency + space
+          extraLetters: currency.length + 2, // currency + surrounding space
         );
 
         final displayHistory = deduped.take(maxDataPoints).toList();
