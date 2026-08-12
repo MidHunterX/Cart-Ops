@@ -56,9 +56,15 @@ class ItemPriceHistoryChart extends StatelessWidget {
           extraLetters: currency.length + 2, // currency + surrounding space
         );
 
-        final displayHistory = reverseChronological
-            ? deduped.take(maxDataPoints).toList()
-            : deduped.reversed.take(maxDataPoints).toList().reversed.toList();
+        final totalPoints = deduped.length;
+        final needsScrolling = totalPoints > maxDataPoints && !isMinimal;
+
+        final displayHistory = needsScrolling
+            ? deduped
+            : (reverseChronological
+                  ? deduped.take(maxDataPoints).toList()
+                  : deduped.reversed.take(maxDataPoints).toList().reversed.toList());
+
         if (displayHistory.length < 2) return const SizedBox.shrink();
 
         final spots = displayHistory.asMap().entries.map((entry) {
@@ -112,49 +118,109 @@ class ItemPriceHistoryChart extends StatelessWidget {
           belowBarData: BarAreaData(show: true, color: colorScheme.primary.withValues(alpha: 0.2)),
         );
 
-        return SizedBox(
-          height: isMinimal ? 80 : 200,
-          width: double.infinity,
-          child: LineChart(
-            LineChartData(
-              gridData: const FlGridData(show: true),
-              titlesData: const FlTitlesData(show: false),
-              borderData: FlBorderData(show: false),
-              lineTouchData: LineTouchData(
-                enabled: true,
-                handleBuiltInTouches: false,
-                touchTooltipData: LineTouchTooltipData(
-                  getTooltipColor: (touchedSpot) => Colors.transparent,
-                  tooltipPadding: EdgeInsets.zero,
-                  tooltipMargin: 8,
-                  fitInsideHorizontally: true,
-                  fitInsideVertically: true,
-                  getTooltipItems: (touchedSpots) {
-                    return touchedSpots.map((touchedSpot) {
-                      return LineTooltipItem(
-                        touchedSpot.y.toCurrencyString(currency),
-                        textTheme.bodySmall?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: colorScheme.onSurface,
-                            ) ??
-                            const TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
-                      );
-                    }).toList();
-                  },
-                ),
+        final chart = LineChart(
+          LineChartData(
+            gridData: const FlGridData(show: true),
+            titlesData: const FlTitlesData(show: false),
+            borderData: FlBorderData(show: false),
+            lineTouchData: LineTouchData(
+              enabled: true,
+              handleBuiltInTouches: false,
+              touchTooltipData: LineTouchTooltipData(
+                getTooltipColor: (touchedSpot) => Colors.transparent,
+                tooltipPadding: EdgeInsets.zero,
+                tooltipMargin: 8,
+                fitInsideHorizontally: true,
+                fitInsideVertically: true,
+                getTooltipItems: (touchedSpots) {
+                  return touchedSpots.map((touchedSpot) {
+                    return LineTooltipItem(
+                      touchedSpot.y.toCurrencyString(currency),
+                      textTheme.bodySmall?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: colorScheme.onSurface,
+                          ) ??
+                          const TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
+                    );
+                  }).toList();
+                },
               ),
-              minX: rawMinX,
-              maxX: rawMaxX,
-              minY: minY,
-              maxY: maxY,
-              lineBarsData: [lineBarData],
-              showingTooltipIndicators: spots.map((spot) {
-                return ShowingTooltipIndicators([LineBarSpot(lineBarData, 0, spot)]);
-              }).toList(),
             ),
+            minX: rawMinX,
+            maxX: rawMaxX,
+            minY: minY,
+            maxY: maxY,
+            lineBarsData: [lineBarData],
+            showingTooltipIndicators: spots.map((spot) {
+              return ShowingTooltipIndicators([LineBarSpot(lineBarData, 0, spot)]);
+            }).toList(),
           ),
         );
+
+        if (needsScrolling) {
+          final chartWidth = totalPoints * (availableWidth / maxDataPoints);
+          return _ScrollableChart(
+            chart: chart,
+            height: isMinimal ? 80 : 200,
+            width: chartWidth,
+            scrollToEnd: true,
+          );
+        } else {
+          return SizedBox(height: isMinimal ? 80 : 200, width: double.infinity, child: chart);
+        }
       },
+    );
+  }
+}
+
+class _ScrollableChart extends StatefulWidget {
+  final Widget chart;
+  final double height;
+  final double width;
+  final bool scrollToEnd;
+
+  const _ScrollableChart({
+    required this.chart,
+    required this.height,
+    required this.width,
+    this.scrollToEnd = true,
+  });
+
+  @override
+  State<_ScrollableChart> createState() => _ScrollableChartState();
+}
+
+class _ScrollableChartState extends State<_ScrollableChart> {
+  final ScrollController _scrollController = ScrollController();
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.scrollToEnd) {
+      // WidgetsBinding to ensure the layout is complete before scrolling
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (_scrollController.hasClients) {
+          _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
+        }
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: widget.height,
+      child: SingleChildScrollView(
+        controller: _scrollController,
+        scrollDirection: Axis.horizontal,
+        child: SizedBox(width: widget.width, height: widget.height, child: widget.chart),
+      ),
     );
   }
 }
