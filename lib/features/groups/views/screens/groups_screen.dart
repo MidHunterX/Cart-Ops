@@ -86,6 +86,7 @@ class _GroupsScreenState extends State<GroupsScreen> {
     final bool showTitles = showGroups && showPurchases;
     // Complete Void (Full Empty Screen)
     final bool completeVoid = !hasPurchases && !hasGroups && !_isLoadingGroups;
+    final bool strictlyGroups = onlyGroups && isGroupEnabled;
 
     const double groupTileHeight = 160;
 
@@ -93,13 +94,14 @@ class _GroupsScreenState extends State<GroupsScreen> {
       appBar: AppBar(
         title: const Text('Cart Ops'),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.inventory_2_outlined),
-            onPressed: () => Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => const ItemsScreen(group: null)),
+          if (!strictlyGroups)
+            IconButton(
+              icon: const Icon(Icons.inventory_2_outlined),
+              onPressed: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const ItemsScreen(group: null)),
+              ),
             ),
-          ),
           IconButton(
             icon: const Icon(Icons.settings),
             onPressed: () =>
@@ -107,7 +109,7 @@ class _GroupsScreenState extends State<GroupsScreen> {
           ),
         ],
       ),
-      floatingActionButton: onlyGroups && isGroupEnabled
+      floatingActionButton: strictlyGroups
           ? null
           : DextrousFloatingActionButton(
               isCenter: context.dominantHand == DominantHand.center,
