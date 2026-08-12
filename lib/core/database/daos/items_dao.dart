@@ -90,7 +90,10 @@ class ItemsDao extends DatabaseAccessor<AppDatabase> with _$ItemsDaoMixin {
             purchasedItems,
           ).join([innerJoin(purchases, purchases.id.equalsExp(purchasedItems.purchaseId))])
           ..where(purchasedItems.itemId.equals(itemId))
-          ..orderBy([OrderingTerm.desc(purchases.purchaseDate)]);
+          ..orderBy([
+            OrderingTerm.desc(purchases.purchaseDate),
+            OrderingTerm.desc(purchasedItems.id),
+          ]);
     final rows = await query.get();
     return rows.map((row) {
       return PurchasedItemWithPurchase(row.readTable(purchasedItems), row.readTable(purchases));

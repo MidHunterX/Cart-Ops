@@ -21,8 +21,6 @@ class _ItemStats {
   final bool isWeight;
   final DateTime lastPurchaseDate;
   final int trend; // -1 down, 0 flat/unknown, 1 up
-  final List<PurchasedItemWithPurchase> chronological; // oldest -> newest
-  final List<PurchasedItemWithPurchase> recentFirst; // newest -> oldest
 
   _ItemStats({
     required this.count,
@@ -35,24 +33,20 @@ class _ItemStats {
     required this.isWeight,
     required this.lastPurchaseDate,
     required this.trend,
-    required this.chronological,
-    required this.recentFirst,
   });
 
   static double _discounted(PurchasedItem p) => (p.price ?? 0) * (1 - p.discount / 100);
 
   factory _ItemStats.from(List<PurchasedItemWithPurchase> history) {
-    final chronological = [...history]
-      ..sort((a, b) => a.purchase.purchaseDate.compareTo(b.purchase.purchaseDate));
 
     double totalSpent = 0;
     double totalQuantity = 0;
     double minPrice = double.infinity;
     double maxPrice = -double.infinity;
-    DateTime minDate = chronological.first.purchase.purchaseDate;
-    DateTime maxDate = chronological.first.purchase.purchaseDate;
+    DateTime minDate = history.first.purchase.purchaseDate;
+    DateTime maxDate = history.first.purchase.purchaseDate;
 
-    for (final h in chronological) {
+    for (final h in history) {
       final p = h.purchasedItem;
       final discounted = _discounted(p);
       totalSpent += discounted;
@@ -70,9 +64,9 @@ class _ItemStats {
     }
 
     int trend = 0;
-    if (chronological.length >= 2) {
-      final last = _discounted(chronological.last.purchasedItem);
-      final prev = _discounted(chronological[chronological.length - 2].purchasedItem);
+    if (history.length >= 2) {
+      final last = _discounted(history.last.purchasedItem);
+      final prev = _discounted(history[history.length - 2].purchasedItem);
       if (last > prev) {
         trend = 1;
       } else if (last < prev) {
@@ -81,18 +75,16 @@ class _ItemStats {
     }
 
     return _ItemStats(
-      count: chronological.length,
-      avgPrice: totalSpent / chronological.length,
+      count: history.length,
+      avgPrice: totalSpent / history.length,
       minPrice: minPrice,
       minPriceDate: minDate,
       maxPrice: maxPrice,
       maxPriceDate: maxDate,
       totalQuantity: totalQuantity,
-      isWeight: chronological.first.purchasedItem.isWeight,
-      lastPurchaseDate: chronological.last.purchase.purchaseDate,
+      isWeight: history.first.purchasedItem.isWeight,
+      lastPurchaseDate: history.last.purchase.purchaseDate,
       trend: trend,
-      chronological: chronological,
-      recentFirst: chronological.reversed.toList(),
     );
   }
 }
@@ -145,7 +137,7 @@ class ItemDetailScreen extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 8),
-                  ItemPriceHistoryChart(history: stats.recentFirst),
+                  ItemPriceHistoryChart(history: history),
                   const SizedBox(height: 24),
                 ],
 
@@ -157,10 +149,10 @@ class ItemDetailScreen extends StatelessWidget {
                 ListView.separated(
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
-                  itemCount: stats.recentFirst.length,
+                  itemCount: history.length,
                   separatorBuilder: (_, _) => const Divider(),
                   itemBuilder: (ctx, index) {
-                    final itemWithPurchase = stats.recentFirst[index];
+                    final itemWithPurchase = history[index];
                     final isBest = itemWithPurchase.purchase.purchaseDate == stats.minPriceDate;
                     return _HistoryTile(entry: itemWithPurchase, isBestPrice: isBest);
                   },
