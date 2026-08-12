@@ -8,12 +8,34 @@ part 'items_dao.g.dart';
 class ItemsDao extends DatabaseAccessor<AppDatabase> with _$ItemsDaoMixin {
   ItemsDao(super.db);
 
+  Expression<int> _buildPurchaseCountExpression() {
+    return subqueryExpression<int>(
+      selectOnly(purchasedItems)
+        ..addColumns([countAll()])
+        ..where(purchasedItems.itemId.equalsExp(items.id)),
+    );
+  }
+
   Stream<List<Item>> watchItemsInGroup(int groupId) {
-    return (select(items)..where((t) => t.groupId.equals(groupId))).watch();
+    final purchaseCount = _buildPurchaseCountExpression();
+    return (select(items)
+          ..where((t) => t.groupId.equals(groupId))
+          ..orderBy([
+            (_) => OrderingTerm.desc(purchaseCount),
+            (t) => OrderingTerm.desc(t.id), // Fallback tie-breaker sort
+          ]))
+        .watch();
   }
 
   Stream<List<Item>> watchItemsWithoutGroup() {
-    return (select(items)..where((t) => t.groupId.isNull())).watch();
+    final purchaseCount = _buildPurchaseCountExpression();
+    return (select(items)
+          ..where((t) => t.groupId.isNull())
+          ..orderBy([
+            (_) => OrderingTerm.desc(purchaseCount),
+            (t) => OrderingTerm.desc(t.id), // Fallback tie-breaker sort
+          ]))
+        .watch();
   }
 
   Future<Item?> getItemById(int id) {
