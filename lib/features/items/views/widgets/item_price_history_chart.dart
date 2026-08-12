@@ -8,8 +8,14 @@ import 'package:shopping_assist/features/settings/providers/settings_provider.da
 class ItemPriceHistoryChart extends StatelessWidget {
   final List<PurchasedItemWithPurchase> history;
   final bool isMinimal;
+  final bool reverseChronological;
 
-  const ItemPriceHistoryChart({super.key, required this.history, this.isMinimal = false});
+  const ItemPriceHistoryChart({
+    super.key,
+    required this.history,
+    this.isMinimal = false,
+    this.reverseChronological = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -18,13 +24,13 @@ class ItemPriceHistoryChart extends StatelessWidget {
     final validHistory = history.where((h) => h.purchasedItem.price != null).toList();
     if (validHistory.length < 2) return const SizedBox.shrink();
 
-    final chronological = validHistory.reversed.toList();
+    final graphPoints = reverseChronological ? validHistory : validHistory.reversed.toList();
 
     // Deduplicate consecutive points with similar final price
     const double epsilon = 0.001;
     final deduped = <PurchasedItemWithPurchase>[];
-    for (var i = 0; i < chronological.length; i++) {
-      final current = chronological[i];
+    for (var i = 0; i < graphPoints.length; i++) {
+      final current = graphPoints[i];
       final currentPrice = current.purchasedItem.price! - current.purchasedItem.discount;
       if (i == 0) {
         deduped.add(current);
@@ -37,7 +43,7 @@ class ItemPriceHistoryChart extends StatelessWidget {
       }
     }
     // Special case for multiple equal points
-    if (deduped.length < 2) deduped.addAll(chronological);
+    if (deduped.length < 2) deduped.addAll(graphPoints);
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -50,7 +56,9 @@ class ItemPriceHistoryChart extends StatelessWidget {
           extraLetters: currency.length + 2, // currency + surrounding space
         );
 
-        final displayHistory = deduped.take(maxDataPoints).toList();
+        final displayHistory = reverseChronological
+            ? deduped.take(maxDataPoints).toList()
+            : deduped.reversed.take(maxDataPoints).toList().reversed.toList();
         if (displayHistory.length < 2) return const SizedBox.shrink();
 
         final spots = displayHistory.asMap().entries.map((entry) {
