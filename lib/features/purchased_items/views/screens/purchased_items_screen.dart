@@ -389,6 +389,11 @@ class _PurchasedItemsScreenState extends State<PurchasedItemsScreen> {
                 checkAll,
               );
             },
+            onInvertAll: () {
+              context.read<PurchasedItemsRepository>().invertAllItemsCheckState(
+                _currentPurchase.id,
+              );
+            },
           ),
           Expanded(
             child: CustomScrollView(

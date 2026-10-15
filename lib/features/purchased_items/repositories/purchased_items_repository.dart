@@ -219,4 +219,8 @@ class PurchasedItemsRepository {
   Future<void> setAllItemsCheckState(int purchaseId, bool isChecked) {
     return _purchasedItemsDao.setAllItemsCheckState(purchaseId, isChecked);
   }
+
+  Future<void> invertAllItemsCheckState(int purchaseId) {
+    return _purchasedItemsDao.invertAllItemsCheckState(purchaseId);
+  }
 }

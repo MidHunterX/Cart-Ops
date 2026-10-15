@@ -44,4 +44,18 @@ class PurchasedItemsDao extends DatabaseAccessor<AppDatabase> with _$PurchasedIt
       PurchasedItemsCompanion(isChecked: Value(isChecked)),
     );
   }
+
+  /// Flips each item's check state individually, instead of collapsing
+  /// them all into a single state.
+  Future<void> invertAllItemsCheckState(int purchaseId) {
+    final table = purchasedItems.actualTableName;
+    final checkColumn = purchasedItems.isChecked.$name;
+    final purchaseColumn = purchasedItems.purchaseId.$name;
+    return customUpdate(
+      'UPDATE $table SET $checkColumn = NOT $checkColumn WHERE $purchaseColumn = ?',
+      variables: [Variable.withInt(purchaseId)],
+      updates: {purchasedItems},
+      updateKind: UpdateKind.update,
+    );
+  }
 }

@@ -11,6 +11,10 @@ class PurchaseSummaryCard extends StatelessWidget {
   // Checklist Feature
   final bool? allChecked;
   final ValueChanged<bool?>? onToggleAll;
+
+  /// Long-press on the checkbox: inverts each item's state instead of
+  /// collapsing them all into a single state.
+  final VoidCallback? onInvertAll;
   // Hero Animation
   final int purchaseId;
 
@@ -26,6 +30,7 @@ class PurchaseSummaryCard extends StatelessWidget {
     this.budget,
     this.allChecked,
     this.onToggleAll,
+    this.onInvertAll,
   });
 
   @override
@@ -59,13 +64,17 @@ class PurchaseSummaryCard extends StatelessWidget {
     return Row(
       children: [
         if (isChecklistMode)
-          Checkbox(
-            value: allChecked,
-            tristate: true,
-            onChanged: onToggleAll,
-            side: BorderSide(color: colorScheme.onPrimaryContainer, width: 2),
-            checkColor: colorScheme.onPrimary,
-            activeColor: colorScheme.onPrimaryContainer,
+          GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onLongPress: onInvertAll,
+            child: Checkbox(
+              value: allChecked,
+              tristate: true,
+              onChanged: onToggleAll,
+              side: BorderSide(color: colorScheme.onPrimaryContainer, width: 2),
+              checkColor: colorScheme.onPrimary,
+              activeColor: colorScheme.onPrimaryContainer,
+            ),
           )
         else
           Hero(

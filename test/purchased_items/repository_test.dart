@@ -801,4 +801,76 @@ void main() {
       },
     );
   });
+
+  group('Check state tests', () {
+    test('invertAllItemsCheckState flips each item individually', () async {
+      final purchase = await purchasesRepository.createPurchase(null);
+      final initialStates = {'Milk': true, 'Bread': false, 'Eggs': true};
+      for (final entry in initialStates.entries) {
+        final id = await purchasedItemsRepository.addPurchasedItem(
+          name: entry.key,
+          price: 1.0,
+          qty: 1.0,
+          discount: 0.0,
+          isWeight: false,
+          purchaseId: purchase.id,
+          group: null,
+        );
+        await purchasedItemsRepository.toggleItemCheck(id, entry.value);
+      }
+
+      await purchasedItemsRepository.invertAllItemsCheckState(purchase.id);
+
+      var items = await purchasedItemsRepository.watchPurchasedItems(purchase.id).first;
+      var statesByName = {
+        for (final item in items) item.purchasedItem.name: item.purchasedItem.isChecked,
+      };
+      expect(statesByName['Milk'], false);
+      expect(statesByName['Bread'], true);
+      expect(statesByName['Eggs'], false);
+
+      // Inverting again restores the original states
+      await purchasedItemsRepository.invertAllItemsCheckState(purchase.id);
+
+      items = await purchasedItemsRepository.watchPurchasedItems(purchase.id).first;
+      statesByName = {
+        for (final item in items) item.purchasedItem.name: item.purchasedItem.isChecked,
+      };
+      expect(statesByName['Milk'], true);
+      expect(statesByName['Bread'], false);
+      expect(statesByName['Eggs'], true);
+    });
+
+    test('invertAllItemsCheckState does not affect other purchases', () async {
+      final purchaseA = await purchasesRepository.createPurchase(null);
+      final purchaseB = await purchasesRepository.createPurchase(null);
+      final aItemId = await purchasedItemsRepository.addPurchasedItem(
+        name: 'A Item',
+        price: 1.0,
+        qty: 1.0,
+        discount: 0.0,
+        isWeight: false,
+        purchaseId: purchaseA.id,
+        group: null,
+      );
+      final bItemId = await purchasedItemsRepository.addPurchasedItem(
+        name: 'B Item',
+        price: 1.0,
+        qty: 1.0,
+        discount: 0.0,
+        isWeight: false,
+        purchaseId: purchaseB.id,
+        group: null,
+      );
+      await purchasedItemsRepository.toggleItemCheck(aItemId, true);
+      await purchasedItemsRepository.toggleItemCheck(bItemId, true);
+
+      await purchasedItemsRepository.invertAllItemsCheckState(purchaseA.id);
+
+      final aItems = await purchasedItemsRepository.watchPurchasedItems(purchaseA.id).first;
+      expect(aItems.single.purchasedItem.isChecked, false); // Flipped
+      final bItems = await purchasedItemsRepository.watchPurchasedItems(purchaseB.id).first;
+      expect(bItems.single.purchasedItem.isChecked, true); // Untouched
+    });
+  });
 }
