@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:shopping_assist/core/database/database.dart';
 
+const double _kOptionsMaxHeight = 200.0;
+
+String _itemDisplayName(Item option) => option.name;
+
 class ItemNameDialog {
   static Future<void> show({
     required BuildContext context,
@@ -28,8 +32,13 @@ class ItemNameDialog {
           title: Text('Item Name', style: Theme.of(context).textTheme.titleLarge),
           content: Autocomplete<Item>(
             initialValue: TextEditingValue(text: currentName),
-            displayStringForOption: (Item option) => option.name,
+            displayStringForOption: _itemDisplayName,
             optionsViewOpenDirection: OptionsViewOpenDirection.down,
+            optionsViewBuilder: (context, onSelected, options) => _ItemOptionsView(
+              options: options,
+              onSelected: onSelected,
+              displayStringForOption: _itemDisplayName,
+            ),
             optionsBuilder: (TextEditingValue textEditingValue) {
               if (textEditingValue.text.isEmpty) {
                 return const Iterable<Item>.empty();
@@ -79,6 +88,99 @@ class ItemNameDialog {
               child: const Text('Save'),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+/// The dropdown options list shown by [Autocomplete].
+///
+/// Mirrors the default Material options view, but wraps the list in a
+/// [Scrollbar] with `thumbVisibility: true` so a scrollbar is shown whenever
+/// the options overflow [_kOptionsMaxHeight] and hidden when they fit.
+class _ItemOptionsView extends StatefulWidget {
+  const _ItemOptionsView({
+    required this.options,
+    required this.onSelected,
+    required this.displayStringForOption,
+  });
+
+  final Iterable<Item> options;
+  final void Function(Item option) onSelected;
+  final String Function(Item option) displayStringForOption;
+
+  @override
+  State<_ItemOptionsView> createState() => _ItemOptionsViewState();
+}
+
+class _ItemOptionsViewState extends State<_ItemOptionsView> {
+  final ScrollController _scrollController = ScrollController();
+  int _highlightedIndex = 0;
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _scrollToHighlightedOption(int highlightedIndex) {
+    if (!mounted || highlightedIndex >= widget.options.length || !_scrollController.hasClients) {
+      return;
+    }
+    final highlightedContext = GlobalObjectKey(
+      widget.options.elementAt(highlightedIndex),
+    ).currentContext;
+    if (highlightedContext == null) {
+      _scrollController.jumpTo(
+        highlightedIndex == 0 ? 0.0 : _scrollController.position.maxScrollExtent,
+      );
+    } else {
+      Scrollable.ensureVisible(highlightedContext, alignment: 0.5);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final int highlightedIndex = AutocompleteHighlightedOption.of(context);
+    if (highlightedIndex != _highlightedIndex) {
+      _highlightedIndex = highlightedIndex;
+      WidgetsBinding.instance.addPostFrameCallback(
+        (_) => _scrollToHighlightedOption(highlightedIndex),
+        debugLabel: 'ItemOptionsView.ensureVisible',
+      );
+    }
+
+    return Material(
+      elevation: 4.0,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxHeight: _kOptionsMaxHeight),
+        child: Scrollbar(
+          controller: _scrollController,
+          thumbVisibility: true,
+          child: ListView.builder(
+            controller: _scrollController,
+            padding: EdgeInsets.zero,
+            shrinkWrap: true,
+            itemCount: widget.options.length,
+            itemBuilder: (context, index) {
+              final Item option = widget.options.elementAt(index);
+              return Semantics(
+                button: true,
+                child: InkWell(
+                  key: GlobalObjectKey(option),
+                  onTap: () => widget.onSelected(option),
+                  child: Builder(
+                    builder: (context) => Container(
+                      color: highlightedIndex == index ? Theme.of(context).focusColor : null,
+                      padding: const EdgeInsets.all(16.0),
+                      child: Text(widget.displayStringForOption(option)),
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
         ),
       ),
     );
